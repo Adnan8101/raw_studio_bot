@@ -1,83 +1,16 @@
-import { Client, Interaction, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, TextChannel, DMChannel, ModalBuilder, TextInputBuilder, TextInputStyle, ChannelType } from 'discord.js';
+import { Client, Interaction, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, TextChannel, ModalBuilder, TextInputBuilder, TextInputStyle, ChannelType } from 'discord.js';
 import { prisma } from '../database/connect';
 import { CONFIG } from '../config';
 import { sendToManualReview } from './messageCreate';
 import { getTargetRoleName, deleteModMailThread, getRoleMemberCount, sendVerificationLog } from '../utils/discord';
 
-import { getGameManager } from '../commands/Games/Guess the Number/gameInstance';
-import { handleGuessTheNumberCommand } from '../commands/Games/Guess the Number/gtn';
-import { handleMemoryCommand } from '../commands/Games/Memory Game/memory';
-import { handleMathCommand } from '../commands/Games/Math Game/math';
-import { handleHiddenNumberCommand } from '../commands/Games/Hidden Number/hidden';
-import { handleStealCommand } from '../commands/Utility/steal';
-import { handleRestrictCommand } from '../commands/Name Prevention/restrict';
-import { handleEquationCommand } from '../commands/Games/Emoji Equation/equation';
-import { handleRecorderCommand } from '../commands/recording/recorder';
-import { handleVowelsCommand } from '../commands/Games/vowels/vowels';
-import { handleSequenceCommand } from '../commands/Games/sequence/sequence';
-import { handleReverseCommand } from '../commands/Games/reverse/reverse';
-import { handleEvalCommand } from '../commands/owner/eval';
-
-const commandHandlers: Record<string, (interaction: any, ...args: any[]) => Promise<void>> = {
-    'gtn': async (interaction, client) => {
-        const gameManager = getGameManager(client);
-        await handleGuessTheNumberCommand(interaction, gameManager);
-    },
-    'memory': handleMemoryCommand,
-    'math': handleMathCommand,
-    'hidden': handleHiddenNumberCommand,
-    'steal': handleStealCommand,
-    'restrict': handleRestrictCommand,
-    'equation': handleEquationCommand,
-    'recorder': handleRecorderCommand,
-    'vowels': handleVowelsCommand,
-    'sequence': handleSequenceCommand,
-    'reverse': handleReverseCommand,
-    'eval': handleEvalCommand
-};
-
 export const onInteractionCreate = async (client: Client, interaction: Interaction) => {
     try {
+        // Chat Input Commands are now handled in index.ts via CommandLoader
         if (interaction.isChatInputCommand()) {
-            const handler = commandHandlers[interaction.commandName];
-            if (handler) {
-                await handler(interaction, client);
-            }
-
-            if (interaction.replied || interaction.deferred) return;
-
-
-
-            if (interaction.commandName === 'clear-my-dm') {
-                await interaction.deferReply({ ephemeral: true });
-                if (!interaction.channel?.isDMBased()) {
-                    await interaction.editReply('This command can only be used in DMs.');
-                    return;
-                }
-                try {
-                    const channel = interaction.channel as DMChannel;
-                    const messages = await channel.messages.fetch({ limit: 100 });
-                    const botMessages = messages.filter(m => m.author.id === client.user?.id);
-                    if (botMessages.size === 0) {
-                        await interaction.editReply('No messages found to delete.');
-                        return;
-                    }
-                    await interaction.editReply(`Found ${botMessages.size} messages.Deleting...`);
-                    for (const msg of botMessages.values()) {
-                        try {
-                            await msg.delete();
-                        } catch (e) {
-                            console.error(`Failed to delete message ${msg.id}: `, e);
-                        }
-                    }
-                    await interaction.followUp({ content: '✅ **Cleared all my messages.**', ephemeral: true });
-                } catch (error) {
-                    console.error('Error clearing DMs:', error);
-                    await interaction.editReply('❌ An error occurred while clearing messages.');
-                }
-            }
             return;
         }
+
         if (interaction.isModalSubmit()) {
             if (interaction.customId.startsWith('reject_reason_')) {
                 await interaction.deferReply({ ephemeral: false });

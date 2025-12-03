@@ -67,6 +67,10 @@ export const data = new SlashCommandBuilder()
         option.setName('thumbnail')
             .setDescription('URL for giveaway thumbnail')
             .setRequired(false))
+    .addStringOption(option =>
+        option.setName('emoji')
+            .setDescription('Custom emoji for reaction (default: 🎉)')
+            .setRequired(false))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild);
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -86,6 +90,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const customMessage = interaction.options.getString('custom_message');
     const assignRole = interaction.options.getRole('assign_role');
     const thumbnail = interaction.options.getString('thumbnail');
+    const emoji = interaction.options.getString('emoji') || '🎉';
 
     const durationSeconds = parseDuration(durationStr);
     if (!durationSeconds) {
@@ -105,7 +110,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     // Create Embed
     const embed = new EmbedBuilder()
         .setTitle(prize)
-        .setDescription(`React with 🎉 to enter!\nEnds: <t:${Math.floor(endTime.getTime() / 1000)}:R> (<t:${Math.floor(endTime.getTime() / 1000)}:f>)\nHosted by: ${interaction.user}`)
+        .setDescription(`React with ${emoji} to enter!\nEnds: <t:${Math.floor(endTime.getTime() / 1000)}:R> (<t:${Math.floor(endTime.getTime() / 1000)}:f>)\nHosted by: ${interaction.user}`)
         .addFields(
             { name: 'Winners', value: `${winners}`, inline: true },
             { name: 'Host', value: `${interaction.user}`, inline: true }
@@ -138,7 +143,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     try {
         const message = await channel.send({ embeds: [embed] });
-        await message.react('🎉');
+        await message.react(emoji);
 
         await db.createGiveaway({
             messageId: message.id,
@@ -157,7 +162,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             voiceRequirement: voiceRequirement || null,
             customMessage: customMessage || null,
             assignRole: assignRole?.id,
-            thumbnail: thumbnail || null
+            thumbnail: thumbnail || null,
+            emoji: emoji
         });
 
         await interaction.reply({ embeds: [createSuccessEmbed(`Giveaway created in ${channel}!`)], flags: MessageFlags.Ephemeral });

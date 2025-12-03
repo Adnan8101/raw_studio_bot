@@ -71,7 +71,8 @@ export class GiveawayManager {
         }
 
         // Get reaction users
-        const reaction = message.reactions.cache.get('🎉');
+        const reactionEmoji = giveaway.emoji || '🎉';
+        const reaction = message.reactions.cache.get(reactionEmoji);
         if (!reaction) {
             await this.db.endGiveaway(messageId);
             await channel.send(`Giveaway for **${giveaway.prize}** ended, but no one entered!`);

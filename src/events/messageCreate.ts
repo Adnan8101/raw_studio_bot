@@ -17,6 +17,7 @@ import { getSequenceGameManager } from '../commands/Games/sequence/sequenceManag
 import { getReverseGameManager } from '../commands/Games/reverse/reverseManager';
 import { OWNER_ID, evaluateCode, createEvalEmbed } from '../commands/owner/evalHelper';
 import { DatabaseManager } from '../utils/DatabaseManager';
+import { services } from '../index';
 
 export const onMessageCreate = async (client: Client, message: Message) => {
     if (message.author.bot) {
@@ -66,10 +67,10 @@ export const onMessageCreate = async (client: Client, message: Message) => {
         const emojiEquationManager = getEmojiEquationManager(client);
 
         // Fetch Prefix
+        // Fetch Prefix
         let prefix = '!';
         if (message.guildId) {
-            const settings = await prisma.guildConfig.findUnique({ where: { guildId: message.guildId } });
-            if (settings) prefix = settings.prefix;
+            prefix = await services.guildConfigService.getPrefix(message.guildId);
         }
 
         // Handle Steal Reply

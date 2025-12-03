@@ -28,10 +28,11 @@ export interface PrefixInteraction {
   reply: (options: any) => Promise<Message>;
   editReply: (options: any) => Promise<Message>;
   followUp: (options: any) => Promise<Message>;
-  deferReply: (options?: any) => Promise<void>;
+  deferReply: (options?: any) => Promise<Message | void>;
   inGuild: () => boolean;
   args: string[];
   message: Message;
+  createdTimestamp: number;
 }
 
 /**
@@ -463,6 +464,7 @@ export async function createPrefixInteraction(
     options: createOptions(message, args, commandName),
     args: args.slice(1), // Exclude command name
     message: message,
+    createdTimestamp: message.createdTimestamp,
 
     async reply(options: any): Promise<Message> {
       if ('send' in message.channel) {
@@ -499,11 +501,20 @@ export async function createPrefixInteraction(
       throw new Error('Channel does not support sending messages');
     },
 
-    async deferReply(options?: any): Promise<void> {
-      // For prefix commands, don't send "thinking" message
-      // Just mark as deferred
+    async deferReply(options?: any): Promise<Message | void> {
+      // For prefix commands, trigger typing to indicate processing
+      if ('sendTyping' in message.channel) {
+        await message.channel.sendTyping().catch(() => { });
+      }
       isDeferred = true;
       interaction.deferred = true;
+
+      if (options?.fetchReply) {
+        if ('send' in message.channel) {
+          replyMessage = await message.channel.send({ content: 'Thinking...' });
+        }
+        return replyMessage || undefined;
+      }
     },
 
     inGuild(): boolean {

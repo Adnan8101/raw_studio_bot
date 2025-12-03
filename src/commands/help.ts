@@ -45,7 +45,7 @@ export const slashCommand: SlashCommand = {
 const categoryConfig: Record<string, { name: string; emoji: string; description: string }> = {
   antinuke: {
     name: 'Anti-Nuke',
-    emoji: '<:antinuke:1437996074559078492>',
+    emoji: '<:xieron_antinuke:1437996169799270472>',
     description: 'Anti-Nuke Protection System'
   },
   moderation: {
@@ -70,17 +70,17 @@ const categoryConfig: Record<string, { name: string; emoji: string; description:
   },
   invites_welcome: {
     name: 'Invites',
-    emoji: '📨',
+    emoji: '<:invitesss:1445795811349762144>',
     description: 'Invites System'
   },
   welcome: {
     name: 'Welcome',
-    emoji: '👋',
+    emoji: '<:welcomer:1437997391159623700>',
     description: 'Welcome System'
   },
   serverstats: {
     name: 'Server Stats',
-    emoji: '<:serveur:904792335517380618>',
+    emoji: '<:server:1445795986449498324>',
     description: 'Server Statistics'
   },
   quarantine: {
@@ -100,12 +100,12 @@ const categoryConfig: Record<string, { name: string; emoji: string; description:
   },
   utility: {
     name: 'Utility',
-    emoji: '🛠️',
+    emoji: '<:utility:1445794957582536908>',
     description: 'Utility Commands'
   },
   games: {
     name: 'Games',
-    emoji: '<a:games:1445635453326983319>',
+    emoji: '<:gamer:1445795367735136347>',
     description: 'Fun & Games'
   },
   name_prevention: {
@@ -115,13 +115,28 @@ const categoryConfig: Record<string, { name: string; emoji: string; description:
   },
   recording: {
     name: 'Recording',
-    emoji: '🎙️',
+    emoji: '<:xieron_mic:1445793726755508486>',
     description: 'Voice Recording'
   },
   general: {
     name: 'General',
-    emoji: 'ℹ️',
+    emoji: '<:e_info:1445794776485073086>',
     description: 'General Commands'
+  },
+  giveaways: {
+    name: 'Giveaways',
+    emoji: '<:Giveaways:1445794098479894633>',
+    description: 'Giveaway System'
+  },
+  owner: {
+    name: 'Owner',
+    emoji: '<:developer:1445794287429091379>',
+    description: 'Owner Commands'
+  },
+  voice: {
+    name: 'Voice',
+    emoji: '<:xieron_mic:1445793726755508486>',
+    description: 'Voice Management'
   }
 };
 
@@ -148,6 +163,9 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   services: { guildConfigService: GuildConfigService; commands: Collection<string, any> }
 ) {
+  // 0. Defer immediately to show responsiveness
+  await interaction.deferReply();
+
   const prefix = await services.guildConfigService.getPrefix(interaction.guild!.id);
   const commands = services.commands;
   const specificCommand = interaction.options.getString('command');
@@ -160,17 +178,13 @@ export async function execute(
     if (cmd) {
       // Check if user can run this command
       if (!canRunCommand(cmd, interaction.member as GuildMember)) {
-        await interaction.reply({
-          embeds: [createInfoEmbed('Permission Denied', 'You do not have permission to view or use this command.')],
-          flags: MessageFlags.Ephemeral
+        await interaction.editReply({
+          embeds: [createInfoEmbed('Permission Denied', 'You do not have permission to view or use this command.')]
         });
         return;
       }
 
       const commandData = cmd.slashCommand || cmd;
-      // Hide owner commands from specific help if user is not owner (optional, but good practice)
-      // For now, we just proceed as requested for the main menu.
-
       const help = {
         name: commandData.data?.name || cmd.name,
         description: commandData.data?.description || cmd.description,
@@ -180,7 +194,7 @@ export async function execute(
       };
 
       const embed = createUsageEmbed(help);
-      await interaction.reply({ embeds: [embed] });
+      await interaction.editReply({ embeds: [embed] });
       return;
     } else {
       // Command not found logic...
@@ -216,28 +230,14 @@ export async function execute(
         .setColor(EmbedColors.ERROR)
         .setDescription(errorDescription);
 
-      await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
+      await interaction.editReply({ embeds: [errorEmbed] });
       return;
     }
   }
 
-  // 2. Group Commands by Category
+  // 2. Group Commands by Category & Count Total (Single Pass)
   const categories: Record<string, any[]> = {};
-
-  commands.forEach((cmd: any) => {
-    // Filter by permission
-    if (!canRunCommand(cmd, interaction.member as GuildMember)) return;
-
-    const commandData = cmd.slashCommand || cmd;
-    let category = (commandData.category || 'general').toLowerCase().replace(/\s+/g, '_');
-
-    if (!categories[category]) {
-      categories[category] = [];
-    }
-    categories[category].push(commandData);
-  });
-
-  const sortedCategories = Object.keys(categories).sort();
+  let totalCommandsCount = 0;
 
   // Helper to flatten commands into display strings
   const getCommandDisplayNames = (cmd: any): string[] => {
@@ -275,12 +275,24 @@ export async function execute(
     return subcommands.length > 0 ? subcommands : [`/${name}`];
   };
 
-  // Calculate total commands (including subcommands)
-  let totalCommandsCount = 0;
   commands.forEach((cmd: any) => {
+    // Filter by permission
     if (!canRunCommand(cmd, interaction.member as GuildMember)) return;
+
+    // Count
     totalCommandsCount += getCommandDisplayNames(cmd).length;
+
+    // Categorize
+    const commandData = cmd.slashCommand || cmd;
+    let category = (commandData.category || 'general').toLowerCase().replace(/\s+/g, '_');
+
+    if (!categories[category]) {
+      categories[category] = [];
+    }
+    categories[category].push(commandData);
   });
+
+  const sortedCategories = Object.keys(categories).sort();
 
   // 3. Build Main Menu Embed
   const moduleList = sortedCategories.map(key => {
@@ -331,7 +343,7 @@ export async function execute(
 
   const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
 
-  const response = await interaction.reply({
+  const response = await interaction.editReply({
     embeds: [mainEmbed],
     components: [row],
   });

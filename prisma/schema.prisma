@@ -475,6 +475,7 @@ model Giveaway {
   // New Features
   assignRole            String?  @map("assign_role")
   thumbnail             String?
+  emoji                 String?  @map("emoji")
 
   participants          GiveawayParticipant[]
   winners               GiveawayWinner[]
