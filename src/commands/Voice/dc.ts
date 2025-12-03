@@ -34,9 +34,9 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
 
         const content = message.content.trim();
         const args = content.split(/ +/);
-        args.shift(); 
+        args.shift();
 
-        
+
         if (message.reference && message.reference.messageId) {
             try {
                 const repliedMessage = await message.channel.messages.fetch(message.reference.messageId);
@@ -46,20 +46,20 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
             } catch (e) { }
         }
 
-        
+
         if (!targetMember && args.length > 0) {
             const arg = args[0];
 
-            
+
             const mentionMatch = arg.match(/^<@!?(\d{17,19})>$/);
             if (mentionMatch) {
                 targetMember = await message.guild?.members.fetch(mentionMatch[1]).catch(() => null) || null;
             }
-            
+
             else if (arg.match(/^\d{17,19}$/)) {
                 targetMember = await message.guild?.members.fetch(arg).catch(() => null) || null;
             }
-            
+
             else {
                 try {
                     const fetchedMember = await message.guild!.members.fetch({ query: arg, limit: 1 });
@@ -73,7 +73,7 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
 
     if (!targetMember) {
         if (isSlash) {
-            await interaction.reply({ embeds: [createErrorEmbed('User not found.')], flags: MessageFlags.Ephemeral });
+            await interaction.reply({ embeds: [createErrorEmbed('User not found.')] });
         }
         return;
     }
@@ -83,20 +83,20 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
             await targetMember.voice.disconnect();
 
             if (isSlash) {
-                await interaction.reply({ content: `${CustomEmojis.TICK} Disconnected ${targetMember.user.tag}`, flags: MessageFlags.Ephemeral });
+                await interaction.reply({ content: `${CustomEmojis.TICK} Disconnected ${targetMember.user.tag}` });
             } else {
                 const message = interaction.message as Message;
                 await message.react(CustomEmojis.TICK || '✅');
             }
         } catch (error) {
             if (isSlash) {
-                await interaction.reply({ embeds: [createErrorEmbed('Failed to disconnect user. Check permissions.')], flags: MessageFlags.Ephemeral });
+                await interaction.reply({ embeds: [createErrorEmbed('Failed to disconnect user. Check permissions.')] });
             }
         }
     } else {
-        
+
         if (isSlash) {
-            await interaction.reply({ content: 'User is not in a voice channel.', flags: MessageFlags.Ephemeral });
+            await interaction.reply({ content: 'User is not in a voice channel.' });
         }
     }
 }

@@ -61,19 +61,22 @@ const slashCommand: SlashCommand = {
         .setThumbnail(targetUser.displayAvatarURL())
         .setTimestamp();
 
-      await interaction.editReply({ embeds: [embed] });
+      if (interaction.deferred || interaction.replied) {
+        await interaction.editReply({ embeds: [embed] });
+      } else {
+        await interaction.webhook.editMessage('@original', { embeds: [embed] });
+      }
     } catch (error) {
       console.error('Error fetching invite data:', error);
-      // If editReply fails, try followUp
       try {
-        await interaction.editReply({
-          embeds: [createErrorEmbed('An error occurred while fetching invite statistics.')]
-        });
+        const errorEmbed = createErrorEmbed('An error occurred while fetching invite statistics.');
+        if (interaction.deferred || interaction.replied) {
+          await interaction.followUp({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
+        } else {
+          await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
+        }
       } catch (e) {
-        await interaction.followUp({
-          embeds: [createErrorEmbed('An error occurred while fetching invite statistics.')],
-          flags: MessageFlags.Ephemeral
-        }).catch(() => { });
+        console.error('Error sending error message:', e);
       }
     }
   },

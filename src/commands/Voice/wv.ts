@@ -25,11 +25,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     } else if (member?.voice.channel) {
         channel = member.voice.channel as VoiceChannel;
     } else {
-        
-        
-        
-        
-        
+
+
+
+
+
         const message = (interaction as any).message as Message;
         if (message && message.reference && message.reference.messageId) {
             try {
@@ -41,7 +41,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         }
 
         if (!channel) {
-            await interaction.reply({ embeds: [createErrorEmbed('You must be in a voice channel, reply to a user in a VC, or specify a channel to check.')], flags: MessageFlags.Ephemeral });
+            await interaction.reply({ embeds: [createErrorEmbed('You must be in a voice channel, reply to a user in a VC, or specify a channel to check.')] });
             return;
         }
     }
@@ -49,21 +49,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const members = channel.members;
 
     if (members.size === 0) {
-        await interaction.reply({ embeds: [createErrorEmbed(`No one is in ${channel.name}.`)], flags: MessageFlags.Ephemeral });
+        await interaction.reply({ embeds: [createErrorEmbed(`No one is in ${channel.name}.`)] });
         return;
     }
-
-    const memberList = members.map(m => {
-        let status = '';
-        if (m.voice.serverMute) status += '🔇 ';
-        if (m.voice.serverDeaf) status += '🙉 ';
-        if (m.voice.selfMute) status += 'mic off ';
-        if (m.voice.selfDeaf) status += 'deafened ';
-        return `• ${m.user.tag} ${status}`;
-    }).join('\n');
-
     await interaction.reply({
-        content: `<#${channel.id}>\n${memberList}`,
-        flags: MessageFlags.Ephemeral
+        content: `<#${channel.id}>`
     });
 }

@@ -29,7 +29,7 @@ export const prefixCommand = {
 };
 
 export async function execute(interaction: ChatInputCommandInteraction | any) {
-    
+
     const isSlash = interaction.isChatInputCommand?.();
     const db = DatabaseManager.getInstance();
 
@@ -48,18 +48,18 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
         } else if (member?.voice.channel) {
             targetChannelId = member.voice.channelId!;
         } else {
-            await interaction.reply({ embeds: [createErrorEmbed('You must be in a voice channel or specify a target channel.')], flags: MessageFlags.Ephemeral });
+            await interaction.reply({ embeds: [createErrorEmbed('You must be in a voice channel or specify a target channel.')] });
             return;
         }
     } else {
-        
+
         const message = interaction.message as Message;
         if (!message) return;
 
         member = message.member!;
         const content = message.content.trim();
         const args = content.split(/ +/);
-        args.shift(); 
+        args.shift();
 
         if (args.length === 0 && !message.reference) {
             await interaction.reply({ embeds: [createErrorEmbed('Usage: !ad <user> [channel]')] });
@@ -69,7 +69,7 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
         let userArg: string | undefined;
         let channelArg: string | undefined;
 
-        
+
         if (message.reference && message.reference.messageId) {
             try {
                 const repliedMessage = await message.channel.messages.fetch(message.reference.messageId);
@@ -79,37 +79,37 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
             } catch (e) { }
         }
 
-        
+
         if (targetUser) {
-            
+
             channelArg = args.join(' ');
         } else {
-            
+
             if (args.length > 0) {
                 userArg = args[0];
 
-                
+
                 const isId = userArg.match(/^\d{17,19}$/);
                 const isMention = userArg.match(/^<@!?(\d{17,19})>$/);
 
                 if (isId || isMention) {
-                    
+
                     try {
                         const id = isId ? userArg : isMention![1];
                         const fetchedMember = await message.guild!.members.fetch(id);
                         targetUser = fetchedMember.user;
-                        args.shift(); 
+                        args.shift();
                         channelArg = args.join(' ');
                     } catch (e) { }
                 } else {
-                    
-                    
+
+
                     try {
-                        
+
                         const fetchedMember = await message.guild!.members.fetch({ query: userArg, limit: 1 });
                         if (fetchedMember.size > 0) {
                             targetUser = fetchedMember.first()!.user;
-                            args.shift(); 
+                            args.shift();
                             channelArg = args.join(' ');
                         }
                     } catch (e) { }
@@ -122,7 +122,7 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
             return;
         }
 
-        
+
         if (channelArg) {
             const resolved = await resolveChannel(channelArg, message.guild!);
             if (resolved) targetChannelId = resolved.id;
@@ -130,7 +130,7 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
             if (member.voice.channel) {
                 targetChannelId = member.voice.channelId!;
             } else {
-                
+
                 await interaction.reply({ content: 'Which voice channel should I drag them to?' });
                 try {
                     const channel = message.channel as any;
@@ -164,36 +164,36 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
         }
     }
 
-    
+
     const targetMember = await interaction.guild?.members.fetch(targetUser.id);
     if (!targetMember) return;
 
     if (targetMember.voice.channel) {
-        
+
         try {
             await targetMember.voice.setChannel(targetChannelId);
             const channel = interaction.guild?.channels.cache.get(targetChannelId);
             if (isSlash) {
-                await interaction.reply({ content: CustomEmojis.TICK, flags: MessageFlags.Ephemeral });
+                await interaction.reply({ content: CustomEmojis.TICK });
             } else {
                 await interaction.reply({ content: CustomEmojis.TICK });
             }
         } catch (error) {
             const msg = 'Failed to move user. Check permissions.';
             if (isSlash) {
-                await interaction.reply({ embeds: [createErrorEmbed(msg)], flags: MessageFlags.Ephemeral });
+                await interaction.reply({ embeds: [createErrorEmbed(msg)] });
             } else {
                 await interaction.reply({ embeds: [createErrorEmbed(msg)] });
             }
         }
     } else {
-        
+
         await db.createAutoDragRule(interaction.guildId!, targetUser.id, targetChannelId!, interaction.user.id);
         const channel = interaction.guild?.channels.cache.get(targetChannelId!);
         const msg = `${CustomEmojis.TICK} I will drag ${targetUser} to **${channel?.name || 'the channel'}** when they join a voice channel.`;
 
         if (isSlash) {
-            await interaction.reply({ content: msg, flags: MessageFlags.Ephemeral });
+            await interaction.reply({ content: msg });
         } else {
             await interaction.reply({ content: msg });
         }

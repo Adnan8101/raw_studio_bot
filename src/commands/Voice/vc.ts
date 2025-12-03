@@ -26,8 +26,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     if (!stats) {
         return interaction.reply({
-            content: `${targetUser} has no voice stats recorded.`,
-            ephemeral: true
+            content: `${targetUser} has no voice stats recorded.`
         });
     }
 
