@@ -1,6 +1,4 @@
-/**
- * Channel Moderation Commands - Lock, unlock, hide, unhide, slowmode
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -172,7 +170,7 @@ async function handleLock(
 
     await interaction.editReply({ embeds: [embed] });
 
-    // Send notification in channel
+    
     await channel.send({
       embeds: [
         new EmbedBuilder()
@@ -215,7 +213,7 @@ async function handleUnlock(
 
     await interaction.editReply({ embeds: [embed] });
 
-    // Send notification in channel
+    
     await channel.send({
       embeds: [
         new EmbedBuilder()
@@ -308,7 +306,7 @@ async function handleSlowmode(
     (interaction.options.getChannel('channel') as TextChannel) || (interaction.channel as TextChannel);
   const reason = interaction.options.getString('reason') || 'No reason provided';
 
-  // Parse duration
+  
   let duration: number;
   if (durationStr === '0' || durationStr === '0s') {
     duration = 0;
@@ -322,7 +320,7 @@ async function handleSlowmode(
     duration = Math.floor(parsed / 1000); // Convert to seconds
   }
 
-  // Max 6 hours (21600 seconds)
+  
   if (duration > 21600) {
     const errorEmbed = createErrorEmbed('Slowmode duration cannot exceed 6 hours.');
     await interaction.editReply({ embeds: [errorEmbed] });

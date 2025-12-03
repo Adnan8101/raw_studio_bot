@@ -1,6 +1,4 @@
-/**
- * Prefix Command Parser - Converts prefix commands to interaction-like objects
- */
+
 
 import { Message, ChatInputCommandInteraction, Guild, GuildMember, User, TextChannel } from 'discord.js';
 
@@ -35,9 +33,7 @@ export interface PrefixInteraction {
   createdTimestamp: number;
 }
 
-/**
- * Parse arguments from message content
- */
+
 function parseArgs(content: string, prefix: string): string[] {
   const withoutPrefix = content.slice(prefix.length).trim();
   const args: string[] = [];
@@ -66,37 +62,35 @@ function parseArgs(content: string, prefix: string): string[] {
   return args;
 }
 
-/**
- * Parse mentions and IDs
- */
+
 function parseUserId(arg: string): string | null {
-  // <@123456789> or <@!123456789>
+  
   const userMention = arg.match(/^<@!?(\d+)>$/);
   if (userMention) return userMention[1];
 
-  // Direct ID
+  
   if (/^\d+$/.test(arg)) return arg;
 
   return null;
 }
 
 function parseRoleId(arg: string): string | null {
-  // <@&123456789>
+  
   const roleMention = arg.match(/^<@&(\d+)>$/);
   if (roleMention) return roleMention[1];
 
-  // Direct ID
+  
   if (/^\d+$/.test(arg)) return arg;
 
   return null;
 }
 
 function parseChannelId(arg: string): string | null {
-  // <#123456789>
+  
   const channelMention = arg.match(/^<#(\d+)>$/);
   if (channelMention) return channelMention[1];
 
-  // Direct ID
+  
   if (/^\d+$/.test(arg)) return arg;
 
   return null;
@@ -110,36 +104,34 @@ export class ValidationError extends Error {
   }
 }
 
-/**
- * Create options parser from command arguments
- */
+
 function createOptions(message: Message, args: string[], commandName: string): PrefixCommandOptions {
   const parsedOptions: Map<string, any> = new Map();
   let subcommand: string | null = null;
   let subcommandGroup: string | null = null;
 
-  // Parse based on command structure
-  // Check if first arg after command is a subcommand (no special chars)
+  
+  
   if (args.length > 1 && commandName !== 'help') {
     const potentialSubcommand = args[1].toLowerCase();
-    // Common subcommands
+    
     const commonSubcommands = ['add', 'remove', 'setup', 'list', 'view', 'config', 'lock', 'unlock', 'hide', 'unhide', 'slowmode', 'all', 'bots', 'human', 'enable', 'disable'];
 
     if (commonSubcommands.includes(potentialSubcommand) || (!args[1].match(/^<[@#&]/) && !args[1].match(/^\d+$/))) {
-      // Check if it looks like a subcommand (not a mention or number)
+      
       const nextArg = args[2];
       if (!nextArg || nextArg.match(/^<[@#&]/) || nextArg.match(/^\d+$/) || nextArg.startsWith('-')) {
         subcommand = potentialSubcommand;
-        args = [args[0], ...args.slice(2)]; // Remove subcommand from args
+        args = [args[0], ...args.slice(2)]; 
       }
     }
   }
 
-  // Special handling for purge command
+  
   if (commandName === 'purge') {
     if (args.length > 1) {
       const firstArg = args[1].toLowerCase();
-      // Check if it's a mode or a number
+      
       if (firstArg === 'bots' || firstArg === 'human' || firstArg === 'all') {
         subcommand = firstArg;
         parsedOptions.set('mode', firstArg);
@@ -153,22 +145,22 @@ function createOptions(message: Message, args: string[], commandName: string): P
     }
   }
 
-  // Handle AutoMod Subcommand Groups
+  
   if (commandName === 'automod' && args.length > 1) {
     const firstArg = args[1].toLowerCase();
     if (['anti-spam', 'mass-mention'].includes(firstArg)) {
       subcommandGroup = firstArg;
       if (args.length > 2) {
         subcommand = args[2].toLowerCase();
-        args = [args[0], ...args.slice(3)]; // Remove group and subcommand
+        args = [args[0], ...args.slice(3)]; 
       }
     }
   }
 
-  // Parse remaining args as positional
+  
   let argIndex = 1;
 
-  // Determine command structure and parse accordingly
+  
   const needsUser = ['ban', 'unban', 'kick', 'mute', 'unmute', 'warn', 'checkwarn', 'softban', 'nick', 'role'].includes(commandName) ||
     (commandName === 'quarantine' && ['add', 'remove'].includes(subcommand || ''));
   const needsRole = ['role'].includes(commandName) ||
@@ -180,10 +172,10 @@ function createOptions(message: Message, args: string[], commandName: string): P
   const needsString = ['setprefix', 'nick'].includes(commandName);
   const needsMessageId = ['gend', 'gcancel', 'greroll'].includes(commandName);
 
-  // AutoMod Argument Parsing
+  
   if (commandName === 'automod') {
     if (subcommand === 'enable' || subcommand === 'disable') {
-      // !automod enable <action> [punishment] [action_type]
+      
       if (argIndex < args.length) {
         parsedOptions.set('action', args[argIndex]);
         argIndex++;
@@ -197,7 +189,7 @@ function createOptions(message: Message, args: string[], commandName: string): P
         argIndex++;
       }
     } else if (subcommandGroup === 'anti-spam' && subcommand === 'limit') {
-      // !automod anti-spam limit <message> <threshold_time>
+      
       if (argIndex < args.length) {
         parsedOptions.set('message', args[argIndex]);
         argIndex++;
@@ -207,7 +199,7 @@ function createOptions(message: Message, args: string[], commandName: string): P
         argIndex++;
       }
     } else if (subcommandGroup === 'mass-mention' && subcommand === 'limit') {
-      // !automod mass-mention limit <mentions_allowed>
+      
       if (argIndex < args.length) {
         parsedOptions.set('mentions_allowed', args[argIndex]);
         argIndex++;
@@ -215,10 +207,10 @@ function createOptions(message: Message, args: string[], commandName: string): P
     }
   }
 
-  // AntiNuke Argument Parsing
+  
   if (commandName === 'antinuke') {
     if (subcommand === 'enable') {
-      // !antinuke enable <actions> [window_seconds]
+      
       if (argIndex < args.length) {
         parsedOptions.set('actions', args[argIndex]);
         argIndex++;
@@ -228,7 +220,7 @@ function createOptions(message: Message, args: string[], commandName: string): P
         argIndex++;
       }
     } else if (subcommand === 'restore') {
-      // !antinuke restore [mode] [preview]
+      
       if (argIndex < args.length) {
         parsedOptions.set('mode', args[argIndex]);
         argIndex++;
@@ -240,10 +232,10 @@ function createOptions(message: Message, args: string[], commandName: string): P
     }
   }
 
-  // Logging Argument Parsing
+  
   if (commandName === 'logging') {
     if (subcommand === 'enable') {
-      // !logging enable <channel>
+      
       if (argIndex < args.length) {
         const arg = args[argIndex];
         if (arg.startsWith('<#') || /^\d{17,19}$/.test(arg)) {
@@ -254,9 +246,9 @@ function createOptions(message: Message, args: string[], commandName: string): P
     }
   }
 
-  // Parse user if needed (first positional)
+  
 
-  // Parse user if needed (first positional)
+  
   if (needsUser && argIndex < args.length) {
     const arg = args[argIndex];
     if (arg.startsWith('<@') || /^\d{17,19}$/.test(arg)) {
@@ -265,7 +257,7 @@ function createOptions(message: Message, args: string[], commandName: string): P
     }
   }
 
-  // Parse role if needed
+  
   if (needsRole && argIndex < args.length) {
     const arg = args[argIndex];
     if (arg.startsWith('<@&') || /^\d{17,19}$/.test(arg)) {
@@ -274,7 +266,7 @@ function createOptions(message: Message, args: string[], commandName: string): P
     }
   }
 
-  // Parse channel if needed
+  
   if (needsChannel && argIndex < args.length) {
     const arg = args[argIndex];
     if (arg.startsWith('<#') || /^\d{17,19}$/.test(arg)) {
@@ -283,20 +275,20 @@ function createOptions(message: Message, args: string[], commandName: string): P
     }
   }
 
-  // Parse duration if needed (for mute, softban, slowmode)
+  
   if (needsDuration && argIndex < args.length) {
     const arg = args[argIndex];
-    // Duration format: 5s, 10m, 1h, 2d
+    
     if (/^\d+[smhd]$/i.test(arg) || arg === '0') {
       parsedOptions.set('duration', arg);
       argIndex++;
     }
   }
 
-  // Parse string if needed (for setprefix, nick)
+  
   if (needsString && argIndex < args.length) {
     const arg = args[argIndex];
-    // Accept any non-mention value
+    
     if (!arg.startsWith('<@') && !arg.startsWith('<#') && !arg.startsWith('<@&')) {
       parsedOptions.set('prefix', arg);
       parsedOptions.set('nickname', arg);
@@ -304,7 +296,7 @@ function createOptions(message: Message, args: string[], commandName: string): P
     }
   }
 
-  // Parse special args for specific commands
+  
   if (commandName === 'help' && argIndex < args.length) {
     parsedOptions.set('command', args[argIndex]);
     argIndex++;
@@ -323,12 +315,12 @@ function createOptions(message: Message, args: string[], commandName: string): P
     }
   }
 
-  // Remaining args are reason
+  
   if (argIndex < args.length) {
     parsedOptions.set('reason', args.slice(argIndex).join(' '));
   }
 
-  // Special handling for unban (needs user_id)
+  
   if (commandName === 'unban' && parsedOptions.has('user')) {
     parsedOptions.set('user_id', parsedOptions.get('user'));
   }
@@ -359,8 +351,8 @@ function createOptions(message: Message, args: string[], commandName: string): P
         return null;
       }
 
-      // If not in cache, return a partial user object with just the ID
-      // This prevents crashes in commands that only need the ID
+      
+      
       return message.client.users.cache.get(userId) || ({ id: userId, toString: () => `<@${userId}>`, tag: 'Unknown User' } as User);
     },
 
@@ -439,9 +431,7 @@ function createOptions(message: Message, args: string[], commandName: string): P
   };
 }
 
-/**
- * Create a pseudo-interaction from a message
- */
+
 export async function createPrefixInteraction(
   message: Message,
   prefix: string
@@ -462,7 +452,7 @@ export async function createPrefixInteraction(
     replied: false,
     deferred: false,
     options: createOptions(message, args, commandName),
-    args: args.slice(1), // Exclude command name
+    args: args.slice(1), 
     message: message,
     createdTimestamp: message.createdTimestamp,
 
@@ -502,7 +492,7 @@ export async function createPrefixInteraction(
     },
 
     async deferReply(options?: any): Promise<Message | void> {
-      // For prefix commands, trigger typing to indicate processing
+      
       if ('sendTyping' in message.channel) {
         await message.channel.sendTyping().catch(() => { });
       }

@@ -1,6 +1,4 @@
-/**
- * ActionLimiter - Records events and evaluates sliding window counters
- */
+
 
 import { PrismaClient } from '@prisma/client';
 import { SecurityEvent, ProtectionAction } from '../types';
@@ -14,16 +12,13 @@ export class ActionLimiter {
     private configService: ConfigService
   ) { }
 
-  /**
-   * Record a security event and check if limit exceeded
-   * Returns the count and whether limit was exceeded
-   */
+  
   async recordAndCheck(event: SecurityEvent): Promise<{ count: number; limitExceeded: boolean; limit?: number; resetTime?: number }> {
-    // Get limit configuration
+    
     const limitConfig = await this.configService.getLimit(event.guildId, event.action);
 
     if (!limitConfig) {
-      // Record asynchronously even if no limit
+      
       this.recordActionAsync(event);
       return { count: 1, limitExceeded: false };
     }
@@ -32,29 +27,29 @@ export class ActionLimiter {
     const windowStart = now - limitConfig.windowMs;
     const cacheKey = `${event.guildId}:${event.userId}:${event.action}`;
 
-    // Update memory cache
+    
     let timestamps = this.memoryCache.get(cacheKey) || [];
     timestamps.push(now);
 
-    // Filter out old timestamps
+    
     timestamps = timestamps.filter(t => t >= windowStart);
     this.memoryCache.set(cacheKey, timestamps);
 
     const count = timestamps.length;
     const limitExceeded = count > limitConfig.limitCount;
 
-    // Calculate reset time (when the oldest action in the window expires)
-    // If we have timestamps, the window slides. The count drops when the oldest timestamp + windowMs is reached.
-    // However, for a strict "reset", it's usually when the *current* window expires if we consider it fixed,
-    // but with a sliding window, it's when the oldest relevant action falls out.
-    // Let's return the time when the count will drop below the limit.
-    // Actually, simply returning `now + windowMs` is a safe "full reset",
-    // but `timestamps[0] + limitConfig.windowMs` is when the *first* action expires.
+    
+    
+    
+    
+    
+    
+    
 
     const oldestTimestamp = timestamps[0] || now;
     const resetTime = oldestTimestamp + limitConfig.windowMs;
 
-    // Record to DB asynchronously
+    
     this.recordActionAsync(event);
 
     return {
@@ -83,9 +78,7 @@ export class ActionLimiter {
     }
   }
 
-  /**
-   * Get action count for a user in a time window
-   */
+  
   async getActionCount(
     guildId: string,
     userId: string,
@@ -106,9 +99,7 @@ export class ActionLimiter {
     });
   }
 
-  /**
-   * Get all actions for a user in a time window (for reversion)
-   */
+  
   async getActionsByUser(
     guildId: string,
     userId: string,
@@ -139,9 +130,7 @@ export class ActionLimiter {
     }));
   }
 
-  /**
-   * Get recent actions for a guild
-   */
+  
   async getRecentActions(guildId: string, limit: number = 10): Promise<SecurityEvent[]> {
     const actions = await this.prisma.antiNukeAction.findMany({
       where: { guildId },
@@ -160,9 +149,7 @@ export class ActionLimiter {
     }));
   }
 
-  /**
-   * Clean up old actions (should be run periodically)
-   */
+  
   async cleanupOldActions(olderThanDays: number = 30): Promise<number> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
@@ -178,15 +165,13 @@ export class ActionLimiter {
     return result.count;
   }
 
-  /**
-   * Clear all actions for a guild
-   */
+  
   async clearAllActions(guildId: string): Promise<void> {
     await this.prisma.antiNukeAction.deleteMany({
       where: { guildId },
     });
 
-    // Clear memory cache for this guild
+    
     for (const key of this.memoryCache.keys()) {
       if (key.startsWith(`${guildId}:`)) {
         this.memoryCache.delete(key);

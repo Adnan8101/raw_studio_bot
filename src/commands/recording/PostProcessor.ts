@@ -17,7 +17,7 @@ export class PostProcessor {
         const inputs: string[] = [];
         const inputArgs: string[] = [];
 
-        // Build input args for each file
+        
         for (const file of files) {
             const inputPath = path.join(sessionDir, file);
             inputs.push(inputPath);
@@ -28,13 +28,13 @@ export class PostProcessor {
         const timestamp = Date.now();
         const mixedBasename = `recording_${timestamp}`;
 
-        // Complex filter for mixing and enhancement
+        
         const mixFilter = `amix=inputs=${files.length}:duration=longest`;
         const audioFilters = `${mixFilter},highpass=f=50,dynaudnorm=f=150:g=15,compand=attacks=0:points=-80/-80|-12.4/-12.4|-6/-6|0/-3|20/-3`;
 
         const outputArgs = ['-filter_complex', audioFilters];
 
-        // Default to MP3 320k
+        
         const outputPath = path.join(sessionDir, `${mixedBasename}.mp3`);
         await this.convertMixed(inputs, outputPath, inputArgs, [...outputArgs, '-b:a', '320k']);
         outputFiles.push(outputPath);

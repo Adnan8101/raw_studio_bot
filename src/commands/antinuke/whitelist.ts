@@ -109,7 +109,7 @@ export async function execute(
   const subcommand = interaction.options.getSubcommand();
   const guildId = interaction.guildId!;
 
-  // Permission Check: Role > Bot
+  
   if (!await checkCommandPermission(interaction, { ownerOnly: false })) return;
 
   switch (subcommand) {
@@ -145,7 +145,7 @@ async function handleAddRole(
   const guild = interaction.guild!;
   const botMember = guild.members.me!;
 
-  // Safety checks
+  
   if (role.id === guild.roles.everyone.id) {
     const errorEmbed = new EmbedBuilder()
       .setColor(EmbedColors.ERROR)
@@ -154,7 +154,7 @@ async function handleAddRole(
     return;
   }
 
-  // Warn if role is higher than bot's role
+  
   if (role.position >= botMember.roles.highest.position) {
     const embed = new EmbedBuilder()
       .setTitle('⚠️ Role Hierarchy Warning')
@@ -167,8 +167,8 @@ async function handleAddRole(
     await interaction.followUp({ embeds: [embed], ephemeral: true });
   }
 
-  // Warn if role has Administrator permission and whitelisting for ALL
-  // This warning will be shown after category selection if ALL is chosen
+  
+  
   if (typeof role.permissions !== 'string' && role.permissions.has(PermissionFlagsBits.Administrator)) {
     const embed = new EmbedBuilder()
       .setTitle('⚠️ Security Warning')
@@ -194,7 +194,7 @@ async function handleAddUser(
   const user = interaction.options.getUser('user', true);
   const guild = interaction.guild!;
 
-  // Safety checks
+  
   if (user.bot && user.id === interaction.client.user.id) {
     const errorEmbed = new EmbedBuilder()
       .setColor(EmbedColors.ERROR)
@@ -244,7 +244,7 @@ async function handleList(
   guildId: string
 ): Promise<void> {
   if (!interaction.deferred && !interaction.replied) {
-    await interaction.deferReply({ flags: 64 }); // MessageFlags.Ephemeral
+    await interaction.deferReply({ flags: 64 }); 
   }
 
   const filterOption = interaction.options.getString('filter');
@@ -259,7 +259,7 @@ async function handleList(
     return;
   }
 
-  // Group by target
+  
   const grouped = new Map<string, typeof entries>();
   for (const entry of entries) {
     if (!grouped.has(entry.targetId)) {
@@ -268,7 +268,7 @@ async function handleList(
     grouped.get(entry.targetId)!.push(entry);
   }
 
-  // Fetch actual names for roles and users
+  
   const lines: string[] = [];
   let index = 1;
 
@@ -276,7 +276,7 @@ async function handleList(
     const isRole = targetEntries[0].isRole;
     const categoriesList = targetEntries.map(e => formatCategoryName(e.category as WhitelistCategory));
 
-    // Check for ALL category
+    
     const hasAll = categoriesList.includes('ALL') || categoriesList.includes('ALL (bypass everything)');
     const displayCategories = hasAll ? 'All Categories' : categoriesList.join(', ');
 
@@ -285,7 +285,7 @@ async function handleList(
     index++;
   }
 
-  // Split into pages if too long
+  
   const pageSize = 10;
   const pages: string[][] = [];
   for (let i = 0; i < lines.length; i += pageSize) {
@@ -301,7 +301,7 @@ async function handleList(
     })
     .setTimestamp();
 
-  // Add management buttons
+  
   const removeButton = new ButtonBuilder()
     .setCustomId(`whitelist_list_remove_${interaction.user.id}`)
     .setLabel('Remove Entry')
@@ -315,7 +315,7 @@ async function handleList(
     components: [row]
   });
 
-  // Create collector
+  
   const collector = response.createMessageComponentCollector({
     componentType: ComponentType.Button,
     filter: i => i.user.id === interaction.user.id && i.customId === `whitelist_list_remove_${interaction.user.id}`,
@@ -366,7 +366,7 @@ async function handleRemoveSelection(
     });
   }
 
-  // Truncate to 25 options (Discord limit)
+  
   if (options.length > 25) {
     options.length = 25;
   }
@@ -398,7 +398,7 @@ async function handleRemoveSelection(
     const [targetId, isRoleStr] = i.values[0].split(':');
     const isRole = isRoleStr === 'true';
 
-    // Get target name for display
+    
     let targetName = targetId;
     try {
       if (isRole) {
@@ -410,17 +410,17 @@ async function handleRemoveSelection(
       }
     } catch { }
 
-    // We need to pass a ChatInputCommandInteraction to handleManageInteractive, 
-    // but we have a StringSelectMenuInteraction. 
-    // However, handleManageInteractive uses it for editReply/followUp/user.id.
-    // We can cast it or adapt it. 
-    // Since handleManageInteractive expects ChatInputCommandInteraction mainly for initial reply editing,
-    // and we are already in a component flow, we might need to adjust handleManageInteractive or call it carefully.
+    
+    
+    
+    
+    
+    
 
-    // Actually, handleManageInteractive calls editReply on the interaction passed to it.
-    // If we pass 'i' (the select menu interaction), it has editReply.
-    // But typescript might complain. Let's cast it for now as they share the needed methods for this flow.
-    // Or better, update handleManageInteractive signature to accept RepliableInteraction.
+    
+    
+    
+    
 
     await i.deferUpdate();
     await handleManageInteractive(originalInteraction, services, guildId, targetId, targetName, isRole);
@@ -435,7 +435,7 @@ async function handleManageInteractive(
   targetName: string,
   isRole: boolean
 ): Promise<void> {
-  // Fetch current entries
+  
   const entries = await services.whitelistService.getEntriesForTarget(guildId, targetId);
   const currentCategories = new Set(entries.map(e => e.category as WhitelistCategory));
   const allCategories = Object.values(WhitelistCategory);
@@ -482,7 +482,7 @@ async function handleManageInteractive(
     components: [row1, row2]
   });
 
-  // Create collector
+  
   const collector = response.createMessageComponentCollector({
     filter: i => i.user.id === interaction.user.id && i.customId.includes(interaction.id),
     time: 60000
@@ -503,7 +503,7 @@ async function handleManageInteractive(
     } else if (i.customId === `whitelist_save_${interaction.id}`) {
       await i.deferUpdate();
 
-      // Calculate changes
+      
       const toAdd = [...selectedCategories].filter(c => !currentCategories.has(c));
       const toRemove = [...currentCategories].filter(c => !selectedCategories.has(c));
 
@@ -512,7 +512,7 @@ async function handleManageInteractive(
         return;
       }
 
-      // Apply changes
+      
       if (toAdd.length > 0) {
         if (isRole) {
           await services.whitelistService.addRole(guildId, targetId, toAdd, interaction.user.id);
@@ -529,7 +529,7 @@ async function handleManageInteractive(
         }
       }
 
-      // Success embed
+      
       const successEmbed = new EmbedBuilder()
         .setColor(EmbedColors.SUCCESS)
         .setTitle('<:tcet_tick:1437995479567962184> Whitelist Updated')
@@ -595,7 +595,7 @@ async function handleReset(
     return;
   }
 
-  // Count entries before reset
+  
   const entries = await services.whitelistService.listAll(guildId);
   const count = entries.length;
 
@@ -607,7 +607,7 @@ async function handleReset(
     return;
   }
 
-  // Reset
+  
   await services.whitelistService.reset(guildId);
 
   const embed = new EmbedBuilder()

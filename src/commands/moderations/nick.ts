@@ -1,6 +1,4 @@
-/**
- * Nick Command - Change a member's nickname
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -50,7 +48,7 @@ export async function execute(
   const guild = interaction.guild!;
   const moderator = interaction.member as any;
 
-  // Get member
+  
   let target;
   try {
     target = await guild.members.fetch(user.id);
@@ -60,7 +58,7 @@ export async function execute(
     return;
   }
 
-  // Check permissions
+  
   const moderatorCheck = canModerate(moderator, target, PermissionFlagsBits.ManageNicknames);
   if (!moderatorCheck.allowed) {
     const errorEmbed = createErrorEmbed(moderatorCheck.reason || 'You cannot moderate this user.');
@@ -75,10 +73,10 @@ export async function execute(
     return;
   }
 
-  // Store old nickname
+  
   const oldNickname = target.nickname || target.user.username;
 
-  // Change nickname
+  
   try {
     await target.setNickname(nickname, reason);
 
@@ -91,7 +89,7 @@ export async function execute(
 
     await interaction.editReply({ embeds: [embed] });
 
-    // Send to logging channel
+    
     await services.loggingService.logModeration(guild.id, {
       action: 'Nickname Change',
       target: user,

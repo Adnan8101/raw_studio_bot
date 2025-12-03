@@ -5,7 +5,7 @@ export class StatsService {
     private static instance: StatsService;
     private client: Client;
     private db: DatabaseManager;
-    private voiceJoinTimes: Map<string, number> = new Map(); // key: "guildId-userId", value: timestamp
+    private voiceJoinTimes: Map<string, number> = new Map(); 
 
     private constructor(client: Client) {
         this.client = client;
@@ -24,7 +24,7 @@ export class StatsService {
         this.client.on(Events.MessageCreate, this.handleMessage.bind(this));
         this.client.on(Events.VoiceStateUpdate, this.handleVoiceStateUpdate.bind(this));
 
-        // Periodic save for voice stats (every 5 minutes)
+        
         setInterval(this.saveVoiceStats.bind(this), 5 * 60 * 1000);
     }
 
@@ -41,19 +41,19 @@ export class StatsService {
         const key = `${member.guild.id}-${member.id}`;
         const now = Date.now();
 
-        // User joined a voice channel (and wasn't in one before)
+        
         if (!oldState.channelId && newState.channelId) {
             this.voiceJoinTimes.set(key, now);
         }
-        // User left a voice channel (and isn't in one anymore)
+        
         else if (oldState.channelId && !newState.channelId) {
             await this.processVoiceLeave(key, now, member.guild.id, member.id);
         }
-        // User switched channels (effectively leave + join, but we can just keep the timer running or restart it)
-        // For simplicity and accuracy, we treat it as continuous if they stay in voice.
-        // However, if we want to track per-channel, we'd restart. Here we track total voice time.
-        // If we want to be safe against "ghost" sessions, we can restart the timer.
-        // Let's restart the timer to be safe and save the chunk.
+        
+        
+        
+        
+        
         else if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
             await this.processVoiceLeave(key, now, member.guild.id, member.id);
             this.voiceJoinTimes.set(key, now);
@@ -83,7 +83,7 @@ export class StatsService {
 
             if (minutes > 0) {
                 await this.db.addVoiceMinutes(guildId, userId, minutes);
-                // Update join time to now so we don't double count
+                
                 this.voiceJoinTimes.set(key, now);
             }
         }

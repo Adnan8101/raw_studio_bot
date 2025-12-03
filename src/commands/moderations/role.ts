@@ -1,6 +1,4 @@
-/**
- * Role Command - Add or remove a role from a member
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -91,7 +89,7 @@ export const syntax = '/role manage <user> <role|role_name> [reason] OR /role al
 export const example = '/role manage user:@Tai role:@Member reason:Promotion';
 export const permission = 'Manage Roles';
 
-// Prefix command export
+
 export const prefixCommand = {
   aliases: ['role'],
   description: 'Manage roles and aliases',
@@ -106,11 +104,11 @@ export async function execute(
   const subcommand = interaction.options.getSubcommand(false);
   const group = interaction.options.getSubcommandGroup(false);
 
-  // Handle prefix command fallback (where subcommand might be null)
-  // If it's a prefix command !role <user> <role>, it maps to 'manage' logic
-  // But we need to check how arguments are passed.
-  // For now, we assume if no subcommand/group, it's the legacy 'manage' behavior
-  // OR we explicitly check for 'aliases' group.
+  
+  
+  
+  
+  
 
   if (group === 'aliases') {
     switch (subcommand) {
@@ -134,10 +132,10 @@ export async function execute(
 import { resolveRole } from '../../utils/resolver';
 
 async function handleManage(
-  interaction: ChatInputCommandInteraction | any, // Allow 'any' for prefix command interaction wrapper
+  interaction: ChatInputCommandInteraction | any, 
   services: { loggingService: LoggingService }
 ): Promise<void> {
-  // Check if it's a slash command or prefix command wrapper
+  
   const isSlash = interaction.isChatInputCommand?.();
 
   let user;
@@ -154,15 +152,15 @@ async function handleManage(
     roleNameInput = interaction.options.getString('role_name');
     reason = interaction.options.getString('reason') || 'No reason provided';
   } else {
-    // Prefix command logic (!role <user> <role_name> [reason])
-    // The interaction wrapper might not have options parsed exactly as we want for "rest of string"
-    // So we parse message content manually.
+    
+    
+    
     const message = interaction.message as Message;
     if (!message) return;
 
     const content = message.content.trim();
     const parts = content.split(/ +/);
-    parts.shift(); // Remove command name
+    parts.shift(); 
 
     if (parts.length < 2) {
       await interaction.reply({ embeds: [createErrorEmbed('Usage: !role <user> <role_name> [reason]')] });
@@ -170,7 +168,7 @@ async function handleManage(
     }
 
     const userArg = parts.shift()!;
-    // Try to resolve user
+    
     if (message.mentions.members && message.mentions.members.size > 0) {
       user = message.mentions.members.first()?.user;
     } else {
@@ -185,36 +183,36 @@ async function handleManage(
       return;
     }
 
-    // The rest is role name + reason. This is tricky because reason is optional.
-    // We'll assume the last part is reason if it looks like one? No, that's ambiguous.
-    // Let's assume: <role_name> is one word OR we try to match the longest possible prefix as role.
-    // Actually, usually !role @user Admin Reason
-    // We can try to resolve role from the remaining string.
+    
+    
+    
+    
+    
 
     const remaining = parts.join(' ');
-    // We will try to resolve role from the whole remaining string first.
-    // If not found, we split off the last word as reason and try again, etc.
-    // But `resolveRole` is fuzzy.
+    
+    
+    
 
-    // Simple approach: Assume role is the next argument (single word) OR if quoted?
-    // Better: Try to resolve role using the whole string. If it matches, good.
-    // If not, assume last word is reason?
+    
+    
+    
 
-    // Let's try to resolve the role using the first part.
-    // If the user typed "!role @user Mod Team", is "Mod Team" the role?
-    // If we have a role "Mod Team", yes.
-    // If we have role "Mod" and reason "Team", then "Mod Team" might fuzzy match "Mod" poorly or "Mod Team" well?
+    
+    
+    
+    
 
-    // Let's use a heuristic:
-    // 1. Try whole string.
-    // 2. If no match, pop last word (reason) and try again.
+    
+    
+    
 
     let bestRole = await resolveRole(remaining, guild);
     if (bestRole) {
       role = bestRole;
-      // No reason extracted (or it's part of the role name match)
+      
     } else {
-      // Try splitting
+      
       const splitParts = remaining.split(' ');
       if (splitParts.length > 1) {
         const potentialReason = splitParts.pop();
@@ -228,7 +226,7 @@ async function handleManage(
     }
 
     if (!role) {
-      // Fallback: try first word as role
+      
       const firstWord = parts[0];
       const roleMatch = await resolveRole(firstWord, guild);
       if (roleMatch) {
@@ -238,7 +236,7 @@ async function handleManage(
     }
   }
 
-  // Resolve role if provided via string option in slash command
+  
   if (!role && roleNameInput) {
     role = await resolveRole(roleNameInput, guild);
   }
@@ -249,7 +247,7 @@ async function handleManage(
     return;
   }
 
-  // Validate role hierarchy
+  
   if (role.id === guild.roles.everyone.id) {
     const errorEmbed = createErrorEmbed('Cannot modify the @everyone role.');
     await interaction.editReply({ embeds: [errorEmbed] });
@@ -269,7 +267,7 @@ async function handleManage(
     return;
   }
 
-  // Get member
+  
   let target;
   try {
     target = await guild.members.fetch(user.id);
@@ -279,7 +277,7 @@ async function handleManage(
     return;
   }
 
-  // Perform Action
+  
   await modifyRole(interaction, target, role, reason, services, isSlash);
 }
 
@@ -314,7 +312,7 @@ async function modifyRole(
       await interaction.reply({ embeds: [embed] });
     }
 
-    // Send to logging channel
+    
     await services.loggingService.logModeration(interaction.guildId!, {
       action: hasRole ? 'Role Removed' : 'Role Added',
       target: target.user,
@@ -337,7 +335,7 @@ async function handleSetup(
   const role = interaction.options.getRole('role', true);
   const guildId = interaction.guildId!;
 
-  // Fetch existing aliases for this role to pre-fill
+  
   const allAliases = await prisma.roleAlias.findMany({ where: { guildId } });
   const roleAliases = allAliases
     .filter(a => a.roleId === role.id)
@@ -364,7 +362,7 @@ async function handleSetup(
   try {
     const submission = await interaction.awaitModalSubmit({
       filter: i => i.customId === modalId,
-      time: 300000 // 5 minutes
+      time: 300000 
     });
 
     await submission.deferReply();

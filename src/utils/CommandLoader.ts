@@ -49,25 +49,41 @@ export class CommandLoader {
                 await this.readCommands(filePath);
             } else if (file.endsWith('.ts') || file.endsWith('.js')) {
                 try {
-                    // Delete from cache to ensure fresh reload if needed
+                    
                     delete require.cache[require.resolve(filePath)];
 
-                    // eslint-disable-next-line @typescript-eslint/no-var-requires
+                    
                     const commandModule = require(filePath);
 
-                    // Handle both default export and named exports
+                    
                     const command = commandModule.default || commandModule;
 
-                    // Check if it's a valid command
+                    
                     if (command?.data?.name) {
                         this.commands.set(command.data.name, command);
+                        
 
-                        // Handle aliases for prefix commands
+                        
                         if (command.prefixCommand?.aliases) {
                             for (const alias of command.prefixCommand.aliases) {
                                 this.aliases.set(alias, command.data.name);
                             }
                         }
+                    } else if (command?.name && command?.execute) {
+                        
+                        
+                        
+                        
+
+                        
+                        if (!command.data) {
+                            command.data = { name: command.name, description: command.description || 'No description' };
+                        }
+
+                        this.commands.set(command.name, command);
+                        
+                    } else {
+                        console.warn(`[CommandLoader] Skipped file ${file}: No valid command data found.`);
                     }
                 } catch (error) {
                     console.error(`[CommandLoader] Error loading command from ${filePath}:`, error);

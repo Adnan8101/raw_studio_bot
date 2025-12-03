@@ -27,7 +27,7 @@ export const handleEvalCommand = async (interaction: ChatInputCommandInteraction
 
     const code = interaction.options.getString('code', true);
 
-    // Evaluate
+    
     const result = await evaluateCode(code, {
         client: interaction.client,
         interaction: interaction
@@ -42,15 +42,15 @@ export const handleEvalCommand = async (interaction: ChatInputCommandInteraction
         fetchReply: true
     });
 
-    // Handle delete button
+    
     const collector = reply.createMessageComponentCollector({
         componentType: ComponentType.Button,
-        time: 600000 // 10 minutes
+        time: 600000 
     });
 
     collector.on('collect', async i => {
         if (i.customId === 'delete_eval') {
-            await i.deferUpdate(); // Acknowledge
+            await i.deferUpdate(); 
             await interaction.deleteReply();
             collector.stop();
         }

@@ -3,6 +3,7 @@ import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, 
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import { parseDuration } from '../../utils/time';
 import { createSuccessEmbed, createErrorEmbed } from '../../utils/embedHelpers';
+import { PrefixCommand } from '../../types';
 
 export const category = 'giveaways';
 
@@ -73,44 +74,53 @@ export const data = new SlashCommandBuilder()
             .setRequired(false))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild);
 
-export async function execute(interaction: ChatInputCommandInteraction) {
-    const prize = interaction.options.getString('prize', true);
-    const winners = interaction.options.getInteger('winners', true);
-    const durationStr = interaction.options.getString('duration', true);
-    const channel = interaction.options.getChannel('channel') as TextChannel || interaction.channel as TextChannel;
+export const prefixExecute = async (interaction: any) => {
+    const args = interaction.args;
+    const message = interaction.message;
 
-    // Requirements
-    const roleRequirement = interaction.options.getRole('role_requirement');
-    const inviteRequirement = interaction.options.getInteger('invite_requirement');
-    const accountAgeRequirement = interaction.options.getInteger('account_age');
-    const serverAgeRequirement = interaction.options.getInteger('server_age');
-    const captchaRequirement = interaction.options.getBoolean('captcha');
-    const messageRequirement = interaction.options.getInteger('message_required');
-    const voiceRequirement = interaction.options.getInteger('voice');
-    const customMessage = interaction.options.getString('custom_message');
-    const assignRole = interaction.options.getRole('assign_role');
-    const thumbnail = interaction.options.getString('thumbnail');
-    const emoji = interaction.options.getString('emoji') || '🎉';
+    const helpEmbed = new EmbedBuilder()
+        .setTitle('🎉 Quick Giveaway Help')
+        .setDescription('Start a giveaway quickly with a single command.')
+        .addFields(
+            { name: 'Usage', value: '`!gstart <prize> <winners> <duration>`' },
+            { name: 'Examples', value: '`!gstart Nitro 1 1h`\n`!gstart Mystery Box 5 30m`\n`!gstart $10 Gift Card 2 1d`' },
+            { name: 'Arguments', value: '• **Prize:** What you are giving away (can be multiple words)\n• **Winners:** Number of winners (must be at least 1)\n• **Duration:** How long the giveaway lasts (e.g., 10m, 1h, 2d)' }
+        )
+        .setColor('#2f3136')
+        .setFooter({ text: 'Tip: Duration must be the last argument!' });
 
-    const durationSeconds = parseDuration(durationStr);
-    if (!durationSeconds) {
-        await interaction.reply({ embeds: [createErrorEmbed('Invalid duration format. Use 10m, 1h, 2d, etc.')], flags: MessageFlags.Ephemeral });
+    if (args.length < 3) {
+        await interaction.reply({ embeds: [helpEmbed] });
         return;
     }
 
-    if (winners < 1) {
-        await interaction.reply({ embeds: [createErrorEmbed('Invalid number of winners.')], flags: MessageFlags.Ephemeral });
+    const durationStr = args[args.length - 1];
+    const winnersStr = args[args.length - 2];
+    const prize = args.slice(0, args.length - 2).join(' ');
+
+    if (!durationStr || !winnersStr || !prize) {
+        await interaction.reply({ embeds: [helpEmbed] });
+        return;
+    }
+
+    const durationSeconds = parseDuration(durationStr);
+    if (!durationSeconds) {
+        await interaction.reply({ content: '❌ Invalid duration format. Use 10m, 1h, 2d, etc.', embeds: [helpEmbed] });
+        return;
+    }
+
+    const winners = parseInt(winnersStr);
+    if (isNaN(winners) || winners < 1) {
+        await interaction.reply({ content: '❌ Invalid number of winners.', embeds: [helpEmbed] });
         return;
     }
 
     const endTime = new Date(Date.now() + durationSeconds * 1000);
-
     const db = DatabaseManager.getInstance();
 
-    // Create Embed
     const embed = new EmbedBuilder()
         .setTitle(prize)
-        .setDescription(`React with ${emoji} to enter!\nEnds: <t:${Math.floor(endTime.getTime() / 1000)}:R> (<t:${Math.floor(endTime.getTime() / 1000)}:f>)\nHosted by: ${interaction.user}`)
+        .setDescription(`React with 🎉 to enter!\nEnds: <t:${Math.floor(endTime.getTime() / 1000)}:R> (<t:${Math.floor(endTime.getTime() / 1000)}:f>)\nHosted by: ${interaction.user}`)
         .addFields(
             { name: 'Winners', value: `${winners}`, inline: true },
             { name: 'Host', value: `${interaction.user}`, inline: true }
@@ -119,57 +129,45 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         .setTimestamp(endTime)
         .setFooter({ text: `Ends at` });
 
-    if (thumbnail) {
-        embed.setThumbnail(thumbnail);
-    }
-
-    if (customMessage) {
-        embed.addFields({ name: 'Message', value: customMessage });
-    }
-
-    // Requirements text
-    const requirements: string[] = [];
-    if (roleRequirement) requirements.push(`Role: ${roleRequirement}`);
-    if (inviteRequirement) requirements.push(`Invites: ${inviteRequirement}`);
-    if (accountAgeRequirement) requirements.push(`Account Age: ${accountAgeRequirement} days`);
-    if (serverAgeRequirement) requirements.push(`Server Age: ${serverAgeRequirement} days`);
-    if (messageRequirement) requirements.push(`Messages: ${messageRequirement}`);
-    if (voiceRequirement) requirements.push(`Voice: ${voiceRequirement} mins`);
-    if (captchaRequirement) requirements.push(`Captcha: Required`);
-
-    if (requirements.length > 0) {
-        embed.addFields({ name: 'Requirements', value: requirements.join('\n') });
-    }
-
     try {
-        const message = await channel.send({ embeds: [embed] });
-        await message.react(emoji);
+        const channel = message.channel as TextChannel;
+        const giveawayMessage = await channel.send({ embeds: [embed] });
+        await giveawayMessage.react('🎉');
 
         await db.createGiveaway({
-            messageId: message.id,
+            messageId: giveawayMessage.id,
             channelId: channel.id,
-            guildId: interaction.guildId!,
-            hostId: interaction.user.id,
+            guildId: message.guild!.id,
+            hostId: message.author.id,
             prize,
             winnersCount: winners,
             endTime,
-            roleRequirement: roleRequirement?.id,
-            inviteRequirement: inviteRequirement || null,
-            accountAgeRequirement: accountAgeRequirement || null,
-            serverAgeRequirement: serverAgeRequirement || null,
-            captchaRequirement: captchaRequirement || false,
-            messageRequirement: messageRequirement || null,
-            voiceRequirement: voiceRequirement || null,
-            customMessage: customMessage || null,
-            assignRole: assignRole?.id,
-            thumbnail: thumbnail || null,
-            emoji: emoji
+            roleRequirement: null,
+            inviteRequirement: null,
+            accountAgeRequirement: null,
+            serverAgeRequirement: null,
+            captchaRequirement: false,
+            messageRequirement: null,
+            voiceRequirement: null,
+            customMessage: null,
+            assignRole: null,
+            thumbnail: null,
+            emoji: '🎉'
         });
 
-        await interaction.reply({ embeds: [createSuccessEmbed(`Giveaway created in ${channel}!`)], flags: MessageFlags.Ephemeral });
-
+        await interaction.message.delete().catch(() => { });
     } catch (error) {
         console.error('Failed to create giveaway:', error);
-        await interaction.reply({ embeds: [createErrorEmbed('Failed to create giveaway.')], flags: MessageFlags.Ephemeral });
+        const channel = message.channel as TextChannel;
+        await channel.send('Failed to create giveaway.');
     }
-}
+};
+
+export const prefixCommand: PrefixCommand = {
+    name: 'gcreate',
+    description: 'Start a new giveaway',
+    usage: 'gcreate <prize> <winners> <duration>',
+    aliases: ['gstart', 'gquick'],
+    permissions: [PermissionFlagsBits.ManageGuild],
+    execute: prefixExecute
+};

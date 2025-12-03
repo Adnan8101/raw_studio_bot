@@ -1,7 +1,4 @@
-/**
- * AuditLogMonitor - Monitors audit log and correlates with gateway events
- * Emits SecurityEvents for processing by ActionLimiter
- */
+
 
 import {
   Client,
@@ -35,17 +32,15 @@ export class AuditLogMonitor extends EventEmitter {
     this.setupEventListeners();
   }
 
-  /**
-   * Setup Discord gateway event listeners
-   */
+  
   private setupEventListeners(): void {
-    // Member events
+    
     this.client.on(Events.GuildBanAdd, async (ban) => {
       await this.handleMemberBan(ban.guild, ban.user);
     });
 
     this.client.on(Events.GuildMemberRemove, async (member) => {
-      if (member.partial) return; // Skip partial members
+      if (member.partial) return; 
       await this.handleMemberRemove(member);
     });
 
@@ -55,7 +50,7 @@ export class AuditLogMonitor extends EventEmitter {
       }
     });
 
-    // Role events
+    
     this.client.on(Events.GuildRoleCreate, async (role) => {
       await this.handleRoleCreate(role);
     });
@@ -68,7 +63,7 @@ export class AuditLogMonitor extends EventEmitter {
       await this.handleRoleUpdate(oldRole, newRole);
     });
 
-    // Channel events
+    
     this.client.on(Events.ChannelCreate, async (channel) => {
       if (channel.isDMBased()) return;
       await this.handleChannelCreate(channel as GuildChannel);
@@ -79,33 +74,31 @@ export class AuditLogMonitor extends EventEmitter {
       await this.handleChannelDelete(channel as GuildChannel);
     });
 
-    // Member update for role changes
+    
     this.client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
-      if (oldMember.partial || newMember.partial) return; // Skip partials
+      if (oldMember.partial || newMember.partial) return; 
       await this.handleMemberUpdate(oldMember, newMember);
     });
 
     console.log('✔ AuditLogMonitor: Event listeners registered');
   }
 
-  /**
-   * Handle member ban
-   */
+  
   private async handleMemberBan(guild: Guild, user: User): Promise<void> {
     const guildId = guild.id;
 
-    // Check if anti-nuke is enabled
+    
     const enabled = await this.configService.isEnabled(guildId);
     if (!enabled) return;
 
-    // Check if BAN_MEMBERS protection is active
+    
     const protectionActive = await this.configService.isProtectionEnabled(
       guildId,
       ProtectionAction.BAN_MEMBERS
     );
     if (!protectionActive) return;
 
-    // Fetch audit log to find executor
+    
     const auditLogs = await guild.fetchAuditLogs({
       type: AuditLogEvent.MemberBanAdd,
       limit: 1,
@@ -116,10 +109,10 @@ export class AuditLogMonitor extends EventEmitter {
     const auditEntry = auditLogs.entries.first();
     if (!auditEntry || !auditEntry.executor) return;
 
-    // Ignore actions by the bot itself
+    
     if (auditEntry.executor.id === this.client.user?.id) return;
 
-    // Skip if action is old (more than 5 seconds)
+    
     const ageMs = Date.now() - auditEntry.createdTimestamp;
     if (ageMs > 5000) return;
 
@@ -137,9 +130,7 @@ export class AuditLogMonitor extends EventEmitter {
     });
   }
 
-  /**
-   * Handle member remove (could be kick)
-   */
+  
   private async handleMemberRemove(member: GuildMember): Promise<void> {
     const guildId = member.guild.id;
 
@@ -152,7 +143,7 @@ export class AuditLogMonitor extends EventEmitter {
     );
     if (!protectionActive) return;
 
-    // Fetch audit log
+    
     const auditLogs = await member.guild.fetchAuditLogs({
       type: AuditLogEvent.MemberKick,
       limit: 1,
@@ -163,13 +154,13 @@ export class AuditLogMonitor extends EventEmitter {
     const auditEntry = auditLogs.entries.first();
     if (!auditEntry || !auditEntry.executor) return;
 
-    // Ignore actions by the bot itself
+    
     if (auditEntry.executor.id === this.client.user?.id) return;
 
     const ageMs = Date.now() - auditEntry.createdTimestamp;
     if (ageMs > 5000) return;
 
-    // Check if target matches
+    
     if (auditEntry.target?.id !== member.id) return;
 
     await this.processSecurityEvent({
@@ -186,16 +177,14 @@ export class AuditLogMonitor extends EventEmitter {
     });
   }
 
-  /**
-   * Handle bot add
-   */
+  
   private async handleBotAdd(member: GuildMember): Promise<void> {
     const guildId = member.guild.id;
 
     const enabled = await this.configService.isEnabled(guildId);
     if (!enabled) return;
 
-    // Skip the bot itself
+    
     if (member.id === this.client.user?.id) return;
 
     const protectionActive = await this.configService.isProtectionEnabled(
@@ -204,7 +193,7 @@ export class AuditLogMonitor extends EventEmitter {
     );
     if (!protectionActive) return;
 
-    // Fetch audit log
+    
     const auditLogs = await member.guild.fetchAuditLogs({
       type: AuditLogEvent.BotAdd,
       limit: 1,
@@ -215,7 +204,7 @@ export class AuditLogMonitor extends EventEmitter {
     const auditEntry = auditLogs.entries.first();
     if (!auditEntry || !auditEntry.executor) return;
 
-    // Ignore actions by the bot itself
+    
     if (auditEntry.executor.id === this.client.user?.id) return;
 
     const ageMs = Date.now() - auditEntry.createdTimestamp;
@@ -234,9 +223,7 @@ export class AuditLogMonitor extends EventEmitter {
     });
   }
 
-  /**
-   * Handle role creation
-   */
+  
   private async handleRoleCreate(role: Role): Promise<void> {
     const guildId = role.guild.id;
 
@@ -249,7 +236,7 @@ export class AuditLogMonitor extends EventEmitter {
     );
     if (!protectionActive) return;
 
-    // Fetch audit log
+    
     const auditLogs = await role.guild.fetchAuditLogs({
       type: AuditLogEvent.RoleCreate,
       limit: 1,
@@ -260,7 +247,7 @@ export class AuditLogMonitor extends EventEmitter {
     const auditEntry = auditLogs.entries.first();
     if (!auditEntry || !auditEntry.executor) return;
 
-    // Ignore actions by the bot itself
+    
     if (auditEntry.executor.id === this.client.user?.id) return;
 
     const ageMs = Date.now() - auditEntry.createdTimestamp;
@@ -279,9 +266,7 @@ export class AuditLogMonitor extends EventEmitter {
     });
   }
 
-  /**
-   * Handle role deletion
-   */
+  
   private async handleRoleDelete(role: Role): Promise<void> {
     const guildId = role.guild.id;
 
@@ -294,7 +279,7 @@ export class AuditLogMonitor extends EventEmitter {
     );
     if (!protectionActive) return;
 
-    // Fetch audit log
+    
     const auditLogs = await role.guild.fetchAuditLogs({
       type: AuditLogEvent.RoleDelete,
       limit: 1,
@@ -305,7 +290,7 @@ export class AuditLogMonitor extends EventEmitter {
     const auditEntry = auditLogs.entries.first();
     if (!auditEntry || !auditEntry.executor) return;
 
-    // Ignore actions by the bot itself
+    
     if (auditEntry.executor.id === this.client.user?.id) return;
 
     const ageMs = Date.now() - auditEntry.createdTimestamp;
@@ -324,9 +309,7 @@ export class AuditLogMonitor extends EventEmitter {
     });
   }
 
-  /**
-   * Handle role update (check for dangerous permissions)
-   */
+  
   private async handleRoleUpdate(oldRole: Role, newRole: Role): Promise<void> {
     const guildId = newRole.guild.id;
 
@@ -339,7 +322,7 @@ export class AuditLogMonitor extends EventEmitter {
     );
     if (!protectionActive) return;
 
-    // Check if dangerous permissions were added
+    
     const oldPerms = oldRole.permissions.toArray();
     const newPerms = newRole.permissions.toArray();
     const addedPerms = newPerms.filter(p => !oldPerms.includes(p));
@@ -349,7 +332,7 @@ export class AuditLogMonitor extends EventEmitter {
 
     if (addedDangerous.length === 0) return;
 
-    // Fetch audit log
+    
     const auditLogs = await newRole.guild.fetchAuditLogs({
       type: AuditLogEvent.RoleUpdate,
       limit: 1,
@@ -360,7 +343,7 @@ export class AuditLogMonitor extends EventEmitter {
     const auditEntry = auditLogs.entries.first();
     if (!auditEntry || !auditEntry.executor) return;
 
-    // Ignore actions by the bot itself
+    
     if (auditEntry.executor.id === this.client.user?.id) return;
 
     const ageMs = Date.now() - auditEntry.createdTimestamp;
@@ -380,9 +363,7 @@ export class AuditLogMonitor extends EventEmitter {
     });
   }
 
-  /**
-   * Handle channel creation
-   */
+  
   private async handleChannelCreate(channel: GuildChannel): Promise<void> {
     const guildId = channel.guild.id;
 
@@ -395,7 +376,7 @@ export class AuditLogMonitor extends EventEmitter {
     );
     if (!protectionActive) return;
 
-    // Fetch audit log
+    
     const auditLogs = await channel.guild.fetchAuditLogs({
       type: AuditLogEvent.ChannelCreate,
       limit: 1,
@@ -406,7 +387,7 @@ export class AuditLogMonitor extends EventEmitter {
     const auditEntry = auditLogs.entries.first();
     if (!auditEntry || !auditEntry.executor) return;
 
-    // Ignore actions by the bot itself
+    
     if (auditEntry.executor.id === this.client.user?.id) return;
 
     const ageMs = Date.now() - auditEntry.createdTimestamp;
@@ -425,9 +406,7 @@ export class AuditLogMonitor extends EventEmitter {
     });
   }
 
-  /**
-   * Handle channel deletion
-   */
+  
   private async handleChannelDelete(channel: GuildChannel): Promise<void> {
     const guildId = channel.guild.id;
 
@@ -440,7 +419,7 @@ export class AuditLogMonitor extends EventEmitter {
     );
     if (!protectionActive) return;
 
-    // Fetch audit log
+    
     const auditLogs = await channel.guild.fetchAuditLogs({
       type: AuditLogEvent.ChannelDelete,
       limit: 1,
@@ -451,7 +430,7 @@ export class AuditLogMonitor extends EventEmitter {
     const auditEntry = auditLogs.entries.first();
     if (!auditEntry || !auditEntry.executor) return;
 
-    // Ignore actions by the bot itself
+    
     if (auditEntry.executor.id === this.client.user?.id) return;
 
     const ageMs = Date.now() - auditEntry.createdTimestamp;
@@ -470,9 +449,7 @@ export class AuditLogMonitor extends EventEmitter {
     });
   }
 
-  /**
-   * Handle member update (role changes)
-   */
+  
   private async handleMemberUpdate(oldMember: GuildMember, newMember: GuildMember): Promise<void> {
     const guildId = newMember.guild.id;
 
@@ -485,20 +462,20 @@ export class AuditLogMonitor extends EventEmitter {
     );
     if (!protectionActive) return;
 
-    // Check if admin role was added
+    
     const oldRoleIds = oldMember.roles.cache.map(r => r.id);
     const newRoleIds = newMember.roles.cache.map(r => r.id);
     const addedRoleIds = newRoleIds.filter(id => !oldRoleIds.includes(id));
 
     if (addedRoleIds.length === 0) return;
 
-    // Check if any added role has admin permissions
+    
     const addedRoles = addedRoleIds.map(id => newMember.guild.roles.cache.get(id)).filter(Boolean) as Role[];
     const adminRoles = addedRoles.filter(r => r.permissions.has('Administrator'));
 
     if (adminRoles.length === 0) return;
 
-    // Fetch audit log
+    
     const auditLogs = await newMember.guild.fetchAuditLogs({
       type: AuditLogEvent.MemberRoleUpdate,
       limit: 1,
@@ -509,7 +486,7 @@ export class AuditLogMonitor extends EventEmitter {
     const auditEntry = auditLogs.entries.first();
     if (!auditEntry || !auditEntry.executor) return;
 
-    // Ignore actions by the bot itself
+    
     if (auditEntry.executor.id === this.client.user?.id) return;
 
     const ageMs = Date.now() - auditEntry.createdTimestamp;
@@ -529,36 +506,34 @@ export class AuditLogMonitor extends EventEmitter {
     });
   }
 
-  /**
-   * Process a security event through the full pipeline
-   */
+  
   private async processSecurityEvent(event: SecurityEvent): Promise<void> {
-    // Deduplicate by Audit Log ID
+    
     if (event.auditLogId) {
       if (this.processedLogIds.has(event.auditLogId)) return;
 
       this.processedLogIds.add(event.auditLogId);
-      // Cleanup after 10 seconds
+      
       setTimeout(() => {
         if (event.auditLogId) this.processedLogIds.delete(event.auditLogId);
       }, 10000);
     }
 
     try {
-      // 1. Check whitelist first
+      
       const guild = await this.client.guilds.fetch(event.guildId).catch(() => null);
       if (!guild) return;
 
       const member = await guild.members.fetch(event.userId).catch(() => null);
       if (!member) return;
 
-      // Skip guild owner
+      
       if (member.id === guild.ownerId) {
         console.log(`Skipping security event for guild owner: ${member.user.tag}`);
         return;
       }
 
-      // Check whitelist
+      
       const roleIds = member.roles.cache.map(r => r.id);
       const whitelisted = await this.whitelistService.isWhitelisted(
         event.guildId,
@@ -572,7 +547,7 @@ export class AuditLogMonitor extends EventEmitter {
         return;
       }
 
-      // 2. Record and check limit
+      
       const result = await this.actionLimiter.recordAndCheck(event);
 
       if (result.limitExceeded) {
@@ -580,10 +555,10 @@ export class AuditLogMonitor extends EventEmitter {
           `🚨 Limit exceeded: ${member.user.tag} - ${event.action} (${result.count}/${result.limit})`
         );
 
-        // 3. Execute punishment
+        
         await this.executor.executePunishment(event, result.count, result.limit!, result.resetTime);
 
-        // Emit event for external listeners
+        
         this.emit('limitExceeded', { event, count: result.count, limit: result.limit });
       } else {
         console.log(

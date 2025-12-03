@@ -1,6 +1,4 @@
-/**
- * Moderation Logs Command - Configure moderation action logging
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -35,14 +33,14 @@ export async function execute(
   const channel = interaction.options.getChannel('channel', true) as TextChannel;
   const guildId = interaction.guild!.id;
 
-  // Verify it's a text channel
+  
   if (!channel.isTextBased()) {
     const errorEmbed = createErrorEmbed('Please select a text channel for moderation logs.');
     await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
     return;
   }
 
-  // Check bot permissions in that channel
+  
   const permissions = channel.permissionsFor(interaction.guild!.members.me!);
   if (!permissions?.has(PermissionFlagsBits.SendMessages) || !permissions?.has(PermissionFlagsBits.EmbedLinks)) {
     const errorEmbed = createErrorEmbed(`I need **Send Messages** and **Embed Links** permissions in ${channel}!`);
@@ -50,7 +48,7 @@ export async function execute(
     return;
   }
 
-  // Save to database
+  
   await services.prisma.guildLogging.upsert({
     where: { guildId },
     create: {
@@ -80,7 +78,7 @@ export async function execute(
 
   await interaction.reply({ embeds: [embed] });
 
-  // Send test message to log channel
+  
   const testEmbed = createInfoEmbed(`${CustomEmojis.STAFF} Moderation Logging Activated`, `Moderation logging has been enabled by ${interaction.user}.\n\nThis channel will receive moderation action logs.`)
     .setTimestamp();
 

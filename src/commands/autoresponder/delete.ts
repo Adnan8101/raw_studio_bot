@@ -1,6 +1,4 @@
-/**
- * Delete Auto-Responder Subcommand
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -29,13 +27,13 @@ export async function handleDelete(
     return;
   }
 
-  // Create embed with dropdown
+  
   const embed = new EmbedBuilder()
     .setTitle('🗑️ Delete Auto-Responder')
     .setDescription('Select an auto-responder to delete from the dropdown below.')
     .setColor(EmbedColors.WARNING);
 
-  // Create dropdown menu with all auto-responders
+  
   const options = autoResponders.slice(0, 25).map(ar => ({
     label: ar.trigger.length > 100 ? ar.trigger.substring(0, 97) + '...' : ar.trigger,
     description: ar.response.length > 100 ? ar.response.substring(0, 97) + '...' : ar.response,
@@ -54,11 +52,11 @@ export async function handleDelete(
     components: [row],
   });
 
-  // Wait for selection
+  
   try {
     const selectInteraction = await interaction.channel?.awaitMessageComponent({
       filter: i => i.customId.startsWith('ar_delete_select_') && i.user.id === interaction.user.id,
-      time: 60000, // 1 minute
+      time: 60000, 
     }) as StringSelectMenuInteraction;
 
     const selectedId = selectInteraction.values[0];
@@ -73,7 +71,7 @@ export async function handleDelete(
       return;
     }
 
-    // Delete auto-responder
+    
     await services.autoResponderService.deleteAutoResponder(selectedId);
 
     const successEmbed = new EmbedBuilder()

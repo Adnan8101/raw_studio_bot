@@ -1,6 +1,4 @@
-/**
- * Logging Command - Configure audit log monitoring
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -64,14 +62,14 @@ async function handleEnable(interaction: ChatInputCommandInteraction, prisma: an
   const channel = interaction.options.getChannel('channel', true) as TextChannel;
   const guildId = interaction.guild!.id;
 
-  // Verify it's a text channel
+  
   if (!channel.isTextBased()) {
     const errorEmbed = createErrorEmbed('Please select a text channel for logging.');
     await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
     return;
   }
 
-  // Check bot permissions in that channel
+  
   const permissions = channel.permissionsFor(interaction.guild!.members.me!);
   if (!permissions?.has(PermissionFlagsBits.SendMessages) || !permissions?.has(PermissionFlagsBits.EmbedLinks)) {
     const errorEmbed = createErrorEmbed(`I need **Send Messages** and **Embed Links** permissions in ${channel}!`);
@@ -79,7 +77,7 @@ async function handleEnable(interaction: ChatInputCommandInteraction, prisma: an
     return;
   }
 
-  // Save to database
+  
   await prisma.loggingConfig.upsert({
     where: { guildId },
     create: {
@@ -108,7 +106,7 @@ async function handleEnable(interaction: ChatInputCommandInteraction, prisma: an
 
   await interaction.reply({ embeds: [embed] });
 
-  // Send test message to log channel
+  
   const testEmbed = createInfoEmbed(`${CustomEmojis.LOGGING} Logging System Activated`, `Server logging has been enabled by ${interaction.user}.\n\nThis channel will receive audit log events.`)
     .setTimestamp();
 

@@ -14,10 +14,9 @@ const slashCommand: SlashCommand = {
 
         const embed = new EmbedBuilder()
             .setColor(0x00ff00)
-            .setTitle('🏓 Pong!')
+            .setTitle(' Pong!')
             .addFields(
                 { name: 'Bot Latency', value: `${botLatency}ms`, inline: true },
-                { name: 'WebSocket Ping', value: `${wsLatency}ms`, inline: true }
             )
             .setTimestamp();
 

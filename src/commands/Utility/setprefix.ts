@@ -1,6 +1,4 @@
-/**
- * Setprefix Command - Set custom command prefix
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -37,14 +35,14 @@ export async function execute(
   const prefix = interaction.options.getString('prefix', true);
   const guild = interaction.guild!;
 
-  // Validate prefix
+  
   if (prefix.length > 5) {
     const errorEmbed = createErrorEmbed('Prefix must be 5 characters or less.');
     await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
     return;
   }
 
-  // Set prefix
+  
   await services.guildConfigService.setPrefix(guild.id, prefix);
 
   const embed = new EmbedBuilder()

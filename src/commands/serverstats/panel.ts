@@ -53,7 +53,7 @@ const slashCommand: SlashCommand = {
     const embed = createInfoEmbed('Server Stats Panels', 'Here are all the active stats panels on this server')
       .setTimestamp();
 
-    // Add panels to embed
+    
     for (const panel of panels) {
       const channelTypeText = panel.channelType === 'vc' ? 'Voice Channels' : 'Text Channels';
       const createdDate = new Date(panel.createdAt).toLocaleDateString();
@@ -65,7 +65,7 @@ const slashCommand: SlashCommand = {
       }]);
     }
 
-    // Create select menu for deletion
+    
     if (panels.length > 0) {
       const selectMenu = new StringSelectMenuBuilder()
         .setCustomId('delete_panel')
@@ -100,11 +100,11 @@ const slashCommand: SlashCommand = {
           return;
         }
 
-        // Delete channels and category
+        
         try {
           const guild = interaction.guild;
 
-          // Delete channels
+          
           const channels = [
             selectedPanel.totalChannelId,
             selectedPanel.usersChannelId,
@@ -120,7 +120,7 @@ const slashCommand: SlashCommand = {
             }
           }
 
-          // Delete category
+          
           try {
             const category = await guild.channels.fetch(selectedPanel.categoryId);
             if (category) await category.delete();
@@ -128,7 +128,7 @@ const slashCommand: SlashCommand = {
             console.error(`Error deleting category ${selectedPanel.categoryId}:`, error);
           }
 
-          // Remove from database
+          
           await db.deletePanel(interaction.guild.id, selectedPanelName);
 
           const successEmbed = createSuccessEmbed('Panel Deleted')
@@ -194,7 +194,7 @@ const prefixCommand: PrefixCommand = {
     const embed = createInfoEmbed('Server Stats Panels', 'Here are all the active stats panels on this server')
       .setTimestamp();
 
-    // Add panels to embed
+    
     for (const panel of panels) {
       const channelTypeText = panel.channelType === 'vc' ? 'Voice Channels' : 'Text Channels';
       const createdDate = new Date(panel.createdAt).toLocaleDateString();

@@ -25,11 +25,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     } else if (member?.voice.channel) {
         channel = member.voice.channel as VoiceChannel;
     } else {
-        // Check for reply if prefix command (interaction might be a message wrapper)
-        // But this is 'execute' which takes ChatInputCommandInteraction.
-        // Wait, my bot handles prefix commands by calling execute too?
-        // Usually I have separate logic or I pass 'any'.
-        // Let's check if interaction has 'message' property (for prefix)
+        
+        
+        
+        
+        
         const message = (interaction as any).message as Message;
         if (message && message.reference && message.reference.messageId) {
             try {

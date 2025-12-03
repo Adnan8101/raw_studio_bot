@@ -6,14 +6,7 @@ interface PermissionOptions {
     ownerOnly?: boolean;
 }
 
-/**
- * Checks if the user has permission to run the command.
- * Enforces:
- * 1. Owner Only (if requested)
- * 2. Role Hierarchy (User Role > Bot Role)
- * 
- * Returns true if allowed, false if denied (and replies with error).
- */
+
 export async function checkCommandPermission(
     interaction: ChatInputCommandInteraction,
     options: PermissionOptions = {}
@@ -24,12 +17,12 @@ export async function checkCommandPermission(
     const member = interaction.member as import('discord.js').GuildMember;
     const botMember = guild.members.me!;
 
-    // 1. Owner Override / Check
+    
     if (user.id === guild.ownerId) {
         return true;
     }
 
-    // 2. Owner Only Restriction
+    
     if (ownerOnly) {
         const errorEmbed = new EmbedBuilder()
             .setColor(EmbedColors.ERROR)
@@ -43,8 +36,8 @@ export async function checkCommandPermission(
         return false;
     }
 
-    // 3. Role Hierarchy Check (User > Bot)
-    // We only check this if the user is NOT the owner (already handled above)
+    
+    
     if (member.roles.highest.position <= botMember.roles.highest.position) {
         const errorEmbed = new EmbedBuilder()
             .setColor(EmbedColors.ERROR)

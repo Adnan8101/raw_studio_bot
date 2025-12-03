@@ -1,6 +1,4 @@
-/**
- * CaseService - Manages moderation cases
- */
+
 
 import { PrismaClient } from '@prisma/client';
 import { ModCase } from '../types';
@@ -8,9 +6,7 @@ import { ModCase } from '../types';
 export class CaseService {
   constructor(private prisma: PrismaClient) {}
 
-  /**
-   * Create a new moderation case
-   */
+  
   async createCase(data: {
     guildId: string;
     targetId: string;
@@ -19,7 +15,7 @@ export class CaseService {
     reason?: string;
     metadata?: Record<string, any>;
   }): Promise<ModCase> {
-    // Get next case number for this guild
+    
     const lastCase = await this.prisma.moderationCase.findFirst({
       where: { guildId: data.guildId },
       orderBy: { caseNumber: 'desc' },
@@ -52,9 +48,7 @@ export class CaseService {
     };
   }
 
-  /**
-   * Get a case by case number
-   */
+  
   async getCase(guildId: string, caseNumber: number): Promise<ModCase | null> {
     const modCase = await this.prisma.moderationCase.findUnique({
       where: {
@@ -79,9 +73,7 @@ export class CaseService {
     };
   }
 
-  /**
-   * Get cases for a user
-   */
+  
   async getCasesForUser(guildId: string, userId: string, limit: number = 10): Promise<ModCase[]> {
     const cases = await this.prisma.moderationCase.findMany({
       where: {
@@ -105,9 +97,7 @@ export class CaseService {
     }));
   }
 
-  /**
-   * Overturn a case
-   */
+  
   async overturnCase(guildId: string, caseNumber: number, overturnedBy: string): Promise<void> {
     await this.prisma.moderationCase.update({
       where: {
@@ -121,9 +111,7 @@ export class CaseService {
     });
   }
 
-  /**
-   * Get recent cases
-   */
+  
   async getRecentCases(guildId: string, limit: number = 5): Promise<ModCase[]> {
     const cases = await this.prisma.moderationCase.findMany({
       where: { guildId },

@@ -25,7 +25,7 @@ export class GiveawayManager {
     async startTicker() {
         setInterval(async () => {
             await this.checkGiveaways();
-        }, 500); // Check every 0.5 seconds
+        }, 500); 
     }
 
     async checkGiveaways() {
@@ -52,11 +52,11 @@ export class GiveawayManager {
         const giveaway = await this.db.getGiveaway(messageId);
         if (!giveaway) return [];
 
-        if (!reroll && giveaway.ended) return []; // Already ended
+        if (!reroll && giveaway.ended) return []; 
 
         const channel = await this.client.channels.fetch(giveaway.channelId).catch(() => null) as TextChannel;
         if (!channel) {
-            // Channel deleted, just mark as ended
+            
             await this.db.endGiveaway(messageId);
             return [];
         }
@@ -65,12 +65,12 @@ export class GiveawayManager {
         try {
             message = await channel.messages.fetch(messageId);
         } catch (e) {
-            // Message deleted
+            
             await this.db.endGiveaway(messageId);
             return [];
         }
 
-        // Get reaction users
+        
         const reactionEmoji = giveaway.emoji || '🎉';
         const reaction = message.reactions.cache.get(reactionEmoji);
         if (!reaction) {
@@ -82,7 +82,7 @@ export class GiveawayManager {
         let users = await reaction.users.fetch();
         users = users.filter(u => !u.bot);
 
-        // Filter valid participants
+        
         const validUsers: User[] = [];
         const guild = channel.guild;
 
@@ -92,7 +92,7 @@ export class GiveawayManager {
 
             if (await this.checkRequirements(giveaway, member)) {
                 validUsers.push(user);
-                // Add to participants if not already
+                
                 await this.db.addGiveawayParticipant(giveaway.id, user.id);
             }
         }
@@ -103,17 +103,17 @@ export class GiveawayManager {
             return [];
         }
 
-        // Pick winners
+        
         const winnersCount = reroll ? 1 : giveaway.winnersCount;
         const winners: User[] = [];
 
-        // Simple random pick
+        
         const shuffled = validUsers.sort(() => 0.5 - Math.random());
         for (let i = 0; i < Math.min(winnersCount, shuffled.length); i++) {
             winners.push(shuffled[i]);
         }
 
-        // Update DB
+        
         if (!reroll) {
             await this.db.endGiveaway(messageId);
         }
@@ -122,7 +122,7 @@ export class GiveawayManager {
             await this.db.addGiveawayWinner(giveaway.id, winner.id);
         }
 
-        // Announce
+        
         const winnersString = winners.map(w => w.toString()).join(', ');
 
         const endEmbed = EmbedBuilder.from(message.embeds[0]);
@@ -133,7 +133,7 @@ export class GiveawayManager {
 
         await message.edit({ embeds: [endEmbed] });
 
-        // Winner Message with Button
+        
         const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
         const row = new ActionRowBuilder()
             .addComponents(
@@ -148,7 +148,7 @@ export class GiveawayManager {
             components: [row]
         });
 
-        // Assign Role
+        
         if (giveaway.assignRole) {
             for (const winner of winners) {
                 const member = await guild.members.fetch(winner.id).catch(() => null);
@@ -162,12 +162,12 @@ export class GiveawayManager {
     }
 
     async checkRequirements(giveaway: any, member: GuildMember): Promise<boolean> {
-        // Role Requirement
+        
         if (giveaway.roleRequirement && !member.roles.cache.has(giveaway.roleRequirement)) {
             return false;
         }
 
-        // Account Age
+        
         if (giveaway.accountAgeRequirement) {
             const created = member.user.createdTimestamp;
             const diff = Date.now() - created;
@@ -175,7 +175,7 @@ export class GiveawayManager {
             if (days < giveaway.accountAgeRequirement) return false;
         }
 
-        // Server Age
+        
         if (giveaway.serverAgeRequirement && member.joinedTimestamp) {
             const joined = member.joinedTimestamp;
             const diff = Date.now() - joined;
@@ -183,19 +183,19 @@ export class GiveawayManager {
             if (days < giveaway.serverAgeRequirement) return false;
         }
 
-        // Invite Requirement
+        
         if (giveaway.inviteRequirement) {
             const invites = await this.db.getUserInviteCount(member.guild.id, member.id);
             if (invites < giveaway.inviteRequirement) return false;
         }
 
-        // Message Requirement
+        
         if (giveaway.messageRequirement) {
             const stats = await this.db.getUserStats(member.guild.id, member.id);
             if (!stats || stats.messageCount < giveaway.messageRequirement) return false;
         }
 
-        // Voice Requirement
+        
         if (giveaway.voiceRequirement) {
             const stats = await this.db.getUserStats(member.guild.id, member.id);
             if (!stats || stats.voiceMinutes < giveaway.voiceRequirement) return false;

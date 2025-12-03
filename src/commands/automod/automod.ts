@@ -1,7 +1,4 @@
-/**
- * AutoMod Command - Simple and Clean System
- * Quick setup with sensible defaults
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -27,21 +24,21 @@ export const data = new SlashCommandBuilder()
   .setDescription('Configure server automod system')
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 
-  // Setup command
+  
   .addSubcommand(sub =>
     sub
       .setName('setup')
       .setDescription('Quick setup automod with default settings')
   )
 
-  // View command
+  
   .addSubcommand(sub =>
     sub
       .setName('view')
       .setDescription('View current automod configuration')
   )
 
-  // Enable command
+  
   .addSubcommand(sub =>
     sub
       .setName('enable')
@@ -81,7 +78,7 @@ export const data = new SlashCommandBuilder()
       )
   )
 
-  // Disable command
+  
   .addSubcommand(sub =>
     sub
       .setName('disable')
@@ -101,7 +98,7 @@ export const data = new SlashCommandBuilder()
       )
   )
 
-  // Anti-spam limit command
+  
   .addSubcommandGroup(group =>
     group
       .setName('anti-spam')
@@ -127,7 +124,7 @@ export const data = new SlashCommandBuilder()
       )
   )
 
-  // Mass mention limit command
+  
   .addSubcommandGroup(group =>
     group
       .setName('mass-mention')
@@ -167,7 +164,7 @@ export async function execute(
   const subcommand = interaction.options.getSubcommand();
 
   try {
-    // Root commands
+    
     if (!subcommandGroup) {
       if (subcommand === 'setup') {
         await handleSetup(interaction, autoModService);
@@ -181,7 +178,7 @@ export async function execute(
       return;
     }
 
-    // Subcommand groups
+    
     if (subcommandGroup === 'anti-spam') {
       if (subcommand === 'limit') {
         await handleAntiSpamLimit(interaction, autoModService);
@@ -205,15 +202,15 @@ export async function execute(
 
 import { checkCommandPermission } from '../../utils/permissionHelpers';
 
-// ============================================================================
-// SETUP COMMAND - Shows button to enable all with defaults
-// ============================================================================
+
+
+
 
 async function handleSetup(
   interaction: ChatInputCommandInteraction,
   autoModService: AutoModService
 ) {
-  // Permission Check: Role > Bot
+  
   if (!await checkCommandPermission(interaction, { ownerOnly: false })) return;
 
   const guildId = interaction.guild!.id;
@@ -245,7 +242,7 @@ async function handleSetup(
     fetchReply: true,
   });
 
-  // Wait for button click
+  
   try {
     const confirmation = await response.awaitMessageComponent({
       filter: i => i.user.id === interaction.user.id,
@@ -255,7 +252,7 @@ async function handleSetup(
 
     await confirmation.deferUpdate();
 
-    // Enable all features with defaults
+    
     const features = ['anti_spam', 'mass_mention', 'server_invite', 'anti_link'];
 
     for (const feature of features) {
@@ -267,7 +264,7 @@ async function handleSetup(
 
       if (feature === 'anti_spam') {
         config.maxMessages = 3;
-        config.timeSpanMs = 5000; // 5 seconds
+        config.timeSpanMs = 5000; 
         config.maxLines = 10;
       } else if (feature === 'mass_mention') {
         config.maxMentions = 3;
@@ -276,7 +273,7 @@ async function handleSetup(
       await autoModService.upsertConfig(guildId, feature, config);
     }
 
-    // Update embed with success
+    
     const successEmbed = createSuccessEmbed('AutoMod Enabled Successfully!')
       .setTitle(`${CustomEmojis.TICK} AutoMod Enabled Successfully!`)
       .setDescription(
@@ -311,9 +308,9 @@ async function handleSetup(
   }
 }
 
-// ============================================================================
-// VIEW COMMAND
-// ============================================================================
+
+
+
 
 async function handleView(
   interaction: ChatInputCommandInteraction,
@@ -374,15 +371,15 @@ async function handleView(
   await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 }
 
-// ============================================================================
-// ENABLE COMMAND
-// ============================================================================
+
+
+
 
 async function handleEnable(
   interaction: ChatInputCommandInteraction,
   autoModService: AutoModService
 ) {
-  // Permission Check: Owner Only
+  
   if (!await checkCommandPermission(interaction, { ownerOnly: true })) return;
 
   const guildId = interaction.guild!.id;
@@ -390,7 +387,7 @@ async function handleEnable(
   const punishment = interaction.options.getString('punishment') || 'timeout';
   const actionType = interaction.options.getString('action_type') || 'delete_warn';
 
-  // If timeout is selected, show modal to get duration
+  
   if (punishment === 'timeout') {
     const modal = new ModalBuilder()
       .setCustomId(`timeout_duration_${interaction.user.id}`)
@@ -407,7 +404,7 @@ async function handleEnable(
 
     await interaction.showModal(modal);
 
-    // Wait for modal submit
+    
     const modalSubmit = await interaction.awaitModalSubmit({ time: 60000 }).catch(() => null);
     if (!modalSubmit) return;
 
@@ -437,7 +434,7 @@ async function handleEnable(
         punishmentDuration: Math.floor(timeMs / 1000), // Convert ms to seconds
       };
 
-      // Set defaults for specific features
+      
       if (feature === 'anti_spam') {
         const existing = await autoModService.getConfig(guildId, feature);
         config.maxMessages = existing?.maxMessages || 3;
@@ -500,7 +497,7 @@ async function handleEnable(
 
     await modalSubmit.editReply({ embeds: [embed] });
   } else {
-    // No timeout, proceed normally
+    
     const features = action === 'all'
       ? ['anti_spam', 'mass_mention', 'server_invite', 'anti_link']
       : [action];
@@ -512,7 +509,7 @@ async function handleEnable(
         punishmentType: punishment,
       };
 
-      // Set defaults for specific features
+      
       if (feature === 'anti_spam') {
         const existing = await autoModService.getConfig(guildId, feature);
         config.maxMessages = existing?.maxMessages || 3;
@@ -577,15 +574,15 @@ async function handleEnable(
   }
 }
 
-// ============================================================================
-// DISABLE COMMAND
-// ============================================================================
+
+
+
 
 async function handleDisable(
   interaction: ChatInputCommandInteraction,
   autoModService: AutoModService
 ) {
-  // Permission Check: Owner Only
+  
   if (!await checkCommandPermission(interaction, { ownerOnly: true })) return;
 
   const guildId = interaction.guild!.id;
@@ -615,22 +612,22 @@ async function handleDisable(
   await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 }
 
-// ============================================================================
-// ANTI-SPAM LIMIT COMMAND
-// ============================================================================
+
+
+
 
 async function handleAntiSpamLimit(
   interaction: ChatInputCommandInteraction,
   autoModService: AutoModService
 ) {
-  // Permission Check: Role > Bot
+  
   if (!await checkCommandPermission(interaction, { ownerOnly: false })) return;
 
   const guildId = interaction.guild!.id;
   const maxMessages = interaction.options.getInteger('message', true);
   const thresholdTime = interaction.options.getString('threshold_time', true);
 
-  // Parse time string (e.g., "5s", "10s", "1m")
+  
   const timeMs = parseTimeToMs(thresholdTime);
 
   if (timeMs === null) {
@@ -660,15 +657,15 @@ async function handleAntiSpamLimit(
   await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 }
 
-// ============================================================================
-// MASS MENTION LIMIT COMMAND
-// ============================================================================
+
+
+
 
 async function handleMassMentionLimit(
   interaction: ChatInputCommandInteraction,
   autoModService: AutoModService
 ) {
-  // Permission Check: Role > Bot
+  
   if (!await checkCommandPermission(interaction, { ownerOnly: false })) return;
 
   const guildId = interaction.guild!.id;
@@ -690,9 +687,9 @@ async function handleMassMentionLimit(
   await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 }
 
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
+
+
+
 
 function parseTimeToMs(time: string): number | null {
   const match = time.match(/^(\d+)([smhd])$/);

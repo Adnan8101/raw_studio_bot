@@ -28,13 +28,11 @@ export class PanelHandler implements InteractionHandler {
     }
   }
 
-  /**
-   * Handle delete template selection
-   */
+  
   async handleDeleteTemplateSelect(interaction: StringSelectMenuInteraction, client: BotClient): Promise<void> {
     const userId = interaction.customId.split(':')[2];
     
-    // Verify user is the one who initiated
+    
     if (interaction.user.id !== userId) {
       await interaction.reply({
         content: '<:tcet_cross:1437995480754946178> You cannot use this menu.',
@@ -45,7 +43,7 @@ export class PanelHandler implements InteractionHandler {
 
     const templateIds = interaction.values;
 
-    // Check if already deferred by router
+    
     if (!interaction.deferred && !interaction.replied) {
       await interaction.deferUpdate();
     }
@@ -67,13 +65,11 @@ export class PanelHandler implements InteractionHandler {
     });
   }
 
-  /**
-   * Handle delete all templates for user
-   */
+  
   async handleDeleteTemplateAll(interaction: ButtonInteraction, client: BotClient): Promise<void> {
     const userId = interaction.customId.split(':')[2];
     
-    // Verify user is the one who initiated
+    
     if (interaction.user.id !== userId) {
       await interaction.reply({
         content: '<:tcet_cross:1437995480754946178> You cannot use this button.',
@@ -82,12 +78,12 @@ export class PanelHandler implements InteractionHandler {
       return;
     }
 
-    // Check if already deferred by router
+    
     if (!interaction.deferred && !interaction.replied) {
       await interaction.deferUpdate();
     }
 
-    // Get all templates created by this user's guild
+    
     const allTemplates = await client.db.getAllTemplates();
     const userTemplates = allTemplates.filter((t: any) => t.originalGuild === interaction.guildId);
 
@@ -108,11 +104,9 @@ export class PanelHandler implements InteractionHandler {
     });
   }
 
-  /**
-   * Handle cancel delete operation
-   */
+  
   async handleDeleteTemplateCancel(interaction: ButtonInteraction): Promise<void> {
-    // Check if already deferred by router, use editReply instead of update
+    
     if (interaction.deferred || interaction.replied) {
       await interaction.editReply({
         content: '<:tcet_cross:1437995480754946178> Operation cancelled.',

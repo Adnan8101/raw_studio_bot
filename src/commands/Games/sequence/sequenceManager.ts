@@ -27,14 +27,14 @@ export class SequenceGameManager {
         if (difficulty === 'Medium') cap = 100;
         if (difficulty === 'Hard') cap = 150;
 
-        // If type is auto, pick a random one
+        
         const types = ['arithmetic', 'geometric', 'fibonacci', 'squares', 'primes', 'alternating'];
         let selectedType = type;
         if (type === 'auto') {
-            // Filter types based on difficulty if needed, but most work for all if we adjust params.
-            // Alternating is harder, maybe only for Hard?
-            // Primes are good for any.
-            // Let's just pick random.
+            
+            
+            
+            
             selectedType = types[Math.floor(Math.random() * types.length)];
         }
 
@@ -42,7 +42,7 @@ export class SequenceGameManager {
         let missing = 0;
         let explanation = '';
 
-        // Generate 4-6 terms
+        
         const length = Math.floor(Math.random() * 3) + 4;
 
         switch (selectedType) {
@@ -70,7 +70,7 @@ export class SequenceGameManager {
 
                 for (let i = 0; i < length + 1; i++) {
                     const val = start * Math.pow(ratio, i);
-                    if (val > 10000) break; // Safety cap
+                    if (val > 10000) break; 
                     sequence.push(val);
                 }
                 explanation = `Geometric sequence: Start at ${start}, multiply by ${ratio} each time.`;
@@ -140,11 +140,11 @@ export class SequenceGameManager {
                 for (let i = 1; i < length + 1; i++) {
                     let prev = sequence[i - 1];
                     let next = prev;
-                    if (i % 2 !== 0) { // Odd step: op1
+                    if (i % 2 !== 0) { 
                         if (op1 === '+') next += val1;
                         else if (op1 === '-') next -= val1;
                         else next *= val1;
-                    } else { // Even step: op2
+                    } else { 
                         if (op2 === '+') next += val2;
                         else next -= val2;
                     }
@@ -155,7 +155,7 @@ export class SequenceGameManager {
                 break;
             }
             default: {
-                // Fallback to arithmetic
+                
                 const start = 1;
                 const diff = 2;
                 for (let i = 0; i < length + 1; i++) {
@@ -165,9 +165,9 @@ export class SequenceGameManager {
             }
         }
 
-        // Ensure we have enough terms
+        
         if (sequence.length < 4) {
-            // Retry with arithmetic if generation failed to produce enough terms
+            
             return this.generateSequence(difficulty, 'arithmetic');
         }
 

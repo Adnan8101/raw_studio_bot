@@ -30,7 +30,7 @@ export async function execute(interaction: ChatInputCommandInteraction, client: 
 
     const newPrefix = interaction.options.getString('prefix', true);
 
-    // Validate prefix
+    
     if (newPrefix.length > 5) {
       await interaction.reply({
         content: '<:tcet_cross:1437995480754946178> Prefix must be 5 characters or less.',
@@ -39,7 +39,7 @@ export async function execute(interaction: ChatInputCommandInteraction, client: 
       return;
     }
 
-    // Save the new prefix
+    
     await client.db.saveGuildConfig(interaction.guild.id, newPrefix);
 
     const embed = new EmbedBuilder()

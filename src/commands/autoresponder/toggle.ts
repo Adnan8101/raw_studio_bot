@@ -1,6 +1,4 @@
-/**
- * Toggle Auto-Responder Subcommand
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -29,13 +27,13 @@ export async function handleToggle(
     return;
   }
 
-  // Create embed with dropdown
+  
   const embed = new EmbedBuilder()
     .setTitle('🔄 Toggle Auto-Responder')
     .setDescription('Select an auto-responder to enable/disable from the dropdown below.')
     .setColor(EmbedColors.INFO);
 
-  // Create dropdown menu with all auto-responders
+  
   const options = autoResponders.slice(0, 25).map(ar => {
     const status = ar.enabled ? '<:tcet_tick:1437995479567962184>' : '❌';
     return {
@@ -57,11 +55,11 @@ export async function handleToggle(
     components: [row],
   });
 
-  // Wait for selection
+  
   try {
     const selectInteraction = await interaction.channel?.awaitMessageComponent({
       filter: i => i.customId.startsWith('ar_toggle_select_') && i.user.id === interaction.user.id,
-      time: 60000, // 1 minute
+      time: 60000, 
     }) as StringSelectMenuInteraction;
 
     const selectedId = selectInteraction.values[0];
@@ -76,7 +74,7 @@ export async function handleToggle(
       return;
     }
 
-    // Toggle auto-responder
+    
     const newStatus = !selected.enabled;
     await services.autoResponderService.toggleAutoResponder(selectedId, newStatus);
 

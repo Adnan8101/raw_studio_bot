@@ -1,6 +1,4 @@
-/**
- * Edit Auto-Responder Subcommand
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -32,13 +30,13 @@ export async function handleEdit(
     return;
   }
 
-  // Create embed with dropdown
+  
   const embed = new EmbedBuilder()
     .setTitle('✏️ Edit Auto-Responder')
     .setDescription('Select an auto-responder to edit from the dropdown below.')
     .setColor(EmbedColors.INFO);
 
-  // Create dropdown menu with all auto-responders
+  
   const options = autoResponders.slice(0, 25).map(ar => ({
     label: ar.trigger.length > 100 ? ar.trigger.substring(0, 97) + '...' : ar.trigger,
     description: ar.response.length > 100 ? ar.response.substring(0, 97) + '...' : ar.response,
@@ -57,11 +55,11 @@ export async function handleEdit(
     components: [row],
   });
 
-  // Wait for selection
+  
   try {
     const selectInteraction = await interaction.channel?.awaitMessageComponent({
       filter: i => i.customId.startsWith('ar_edit_select_') && i.user.id === interaction.user.id,
-      time: 60000, // 1 minute
+      time: 60000, 
     }) as StringSelectMenuInteraction;
 
     const selectedId = selectInteraction.values[0];
@@ -76,7 +74,7 @@ export async function handleEdit(
       return;
     }
 
-    // Show modal with current values
+    
     const modal = new ModalBuilder()
       .setCustomId(`ar_edit_modal_${selectedId}_${Date.now()}`)
       .setTitle('Edit Auto-Responder');
@@ -106,16 +104,16 @@ export async function handleEdit(
 
     await selectInteraction.showModal(modal);
 
-    // Wait for modal submission
+    
     const submitted = await selectInteraction.awaitModalSubmit({
-      time: 300000, // 5 minutes
+      time: 300000, 
       filter: i => i.customId.startsWith(`ar_edit_modal_${selectedId}`) && i.user.id === interaction.user.id,
     });
 
     const newTrigger = submitted.fields.getTextInputValue('trigger');
     const newResponse = submitted.fields.getTextInputValue('response');
 
-    // Update auto-responder
+    
     await services.autoResponderService.updateAutoResponder(
       selectedId,
       newTrigger,
@@ -136,7 +134,7 @@ export async function handleEdit(
 
     await submitted.reply({ embeds: [successEmbed], ephemeral: true });
 
-    // Update original interaction
+    
     await interaction.editReply({
       content: '<:tcet_tick:1437995479567962184> Auto-responder updated successfully!',
       embeds: [],

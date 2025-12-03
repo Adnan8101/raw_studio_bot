@@ -1,6 +1,4 @@
-/**
- * Logging Monitor - Monitors and logs audit events
- */
+
 
 import {
   Client,
@@ -27,7 +25,7 @@ export class LoggingMonitor {
   }
 
   private setupListeners() {
-    // Role events
+    
     this.client.on(Events.GuildRoleCreate, async (role) => {
       await this.logRoleCreate(role);
     });
@@ -40,7 +38,7 @@ export class LoggingMonitor {
       await this.logRoleDelete(role);
     });
 
-    // Channel events
+    
     this.client.on(Events.ChannelCreate, async (channel) => {
       if (channel.isDMBased()) return;
       await this.logChannelCreate(channel as GuildChannel);
@@ -56,7 +54,7 @@ export class LoggingMonitor {
       await this.logChannelDelete(channel as GuildChannel);
     });
 
-    // Message events
+    
     this.client.on(Events.MessageUpdate, async (oldMessage, newMessage) => {
       if (!newMessage.guild || newMessage.author?.bot) return;
       await this.logMessageEdit(oldMessage as Message, newMessage as Message);
@@ -73,7 +71,7 @@ export class LoggingMonitor {
       await this.logBulkDelete(messages.size, firstMessage.guild.id, firstMessage.channel as TextChannel);
     });
 
-    // Member events
+    
     this.client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
       await this.logMemberUpdate(oldMember, newMember);
     });
@@ -83,7 +81,7 @@ export class LoggingMonitor {
     const logChannel = await this.getLogChannel(newMember.guild.id);
     if (!logChannel) return;
 
-    // Check for nickname changes
+    
     if (oldMember.nickname !== newMember.nickname) {
       const embed = new EmbedBuilder()
         .setColor(EmbedColors.WARNING)
@@ -99,7 +97,7 @@ export class LoggingMonitor {
       await logChannel.send({ embeds: [embed] });
     }
 
-    // Check for role changes
+    
     const addedRoles = newMember.roles.cache.filter((r: any) => !oldMember.roles.cache.has(r.id));
     const removedRoles = oldMember.roles.cache.filter((r: any) => !newMember.roles.cache.has(r.id));
 
@@ -148,7 +146,7 @@ export class LoggingMonitor {
 
   private async getLogChannel(guildId: string): Promise<TextChannel | null> {
     try {
-      // Check if loggingConfig table exists
+      
       if (!this.prisma.loggingConfig) {
         return null;
       }
@@ -162,7 +160,7 @@ export class LoggingMonitor {
       const channel = this.client.channels.cache.get(config.channelId) as TextChannel;
       return channel || null;
     } catch (error) {
-      // Silently fail if table doesn't exist yet
+      
       return null;
     }
   }

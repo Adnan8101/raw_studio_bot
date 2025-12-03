@@ -1,6 +1,4 @@
-/**
- * AutoMod Whitelist Command - Manage automod whitelist for users, roles, and channels
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -20,7 +18,7 @@ import { EmbedColors, SlashCommand } from '../../types';
 import { CustomEmojis } from '../../utils/emoji';
 import { createErrorEmbed, createSuccessEmbed, createInfoEmbed } from '../../utils/embedHelpers';
 
-// AutoMod action types
+
 const AUTOMOD_ACTIONS = [
   { name: 'Anti-Spam', value: 'anti_spam' },
   { name: 'Mass Mention', value: 'mass_mention' },
@@ -140,7 +138,7 @@ export async function execute(
   const subcommand = interaction.options.getSubcommand();
   const guildId = interaction.guildId!;
 
-  // Permission Check: Owner OR Role > Bot
+  
   const member = interaction.member as import('discord.js').GuildMember;
   const botMember = interaction.guild!.members.me!;
 
@@ -181,7 +179,7 @@ async function handleAdd(
   const role = interaction.options.getRole('role');
   const channel = interaction.options.getChannel('channel');
 
-  // Validate that at least one target is provided
+  
   if (!user && !role && !channel) {
     const errorEmbed = createErrorEmbed('Please specify at least one: user, role, or channel.');
     await interaction.editReply({ embeds: [errorEmbed] });
@@ -192,7 +190,7 @@ async function handleAdd(
   const featureName = getFeatureName(action);
 
   try {
-    // Handle global (add to all features)
+    
     if (action === 'global') {
       const features = ['anti_spam', 'mass_mention', 'server_invite', 'anti_link'];
 
@@ -217,7 +215,7 @@ async function handleAdd(
         addedTargets.push(`${channel} (Channel)`);
       }
     } else {
-      // Add to specific feature
+      
       if (user) {
         await autoModService.addWhitelist(guildId, action, user.id, 'user', interaction.user.id);
         addedTargets.push(`${user} (User)`);
@@ -271,7 +269,7 @@ async function handleRemove(
   const role = interaction.options.getRole('role');
   const channel = interaction.options.getChannel('channel');
 
-  // Validate that at least one target is provided
+  
   if (!user && !role && !channel) {
     const errorEmbed = createErrorEmbed('Please specify at least one: user, role, or channel.');
     await interaction.editReply({ embeds: [errorEmbed] });
@@ -282,7 +280,7 @@ async function handleRemove(
   const featureName = getFeatureName(action);
 
   try {
-    // Handle global (remove from all features)
+    
     if (action === 'global') {
       const features = ['anti_spam', 'mass_mention', 'server_invite', 'anti_link'];
 
@@ -291,7 +289,7 @@ async function handleRemove(
           try {
             await autoModService.removeWhitelist(guildId, feature, user.id);
           } catch (err) {
-            // Ignore if not found
+            
           }
         }
         removedTargets.push(`${user} (User)`);
@@ -302,7 +300,7 @@ async function handleRemove(
           try {
             await autoModService.removeWhitelist(guildId, feature, role.id);
           } catch (err) {
-            // Ignore if not found
+            
           }
         }
         removedTargets.push(`${role} (Role)`);
@@ -313,13 +311,13 @@ async function handleRemove(
           try {
             await autoModService.removeWhitelist(guildId, feature, channel.id);
           } catch (err) {
-            // Ignore if not found
+            
           }
         }
         removedTargets.push(`${channel} (Channel)`);
       }
     } else {
-      // Remove from specific feature
+      
       if (user) {
         await autoModService.removeWhitelist(guildId, action, user.id);
         removedTargets.push(`${user} (User)`);
@@ -359,7 +357,7 @@ async function handleView(
   autoModService: AutoModService,
   guildId: string
 ): Promise<void> {
-  await interaction.deferReply({ flags: 64 }); // Ephemeral
+  await interaction.deferReply({ flags: 64 }); 
 
   const action = interaction.options.getString('action');
   const user = interaction.options.getUser('user');
@@ -367,7 +365,7 @@ async function handleView(
   const channel = interaction.options.getChannel('channel');
 
   try {
-    // If specific target is provided, show their whitelist status
+    
     if (user || role || channel) {
       const targetId = user?.id || role?.id || channel?.id;
       const targetType = user ? 'user' : role ? 'role' : 'channel';
@@ -401,7 +399,7 @@ async function handleView(
       return;
     }
 
-    // Show all whitelist entries for the specified action(s)
+    
     const features = action && action !== 'global'
       ? [action]
       : ['anti_spam', 'mass_mention', 'server_invite', 'anti_link'];
@@ -435,7 +433,7 @@ async function handleView(
       return;
     }
 
-    // Group by type
+    
     const users: string[] = [];
     const roles: string[] = [];
     const channels: string[] = [];
@@ -443,7 +441,7 @@ async function handleView(
     for (const [key, entries] of allWhitelists) {
       const { targetType, targetId } = entries[0];
       const featuresList = entries.map(e => getFeatureName(e.feature));
-      const isGlobal = featuresList.length === 4; // All 4 features
+      const isGlobal = featuresList.length === 4; 
 
       const statusText = isGlobal
         ? '🌐 Global'

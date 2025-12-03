@@ -16,14 +16,14 @@ export class EmojiEquationGameManager {
     private activeGames: Map<string, GameState> = new Map();
     private client: Client;
 
-    // Pool of emojis to use
+    
     private emojiPool = [
-        // Fruits & Vegetables
+        
         '🍎', '🍌', '🍇', '🍉', '🍒', '🍓', '🍍', '🥝', '🥑', '🍆', '🥕', '🌽', '🥦', '🍄', '🥜', '🌰', '🍞', '🥐', '🥖', '🥨', '🥞', '🧀', '🍖', '🍗', '🥩', '🥓', '🍔', '🍟', '🍕', '🌭', '🥪', '🌮', '🌯',
         '🍋', '🍊', '🍐', '🍑', '🥭', '🥥', '🥔', '🧄', '🧅', '🥗', '🍿', '🥫', '🍱', '🍘', '🍙', '🍚', '🍛', '🍜', '🍝', '🍠', '🍢', '🍣', '🍤', '🍥', '🥮', '🍡', '🥟', '🥠', '🥡',
-        // Animals
+        
         '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🐤', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞', '🐜',
-        // Objects
+        
         '⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🎱', '🏓', '🏸', '🥅', '🏒', '🏑', '🏏', '⛳', '🏹', '🎣', '🥊', '🥋', '🎽', '🛹', '🛷', '⛸', '🥌', '🎿', '⛷', '🏂', '🏋️', '🤼', '🤸', '⛹️', '🤺', '🤾', '🏌️', '🏇', '🧘'
     ];
 
@@ -63,7 +63,7 @@ export class EmojiEquationGameManager {
 
             const msg = await channel.send({ embeds: [embed], files: [attachment] });
 
-            // DM the host the answer
+            
             try {
                 const host = await this.client.users.fetch(hostId);
                 await host.send(`**Emoji Equation Answer:** ||${answer}||`);
@@ -134,17 +134,17 @@ export class EmojiEquationGameManager {
             allowedOps = ['+', '-', '*'];
         }
 
-        // Select unique emojis
+        
         const shuffledEmojis = [...this.emojiPool].sort(() => 0.5 - Math.random());
         const selectedEmojis = shuffledEmojis.slice(0, numEmojis);
 
-        // Assign values
+        
         const values: Record<string, number> = {};
         selectedEmojis.forEach(e => values[e] = Math.floor(Math.random() * maxVal) + 1);
 
         const equations: string[] = [];
 
-        // Helper to evaluate expression
+        
         const evaluate = (val1: number, op: string, val2: number): number | null => {
             if (op === '+') return val1 + val2;
             if (op === '-') return val1 - val2;
@@ -158,17 +158,17 @@ export class EmojiEquationGameManager {
         };
 
         for (let i = 0; i < numEquations - 1; i++) {
-            // Pick 2-3 emojis
-            const termsCount = Math.floor(Math.random() * 2) + 2; // 2 or 3
+            
+            const termsCount = Math.floor(Math.random() * 2) + 2; 
             const terms: string[] = [];
             const ops: string[] = [];
 
-            // First term
+            
             let emoji = selectedEmojis[Math.floor(Math.random() * selectedEmojis.length)];
             terms.push(emoji);
             let currentVal = values[emoji];
 
-            // Shuffle ops for uniqueness in this equation
+            
             let availableOps = [...allowedOps].sort(() => 0.5 - Math.random());
 
             for (let j = 1; j < termsCount; j++) {
@@ -183,7 +183,7 @@ export class EmojiEquationGameManager {
                     ops.push(op);
                     terms.push(emoji);
                 } else {
-                    // Fallback to addition if operation fails (e.g. non-integer division)
+                    
                     op = '+';
                     currentVal += val;
                     ops.push(op);
@@ -191,7 +191,7 @@ export class EmojiEquationGameManager {
                 }
             }
 
-            // Construct equation string
+            
             let eqStr = terms[0];
             for (let k = 0; k < ops.length; k++) {
                 eqStr += ` ${ops[k]} ${terms[k + 1]}`;
@@ -200,7 +200,7 @@ export class EmojiEquationGameManager {
             equations.push(eqStr);
         }
 
-        // Final Equation
+        
         const finalTermsCount = difficulty === 'hard' ? 3 : (difficulty === 'medium' ? 3 : 2);
         const finalTerms: string[] = [];
         const finalOps: string[] = [];
@@ -209,7 +209,7 @@ export class EmojiEquationGameManager {
         finalTerms.push(finalEmoji);
         let finalAnswer = values[finalEmoji];
 
-        // Shuffle ops for final equation
+        
         let availableOps = [...allowedOps].sort(() => 0.5 - Math.random());
 
         for (let j = 1; j < finalTermsCount; j++) {
@@ -254,11 +254,11 @@ export class EmojiEquationGameManager {
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
 
-        // Background
-        ctx.fillStyle = '#2f3136'; // Discord dark mode bg
+        
+        ctx.fillStyle = '#2f3136'; 
         ctx.fillRect(0, 0, width, height);
 
-        // Text settings
+        
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 50px sans-serif';
         ctx.textAlign = 'center';
@@ -267,10 +267,10 @@ export class EmojiEquationGameManager {
         let y = 100;
 
         for (const eq of equations) {
-            // Parse equation: "🍎 + 🍌 = 10" -> ["🍎", "+", "🍌", "=", "10"]
+            
             const parts = eq.split(' ');
 
-            // Calculate total width to center
+            
             let totalWidth = 0;
             const elementWidths: number[] = [];
             const elementImages: (Image | null)[] = [];
@@ -278,20 +278,20 @@ export class EmojiEquationGameManager {
 
             for (const part of parts) {
                 if (this.emojiPool.includes(part)) {
-                    // It's an emoji
+                    
                     try {
                         const img = await loadImage(this.getEmojiUrl(part));
                         elementImages.push(img);
-                        elementWidths.push(72); // Twemoji size
+                        elementWidths.push(72); 
                     } catch (e) {
                         console.error(`Failed to load emoji: ${part}`, e);
-                        // Fallback to text if image fails
+                        
                         elementImages.push(null);
                         const textWidth = ctx.measureText(part).width;
                         elementWidths.push(textWidth);
                     }
                 } else {
-                    // Text (numbers, operators)
+                    
                     elementImages.push(null);
                     const textWidth = ctx.measureText(part).width;
                     elementWidths.push(textWidth);
@@ -299,10 +299,10 @@ export class EmojiEquationGameManager {
                 totalWidth += elementWidths[elementWidths.length - 1];
             }
 
-            // Add spacing width
+            
             totalWidth += (parts.length - 1) * spacing;
 
-            // Draw elements centered
+            
             let currentX = (width - totalWidth) / 2;
 
             for (let i = 0; i < parts.length; i++) {
@@ -311,10 +311,10 @@ export class EmojiEquationGameManager {
                 const w = elementWidths[i];
 
                 if (img) {
-                    // Draw emoji image
+                    
                     ctx.drawImage(img, currentX, y - 36, 72, 72);
                 } else {
-                    // Draw text
+                    
                     ctx.fillText(part, currentX + (w / 2), y + 5);
                 }
 

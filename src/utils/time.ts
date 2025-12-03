@@ -1,15 +1,10 @@
-/**
- * Time Utility Functions
- */
 
-/**
- * Parse a duration string into seconds
- * Supports formats like: 1h, 30m, 4s, 1m 30s
- */
+
+
 export function parseDuration(input: string): number | null {
     if (!input) return null;
 
-    // If it's just a number, treat as seconds
+    
     if (/^\d+$/.test(input)) {
         return parseInt(input, 10);
     }
@@ -43,10 +38,7 @@ export function parseDuration(input: string): number | null {
     return found ? totalSeconds : null;
 }
 
-/**
- * Format seconds into a human-readable string
- * e.g., 3665 -> "1h 1m 5s"
- */
+
 export function formatDuration(seconds: number): string {
     if (seconds === 0) return '0s';
 
@@ -71,10 +63,7 @@ export function formatDuration(seconds: number): string {
     return parts.join(' ');
 }
 
-/**
- * Format seconds into a verbose human-readable string
- * e.g., 3665 -> "1 hour 1 minute 5 seconds"
- */
+
 export function formatDurationVerbose(seconds: number): string {
     if (seconds === 0) return '0 seconds';
 

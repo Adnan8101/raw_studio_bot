@@ -44,9 +44,9 @@ export const handleRecorderCommand = async (interaction: ChatInputCommandInterac
         return;
     }
 
-    // Defer immediately to prevent "Unknown interaction" errors
-    // We use ephemeral: true for status/formats/delete, public for start/stop (or as needed)
-    // Actually, let's defer based on subcommand
+    
+    
+    
     const ephemeralSubcommands = ['status', 'formats', 'delete'];
     const isEphemeral = ephemeralSubcommands.includes(subcommand);
 
@@ -57,7 +57,7 @@ export const handleRecorderCommand = async (interaction: ChatInputCommandInterac
         return;
     }
 
-    const member = interaction.member as any; // Cast to any to access voice
+    const member = interaction.member as any; 
     const voiceChannel = member?.voice?.channel as VoiceChannel;
 
     if (subcommand === 'start') {
@@ -109,7 +109,7 @@ export const handleRecorderCommand = async (interaction: ChatInputCommandInterac
         await interaction.editReply({ embeds: [embed] });
 
     } else if (subcommand === 'formats') {
-        // Just update preferences in manager
+        
         const wav = interaction.options.getBoolean('wav') ?? false;
         const mp3 = interaction.options.getBoolean('mp3') ?? false;
         const opus = interaction.options.getBoolean('opus') ?? false;
@@ -118,7 +118,7 @@ export const handleRecorderCommand = async (interaction: ChatInputCommandInterac
         manager.updateFormats(guildId, { wav, mp3, opus, flac });
         await interaction.editReply({ embeds: [createSuccessEmbed('Output formats updated.')] });
     } else if (subcommand === 'delete') {
-        // Implement delete logic
+        
         await interaction.editReply({ embeds: [createSuccessEmbed('Local recordings deleted (Placeholder).')] });
     }
 };

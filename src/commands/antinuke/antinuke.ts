@@ -1,6 +1,4 @@
-/**
- * Anti-Nuke Command - /antinuke enable, disable, status, restore
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -155,7 +153,7 @@ async function handleEnable(
   services: { configService: ConfigService; loggingService: LoggingService },
   guildId: string
 ): Promise<void> {
-  // Permission Check: Owner Only
+  
   if (!await checkCommandPermission(interaction, { ownerOnly: true })) return;
 
   await interaction.deferReply();
@@ -164,7 +162,7 @@ async function handleEnable(
   const windowSeconds = interaction.options.getInteger('window_seconds') ?? 10;
   const windowMs = windowSeconds * 1000;
 
-  // Parse actions
+  
   let protections: ProtectionAction[];
   if (actionsString === 'ALL') {
     protections = Object.values(ProtectionAction);
@@ -172,7 +170,7 @@ async function handleEnable(
     protections = actionsString.split(',').map(a => a.trim()) as ProtectionAction[];
   }
 
-  // Validate protections
+  
   const validProtections = Object.values(ProtectionAction);
   const invalid = protections.filter(p => !validProtections.includes(p));
 
@@ -184,7 +182,7 @@ async function handleEnable(
     return;
   }
 
-  // Check bot permissions
+  
   const guild = interaction.guild!;
   const botMember = guild.members.me!;
   const requiredPerms = [
@@ -202,15 +200,15 @@ async function handleEnable(
     warnings.push(`${CustomEmojis.CAUTION} Bot is missing required permissions. Some protections may not work.`);
   }
 
-  // Get existing config and merge protections (append new ones)
+  
   const existingConfig = await services.configService.getConfig(guildId);
   let finalProtections: ProtectionAction[];
 
   if (actionsString === 'ALL') {
-    // If ALL selected, replace with all protections
+    
     finalProtections = protections;
   } else if (existingConfig?.protections) {
-    // Append new protections to existing ones (maintain order, avoid duplicates)
+    
     const existingSet = new Set(existingConfig.protections);
     finalProtections = [...existingConfig.protections];
 
@@ -220,14 +218,14 @@ async function handleEnable(
       }
     }
   } else {
-    // No existing config, use new protections
+    
     finalProtections = protections;
   }
 
-  // Enable anti-nuke with merged protections
+  
   await services.configService.enableAntiNuke(guildId, finalProtections);
 
-  // Set default limits for newly added protections (3 actions per window)
+  
   const newProtections = actionsString === 'ALL'
     ? finalProtections
     : protections.filter(p => !existingConfig?.protections.includes(p));
@@ -235,12 +233,12 @@ async function handleEnable(
   for (const protection of newProtections) {
     const existingLimit = await services.configService.getLimit(guildId, protection);
     if (!existingLimit) {
-      // Set default limit: 3 actions per window
+      
       await services.configService.setLimit(guildId, protection, 3, windowMs);
     }
   }
 
-  // Create embed
+  
   const embed = new EmbedBuilder()
     .setTitle(`${CustomEmojis.TICK} Anti-Nuke Enabled`)
     .setDescription(`${CustomEmojis.SETTING} Anti-Nuke protection is now active for this server.`)
@@ -280,7 +278,7 @@ async function handleEnable(
     });
   }
 
-  // Respond without buttons (button handlers not implemented yet)
+  
   await interaction.editReply({
     embeds: [embed],
   });
@@ -291,25 +289,25 @@ async function handleSetup(
   services: { configService: ConfigService },
   guildId: string
 ): Promise<void> {
-  // Permission Check: Role > Bot
+  
   if (!await checkCommandPermission(interaction, { ownerOnly: false })) return;
 
   await interaction.deferReply();
 
   const allProtections = Object.values(ProtectionAction);
 
-  // 1. Enable Anti-Nuke with ALL protections
+  
   await services.configService.enableAntiNuke(guildId, allProtections);
 
-  // 2. Set default limits (3 actions in 10s)
+  
   const defaultLimit = 3;
-  const defaultWindowMs = 10000; // 10s
+  const defaultWindowMs = 10000; 
 
   for (const action of allProtections) {
     await services.configService.setLimit(guildId, action, defaultLimit, defaultWindowMs);
   }
 
-  // 3. Set default punishment (BAN)
+  
   for (const action of allProtections) {
     await services.configService.setPunishment(guildId, {
       action: action,
@@ -317,7 +315,7 @@ async function handleSetup(
     });
   }
 
-  // 4. Send success embed
+  
   const embed = new EmbedBuilder()
     .setTitle(`${CustomEmojis.TICK} Anti-Nuke Setup Complete`)
     .setDescription(`${CustomEmojis.SETTING} Anti-Nuke has been fully configured with recommended defaults.`)
@@ -351,7 +349,7 @@ async function handleDisable(
   services: { configService: ConfigService },
   guildId: string
 ): Promise<void> {
-  // Permission Check: Owner Only
+  
   if (!await checkCommandPermission(interaction, { ownerOnly: true })) return;
 
   await interaction.deferReply();
@@ -388,7 +386,7 @@ async function handleStatus(
 
   const brief = interaction.options.getBoolean('brief') ?? false;
 
-  // Get configuration
+  
   const config = await services.configService.getConfig(guildId);
   const loggingConfig = await services.loggingService.getConfig(guildId);
 
@@ -418,7 +416,7 @@ async function handleStatus(
       }
     );
 
-  // Add AutoMod status if service is available
+  
   if (services.autoModService) {
     try {
       const antiSpam = await services.autoModService.getConfig(guildId, 'anti_spam');
@@ -438,11 +436,11 @@ async function handleStatus(
         inline: false,
       });
     } catch (e) {
-      // AutoMod not configured
+      
     }
   }
 
-  // Add configured punishments
+  
   const allPunishments = await services.configService.getAllPunishments(guildId);
   if (allPunishments.length > 0) {
     const punishmentLines = allPunishments.map(p => {
@@ -459,7 +457,7 @@ async function handleStatus(
     });
   }
 
-  // Add logging channels
+  
   const loggingValue = [];
   if (loggingConfig.securityChannel) {
     loggingValue.push(`Security: <#${loggingConfig.securityChannel}>`);
@@ -477,7 +475,7 @@ async function handleStatus(
     inline: false,
   });
 
-  // Add recent actions if not brief
+  
   if (!brief) {
     const recentActions = await services.actionLimiter.getRecentActions(guildId, 5);
     if (recentActions.length > 0) {
@@ -518,7 +516,7 @@ async function handleReset(
 ): Promise<void> {
   await interaction.deferReply({ ephemeral: true });
 
-  // Reset all configuration for this guild
+  
   await services.configService.resetGuild(guildId);
   await services.whitelistService.clearAllWhitelist(guildId);
   await services.actionLimiter.clearAllActions(guildId);
@@ -555,7 +553,7 @@ async function handleRestore(
   const mode = (interaction.options.getString('mode') as RecoveryMode) ?? RecoveryMode.PARTIAL;
   const preview = interaction.options.getBoolean('preview') ?? false;
 
-  // This is a placeholder - full recovery implementation would be more complex
+  
   const embed = new EmbedBuilder()
     .setTitle(preview ? `${CustomEmojis.SETTING} Restore Preview` : `${CustomEmojis.SETTING} Restore Started`)
     .setDescription(

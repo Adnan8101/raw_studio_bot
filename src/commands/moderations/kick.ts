@@ -1,6 +1,4 @@
-/**
- * Kick Command - Kick a member from the server
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -48,7 +46,7 @@ export async function execute(
   const guild = interaction.guild!;
   const moderator = interaction.member as any;
 
-  // Get member
+  
   let target;
   try {
     target = await guild.members.fetch(user.id);
@@ -58,8 +56,8 @@ export async function execute(
     return;
   }
 
-  // Check permissions
-  // Check permissions
+  
+  
   const moderatorCheck = canModerate(moderator, target, PermissionFlagsBits.KickMembers);
   if (!moderatorCheck.allowed) {
     const errorEmbed = createErrorEmbed(moderatorCheck.reason || 'You cannot moderate this user.');
@@ -74,7 +72,7 @@ export async function execute(
     return;
   }
 
-  // Perform kick
+  
   try {
     await target.kick(reason);
 
@@ -87,7 +85,7 @@ export async function execute(
 
     await interaction.editReply({ embeds: [embed] });
 
-    // Log case
+    
     const modCase = await services.caseService.createCase({
       guildId: guild.id,
       targetId: target.id,
@@ -96,7 +94,7 @@ export async function execute(
       reason,
     });
 
-    // Send to logging channel
+    
     await services.loggingService.logModeration(guild.id, {
       action: 'Kick',
       target: target.user,

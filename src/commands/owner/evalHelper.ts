@@ -18,10 +18,10 @@ export const evaluateCode = async (code: string, context: any): Promise<EvalResu
     let type;
 
     try {
-        // Expose context variables to eval
+        
         const { client, message, interaction } = context;
 
-        // Evaluate
+        
         if (code.includes('await')) {
             output = await eval(`(async () => { ${code} })()`);
         } else {
@@ -29,7 +29,7 @@ export const evaluateCode = async (code: string, context: any): Promise<EvalResu
         }
         type = typeof output;
 
-        // Inspect output
+        
         if (typeof output !== 'string') {
             output = inspect(output, { depth: 0 });
         }

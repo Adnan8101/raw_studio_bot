@@ -29,7 +29,7 @@ export class AudioPipeline {
             this.handleUserSpeaking(userId);
         });
 
-        // Auto-split every 1 hour (3600000 ms)
+        
         this.splitInterval = setInterval(() => this.splitRecordings(), 3600000);
     }
 
@@ -60,7 +60,7 @@ export class AudioPipeline {
         console.log('Rotating recordings...');
         const closedFiles: string[] = [];
 
-        // Split individual user streams
+        
         const currentUsers = Array.from(this.activeStreams.keys());
         currentUsers.forEach(userId => {
             const data = this.activeStreams.get(userId);
@@ -68,7 +68,7 @@ export class AudioPipeline {
                 closedFiles.push(data.filename);
                 data.stream.end();
                 this.activeStreams.delete(userId);
-                // Re-trigger handling to create new file
+                
                 this.handleUserSpeaking(userId);
             }
         });
@@ -94,11 +94,11 @@ export class AudioPipeline {
         const filename = path.join(this.sessionDir, `user_${userId}_${Date.now()}.pcm`);
         const out = fs.createWriteStream(filename);
 
-        // Pipeline: Opus Packet -> Decoder -> PCM File
+        
         pipeline(opusStream, decoder, out, (err: any) => {
             if (err) {
                 if (err.code === 'ERR_STREAM_PREMATURE_CLOSE') {
-                    // Ignore premature close during shutdown
+                    
                     return;
                 }
                 console.error(`Pipeline error for user ${userId}:`, err);

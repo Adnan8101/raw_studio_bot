@@ -2,13 +2,12 @@ import {
   SlashCommandBuilder,
   ChatInputCommandInteraction,
   Message,
-  EmbedBuilder,
-  User,
-  GuildMember,
   PermissionFlagsBits
 } from 'discord.js';
 import { SlashCommand, PrefixCommand } from '../../types';
 import { DatabaseManager } from '../../utils/DatabaseManager';
+import { createInfoEmbed, createErrorEmbed, COLORS, ICONS } from '../../utils/embeds';
+import { CustomEmojis } from '../../utils/emoji';
 
 const slashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
@@ -19,7 +18,7 @@ const slashCommand: SlashCommand = {
         .setDescription('The user to check inviter for')
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
-  category: 'invites_welcome',
+  category: 'Invites',
   syntax: '/inviter <user>',
   permission: 'ManageMessages',
   example: '/inviter @Tai',
@@ -29,7 +28,7 @@ const slashCommand: SlashCommand = {
     const guild = interaction.guild;
 
     if (!guild) {
-      await interaction.reply({ content: 'This command can only be used in a server!', ephemeral: true });
+      await interaction.reply({ embeds: [createErrorEmbed('This command can only be used in a server!')], ephemeral: true });
       return;
     }
 
@@ -38,7 +37,7 @@ const slashCommand: SlashCommand = {
       const inviteData = await db.getInviteData(guild.id, user.id);
 
       if (!inviteData || !inviteData.inviterId) {
-        await interaction.reply(`${user.toString()} joined through an unknown invite or vanity URL.`);
+        await interaction.reply({ embeds: [createErrorEmbed(`${user.toString()} joined through an unknown invite or vanity URL.`)] });
         return;
       }
 
@@ -46,13 +45,23 @@ const slashCommand: SlashCommand = {
       const inviterName = inviter ? inviter.user.username : 'Unknown User';
       const inviteCode = inviteData.inviteCode || 'unknown';
 
-      await interaction.reply(
-        `${user.toString()} was invited by **${inviterName}** with invite link \`${inviteCode}\``
-      );
+      const embed = createInfoEmbed('')
+        .setAuthor({
+          name: `Inviter Info`,
+          iconURL: user.displayAvatarURL()
+        })
+        .setDescription(
+          `${CustomEmojis.TICK} **${user.username}** was invited by **${inviterName}**\n` +
+          `**Code:** \`${inviteCode}\``
+        )
+        .setThumbnail(user.displayAvatarURL())
+        .setTimestamp();
+
+      await interaction.reply({ embeds: [embed] });
     } catch (error) {
       console.error('Error fetching inviter data:', error);
       await interaction.reply({
-        content: 'An error occurred while fetching inviter information.',
+        embeds: [createErrorEmbed('An error occurred while fetching inviter information.')],
         ephemeral: true
       });
     }
@@ -72,13 +81,13 @@ const prefixCommand: PrefixCommand = {
     }
 
     if (args.length === 0) {
-      await message.reply('Please provide a user to check! Usage: `inviter <user>`');
+      await message.reply({ embeds: [createErrorEmbed('Please provide a user to check! Usage: `inviter <user>`')] });
       return;
     }
 
     const guild = message.guild;
     if (!guild) {
-      await message.reply('This command can only be used in a server!');
+      await message.reply({ embeds: [createErrorEmbed('This command can only be used in a server!')] });
       return;
     }
 
@@ -88,7 +97,7 @@ const prefixCommand: PrefixCommand = {
     try {
       const user = await guild.members.fetch(userId).catch(() => null);
       if (!user) {
-        await message.reply('User not found in this server!');
+        await message.reply({ embeds: [createErrorEmbed('User not found in this server!')] });
         return;
       }
 
@@ -96,7 +105,7 @@ const prefixCommand: PrefixCommand = {
       const inviteData = await db.getInviteData(guild.id, user.id);
 
       if (!inviteData || !inviteData.inviterId) {
-        await message.reply(`${user.toString()} joined through an unknown invite or vanity URL.`);
+        await message.reply({ embeds: [createErrorEmbed(`${user.toString()} joined through an unknown invite or vanity URL.`)] });
         return;
       }
 
@@ -104,12 +113,22 @@ const prefixCommand: PrefixCommand = {
       const inviterName = inviter ? inviter.user.username : 'Unknown User';
       const inviteCode = inviteData.inviteCode || 'unknown';
 
-      await message.reply(
-        `${user.toString()} was invited by **${inviterName}** with invite link \`${inviteCode}\``
-      );
+      const embed = createInfoEmbed('')
+        .setAuthor({
+          name: `Inviter Info`,
+          iconURL: user.user.displayAvatarURL()
+        })
+        .setDescription(
+          `${CustomEmojis.TICK} **${user.user.username}** was invited by **${inviterName}**\n` +
+          `**Code:** \`${inviteCode}\``
+        )
+        .setThumbnail(user.user.displayAvatarURL())
+        .setTimestamp();
+
+      await message.reply({ embeds: [embed] });
     } catch (error) {
       console.error('Error fetching inviter data:', error);
-      await message.reply('An error occurred while fetching inviter information.');
+      await message.reply({ embeds: [createErrorEmbed('An error occurred while fetching inviter information.')] });
     }
   },
 };

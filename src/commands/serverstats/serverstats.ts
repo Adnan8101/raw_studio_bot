@@ -39,18 +39,18 @@ async function updateServerStats(guild: any): Promise<{ updated: number; errors:
             const users = guild.members.cache.filter((member: any) => !member.user.bot).size;
             const bots = guild.members.cache.filter((member: any) => member.user.bot).size;
 
-            // Status counts
+            
             const online = guild.members.cache.filter((m: any) => m.presence?.status === 'online').size;
             const idle = guild.members.cache.filter((m: any) => m.presence?.status === 'idle').size;
             const dnd = guild.members.cache.filter((m: any) => m.presence?.status === 'dnd').size;
 
-            // Update channels
+            
             const updateChannel = async (id: string, name: string) => {
                 if (!id) return;
                 try {
                     const channel = await guild.channels.fetch(id);
                     if (channel) {
-                        // Optimization: Skip update if name is already correct to avoid rate limits
+                        
                         if (channel.name === name) return;
 
                         if (panel.channelType === 'vc') {
@@ -60,21 +60,21 @@ async function updateServerStats(guild: any): Promise<{ updated: number; errors:
                         }
                     }
                 } catch (e) {
-                    // Ignore missing channels
+                    
                 }
             };
 
             await updateChannel(panel.usersChannelId, panel.channelType === 'vc' ? `Members : ${users}` : `members-${users}`);
             await updateChannel(panel.botsChannelId, panel.channelType === 'vc' ? `Bots : ${bots}` : `bots-${bots}`);
 
-            // Status channel (stored in onlineChannelId)
+            
             if (panel.onlineChannelId) {
                 await updateChannel(panel.onlineChannelId, panel.channelType === 'vc' ? `🟢 ${online} | 🌙 ${idle} | ⛔ ${dnd}` : `status-${online}-${idle}-${dnd}`);
             }
 
             await updateChannel(panel.totalChannelId, panel.channelType === 'vc' ? `All : ${totalMembers}` : `all-${totalMembers}`);
 
-            // Legacy support
+            
             if (panel.idleChannelId) await updateChannel(panel.idleChannelId, panel.channelType === 'vc' ? `🌙 Idle: ${idle}` : `idle-${idle}`);
             if (panel.dndChannelId) await updateChannel(panel.dndChannelId, panel.channelType === 'vc' ? `⛔ DND: ${dnd}` : `dnd-${dnd}`);
 
@@ -182,7 +182,7 @@ async function handleSetup(interaction: ChatInputCommandInteraction) {
 
         const guild = interaction.guild!;
 
-        // Create Category
+        
         const category = await guild.channels.create({
             name: `📊 ${panelName}`,
             type: ChannelType.GuildCategory,
@@ -191,7 +191,7 @@ async function handleSetup(interaction: ChatInputCommandInteraction) {
 
         let totalChannel, usersChannel, botsChannel, onlineChannel;
 
-        // Create Channels with Placeholders
+        
         if (channelType === 'vc') {
             const createVc = async (name: string) => {
                 return await guild.channels.create({
@@ -232,7 +232,7 @@ async function handleSetup(interaction: ChatInputCommandInteraction) {
             totalChannel = await createText('all-loading');
         }
 
-        // Save to Database
+        
         await db.createPanel({
             guildId: guild.id,
             panelName: panelName,
@@ -246,7 +246,7 @@ async function handleSetup(interaction: ChatInputCommandInteraction) {
             dndChannelId: undefined
         });
 
-        // Fetch Data and Update Channels
+        
         await updateServerStats(guild);
 
         const embed = new EmbedBuilder()
@@ -335,7 +335,7 @@ async function handleDelete(interaction: ChatInputCommandInteraction) {
             panel.onlineChannelId,
             panel.idleChannelId,
             panel.dndChannelId
-        ].filter(id => id); // Filter out undefined/null
+        ].filter(id => id); 
 
         let deletedChannels = 0;
         for (const channelId of channels) {

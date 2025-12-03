@@ -29,12 +29,12 @@ async function updateServerStats(guild: Guild): Promise<{ updated: number; error
       const users = guild.members.cache.filter((member: GuildMember) => !member.user.bot).size;
       const bots = guild.members.cache.filter((member: GuildMember) => member.user.bot).size;
 
-      // Status counts
+      
       const online = guild.members.cache.filter(m => !m.user.bot && m.presence?.status === 'online').size;
       const idle = guild.members.cache.filter(m => !m.user.bot && m.presence?.status === 'idle').size;
       const dnd = guild.members.cache.filter(m => !m.user.bot && m.presence?.status === 'dnd').size;
 
-      // Update channels
+      
       const updateChannel = async (id: string, name: string) => {
         if (!id) return;
         try {
@@ -47,21 +47,21 @@ async function updateServerStats(guild: Guild): Promise<{ updated: number; error
             }
           }
         } catch (e) {
-          // Ignore missing channels
+          
         }
       };
 
       await updateChannel(panel.usersChannelId, panel.channelType === 'vc' ? `Members : ${users}` : `members-${users}`);
       await updateChannel(panel.botsChannelId, panel.channelType === 'vc' ? `Bots : ${bots}` : `bots-${bots}`);
 
-      // Status channel (stored in onlineChannelId)
+      
       if (panel.onlineChannelId) {
         await updateChannel(panel.onlineChannelId, panel.channelType === 'vc' ? `🟢 ${online} | 🌙 ${idle} | ⛔ ${dnd}` : `status-${online}-${idle}-${dnd}`);
       }
 
       await updateChannel(panel.totalChannelId, panel.channelType === 'vc' ? `All : ${totalMembers}` : `all-${totalMembers}`);
 
-      // Legacy support (if idle/dnd still exist in DB)
+      
       if (panel.idleChannelId) await updateChannel(panel.idleChannelId, panel.channelType === 'vc' ? `🌙 Idle: ${idle}` : `idle-${idle}`);
       if (panel.dndChannelId) await updateChannel(panel.dndChannelId, panel.channelType === 'vc' ? `⛔ DND: ${dnd}` : `dnd-${dnd}`);
 

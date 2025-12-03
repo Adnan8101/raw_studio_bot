@@ -1,6 +1,4 @@
-/**
- * List Auto-Responders Subcommand
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -32,7 +30,7 @@ export async function handleList(
     .setColor(EmbedColors.INFO)
     .setTimestamp();
 
-  // Show up to 10 auto-responders per page
+  
   const page = interaction.options.getInteger('page') ?? 1;
   const perPage = 10;
   const start = (page - 1) * perPage;

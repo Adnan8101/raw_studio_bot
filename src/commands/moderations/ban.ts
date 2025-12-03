@@ -1,6 +1,4 @@
-/**
- * Ban Command - Ban a member from the server
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -57,25 +55,25 @@ export async function execute(
   const guild = interaction.guild!;
   const moderator = interaction.member as any;
 
-  // Try to get member
+  
   let target;
   try {
     target = await guild.members.fetch(user.id);
   } catch {
-    // User not in guild, can still ban by ID
+    
     try {
       await guild.bans.create(user.id, { reason, deleteMessageSeconds: deleteDays * 86400 });
 
       const embed = createModerationEmbed(
         'Banned',
-        user as any, // Cast to any or User since we don't have a full GuildMember
+        user as any, 
         interaction.user,
         reason
       );
 
       await interaction.editReply({ embeds: [embed] });
 
-      // Log case
+      
       await services.caseService.createCase({
         guildId: guild.id,
         targetId: user.id,
@@ -92,7 +90,7 @@ export async function execute(
     }
   }
 
-  // Check permissions
+  
   const moderatorCheck = canModerate(moderator, target, PermissionFlagsBits.BanMembers);
   if (!moderatorCheck.allowed) {
     const errorEmbed = createErrorEmbed(moderatorCheck.reason || 'You cannot moderate this user.');
@@ -107,7 +105,7 @@ export async function execute(
     return;
   }
 
-  // Perform ban
+  
   try {
     await target.ban({ reason, deleteMessageSeconds: deleteDays * 86400 });
 
@@ -121,7 +119,7 @@ export async function execute(
 
     await interaction.editReply({ embeds: [embed] });
 
-    // Log case
+    
     const modCase = await services.caseService.createCase({
       guildId: guild.id,
       targetId: target.id,
@@ -130,7 +128,7 @@ export async function execute(
       reason,
     });
 
-    // Send to logging channel
+    
     await services.loggingService.logModeration(guild.id, {
       action: 'Ban',
       target: target.user,

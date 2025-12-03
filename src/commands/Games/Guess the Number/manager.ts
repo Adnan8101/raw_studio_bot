@@ -51,7 +51,7 @@ export class GuessTheNumberManager {
         const targetChannel = options.useThread && threadId ? await this.client.channels.fetch(threadId) : channel;
 
         if (targetChannel) {
-            // Unlock channel (or thread)
+            
             if (targetChannel.isThread()) {
                 await (targetChannel as ThreadChannel).setLocked(false);
             } else if (targetChannel.isTextBased() && !targetChannel.isDMBased()) {
@@ -127,7 +127,7 @@ export class GuessTheNumberManager {
 
             const channel = message.channel;
 
-            // Lock channel or thread
+            
             if (channel.isThread()) {
                 await channel.setLocked(true);
             } else if (channel.isTextBased() && !channel.isDMBased()) {
@@ -149,9 +149,9 @@ export class GuessTheNumberManager {
     }
 
     public getClosestGuess(channelId: string, targetNumber: number): number | null {
-        // This would require tracking all guesses, which we aren't doing yet for memory efficiency.
-        // For now, we can't implement this accurately without storing all guesses.
-        // I will leave this as a placeholder or implement a simple version if needed.
+        
+        
+        
         return null;
     }
 
@@ -160,15 +160,15 @@ export class GuessTheNumberManager {
         if (!game || !game.isActive) return false;
 
         const currentRange = game.max - game.min;
-        // Reduce BY percentage (e.g. 30% reduction means keeping 70%)
+        
         const keepPercentage = 100 - percentage;
         const newRangeSize = Math.max(1, Math.floor(currentRange * (keepPercentage / 100)));
 
-        // Center the new range around the target number, but keep it within bounds
+        
         let newMin = Math.max(game.min, game.targetNumber - Math.floor(newRangeSize / 2));
         let newMax = Math.min(game.max, newMin + newRangeSize);
 
-        // Adjust if the range is smaller than calculated (hit boundaries)
+        
         if (newMax - newMin < newRangeSize) {
             if (newMin === game.min) {
                 newMax = Math.min(game.max, newMin + newRangeSize);

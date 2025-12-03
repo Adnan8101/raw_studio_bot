@@ -1,7 +1,4 @@
-/**
- * DatabaseManager - Implementation for invite tracking, welcome/leave, and server stats
- * Integrates with Prisma database
- */
+
 
 import { prisma } from '../database/connect';
 
@@ -17,9 +14,9 @@ export class DatabaseManager {
     return DatabaseManager.instance;
   }
 
-  // ===========================
-  // Welcome/Leave Configuration
-  // ===========================
+  
+  
+  
 
   async setWelcomeChannel(guildId: string, channelId: string): Promise<void> {
     try {
@@ -108,9 +105,9 @@ export class DatabaseManager {
     }
   }
 
-  // ===========================
-  // Invite tracking methods
-  // ===========================
+  
+  
+  
 
   async getUserInviteCount(guildId: string, userId: string): Promise<number> {
     try {
@@ -204,7 +201,7 @@ export class DatabaseManager {
         where: { guildId_userId: { guildId, userId } }
       });
     } catch (error) {
-      // Ignore if not found
+      
     }
   }
 
@@ -272,9 +269,62 @@ export class DatabaseManager {
     }
   }
 
-  // ===========================
-  // Server stats panel methods
-  // ===========================
+  
+  
+  
+
+  async addInviteRole(guildId: string, roleId: string, invites: number): Promise<void> {
+    try {
+      await prisma.inviteRole.upsert({
+        where: { guildId_invites: { guildId, invites } },
+        update: { roleId },
+        create: { guildId, roleId, invites }
+      });
+    } catch (error) {
+      console.error('Failed to add invite role:', error);
+      throw error;
+    }
+  }
+
+  async removeInviteRole(guildId: string, invites: number): Promise<boolean> {
+    try {
+      const result = await prisma.inviteRole.delete({
+        where: { guildId_invites: { guildId, invites } }
+      });
+      return !!result;
+    } catch (error) {
+      
+      return false;
+    }
+  }
+
+  async getInviteRoles(guildId: string): Promise<Array<{ roleId: string; invites: number }>> {
+    try {
+      return await prisma.inviteRole.findMany({
+        where: { guildId },
+        orderBy: { invites: 'asc' }
+      });
+    } catch (error) {
+      console.error('Failed to get invite roles:', error);
+      return [];
+    }
+  }
+
+  async getInviteRoleByCount(guildId: string, invites: number): Promise<string | null> {
+    try {
+      const role = await prisma.inviteRole.findUnique({
+        where: { guildId_invites: { guildId, invites } }
+      });
+      return role?.roleId || null;
+    } catch (error) {
+      console.error('Failed to get invite role by count:', error);
+      return null;
+    }
+  }
+
+  
+  
+  
 
   async createPanel(data: {
     guildId: string;
@@ -338,13 +388,13 @@ export class DatabaseManager {
     }
   }
 
-  // ===========================
-  // User Stats (Messages & Voice)
-  // ===========================
+  
+  
+  
 
-  // ===========================
-  // User Stats (Messages & Voice)
-  // ===========================
+  
+  
+  
 
   private messageCountBuffer: Map<string, number> = new Map();
   private flushInterval: NodeJS.Timeout | null = null;
@@ -355,7 +405,7 @@ export class DatabaseManager {
 
   private startFlushInterval() {
     if (this.flushInterval) return;
-    this.flushInterval = setInterval(() => this.flushMessageCounts(), 60000); // Flush every 60 seconds
+    this.flushInterval = setInterval(() => this.flushMessageCounts(), 60000); 
   }
 
   private async flushMessageCounts() {
@@ -369,8 +419,20 @@ export class DatabaseManager {
       try {
         await prisma.userStats.upsert({
           where: { guildId_userId: { guildId, userId } },
-          update: { messageCount: { increment: count } },
-          create: { guildId, userId, messageCount: count }
+          update: {
+            messageCount: { increment: count },
+            dailyMessages: { increment: count },
+            weeklyMessages: { increment: count },
+            lastMessageDate: new Date()
+          },
+          create: {
+            guildId,
+            userId,
+            messageCount: count,
+            dailyMessages: count,
+            weeklyMessages: count,
+            lastMessageDate: new Date()
+          }
         });
       } catch (error) {
         console.error(`Failed to flush message count for ${guildId}:${userId}`, error);
@@ -408,9 +470,9 @@ export class DatabaseManager {
     }
   }
 
-  // ===========================
-  // Voice System (AutoDrag & AFK)
-  // ===========================
+  
+  
+  
 
   async createAutoDragRule(guildId: string, userId: string, targetChannelId: string, createdBy: string): Promise<void> {
     try {
@@ -443,7 +505,7 @@ export class DatabaseManager {
         where: { guildId_userId: { guildId, userId } }
       });
     } catch (error) {
-      // Ignore if not found
+      
     }
   }
 
@@ -469,23 +531,23 @@ export class DatabaseManager {
     }
   }
 
-  // ===========================
-  // Giveaway System
-  // ===========================
+  
+  
+  
 
   async createGiveaway(data: any): Promise<string> {
     try {
-      // Ensure data matches Prisma schema
-      // Mongoose schema had participants and winners as arrays of strings
-      // Prisma has them as relations.
-      // If data comes with participants/winners as arrays, we need to handle them or ignore them if empty initially.
+      
+      
+      
+      
 
       const { participants, winners, ...giveawayData } = data;
 
       const giveaway = await prisma.giveaway.create({
         data: {
           ...giveawayData,
-          // If we need to create initial participants/winners, we'd do it here, but usually a new giveaway has none.
+          
         }
       });
       return giveaway.messageId;
@@ -507,7 +569,7 @@ export class DatabaseManager {
 
       if (!giveaway) return null;
 
-      // Map back to expected format if needed (arrays of userIds)
+      
       return {
         ...giveaway,
         participants: giveaway.participants.map(p => p.userId),
@@ -554,13 +616,13 @@ export class DatabaseManager {
 
   async addGiveawayParticipant(giveawayId: string, userId: string): Promise<void> {
     try {
-      // giveawayId is messageId
+      
       const giveaway = await prisma.giveaway.findUnique({ where: { messageId: giveawayId } });
       if (!giveaway) return;
 
       await prisma.giveawayParticipant.create({
         data: {
-          giveawayId: giveaway.id, // Use internal ID
+          giveawayId: giveaway.id, 
           userId
         }
       });

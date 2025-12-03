@@ -1,6 +1,4 @@
-/**
- * Softban Command - Temporarily ban a user (ban then unban to delete messages)
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -64,7 +62,7 @@ export async function execute(
   const guild = interaction.guild!;
   const moderator = interaction.member as any;
 
-  // Parse duration
+  
   const duration = parseDuration(durationStr);
   if (!duration) {
     const errorEmbed = createErrorEmbed('Invalid duration format. Use formats like: 1h, 2d, 7d');
@@ -72,12 +70,12 @@ export async function execute(
     return;
   }
 
-  // Try to get member for permission checks
+  
   let target;
   try {
     target = await guild.members.fetch(user.id);
 
-    // Check permissions
+    
     const moderatorCheck = canModerate(moderator, target, PermissionFlagsBits.BanMembers);
     if (!moderatorCheck.allowed) {
       const errorEmbed = createErrorEmbed(moderatorCheck.reason || 'You cannot moderate this user.');
@@ -92,18 +90,18 @@ export async function execute(
       return;
     }
   } catch {
-    // User not in server, continue with ban
+    
   }
 
-  // Perform softban
+  
   try {
-    // Ban the user
+    
     await guild.bans.create(user.id, {
       reason: `Softban: ${reason}`,
       deleteMessageSeconds: deleteDays * 86400,
     });
 
-    // Schedule unban after duration
+    
     setTimeout(async () => {
       try {
         await guild.bans.remove(user.id, 'Softban expired');
@@ -121,7 +119,7 @@ export async function execute(
 
     await interaction.editReply({ embeds: [embed] });
 
-    // Log case
+    
     const modCase = await services.caseService.createCase({
       guildId: guild.id,
       targetId: user.id,
@@ -131,7 +129,7 @@ export async function execute(
       metadata: { duration: formatDuration(duration) },
     });
 
-    // Send to logging channel
+    
     await services.loggingService.logModeration(guild.id, {
       action: 'Softban',
       target: user,

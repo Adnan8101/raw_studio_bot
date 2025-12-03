@@ -82,7 +82,7 @@ export class RecordingManager {
                 formats: { wav: true, mp3: false, opus: false, flac: false }
             };
 
-            // Start monitoring loop (every 5 seconds)
+            
             session.monitorInterval = setInterval(() => this.checkSizeAndRotate(guildId), 5000);
 
             this.sessions.set(guildId, session);
@@ -108,8 +108,8 @@ export class RecordingManager {
                 }
             }
 
-            // Threshold: 50MB PCM (approx 5MB MP3)
-            // 50MB = 50 * 1024 * 1024 = 52428800 bytes
+            
+            
             if (totalSize > 52428800) {
                 console.log(`Session ${guildId} exceeded size limit (${totalSize} bytes). Rotating...`);
                 await this.rotateSession(guildId);
@@ -123,15 +123,15 @@ export class RecordingManager {
         const session = this.sessions.get(guildId);
         if (!session) return;
 
-        // 1. Rotate pipeline to get closed files
+        
         const closedFiles = session.pipeline.rotate();
         if (closedFiles.length === 0) return;
 
-        // 2. Create a temporary chunk directory
+        
         const chunkDir = path.join(session.pipeline.getSessionDir(), `chunk_${Date.now()}`);
         if (!fs.existsSync(chunkDir)) fs.mkdirSync(chunkDir);
 
-        // 3. Move closed files to chunk directory
+        
         for (const file of closedFiles) {
             if (fs.existsSync(file)) {
                 const basename = path.basename(file);
@@ -139,7 +139,7 @@ export class RecordingManager {
             }
         }
 
-        // 4. Process the chunk
+        
         try {
             const textChannel = await this.client.channels.fetch(session.textChannelId) as TextChannel;
             if (textChannel) {
@@ -157,11 +157,11 @@ export class RecordingManager {
                     files: attachments
                 });
 
-                // Cleanup processed files
+                
                 outputFiles.forEach(f => fs.unlinkSync(f));
             }
 
-            // Cleanup chunk dir
+            
             fs.rmSync(chunkDir, { recursive: true, force: true });
 
         } catch (error) {
@@ -183,8 +183,8 @@ export class RecordingManager {
 
         this.sessions.delete(guildId);
 
-        // Process remaining files
-        // Generate Metadata
+        
+        
         const metadata = {
             guildId: session.guildId,
             channelId: session.channelId,
@@ -196,7 +196,7 @@ export class RecordingManager {
 
         fs.writeFileSync(path.join(session.pipeline.getSessionDir(), 'metadata.json'), JSON.stringify(metadata, null, 2));
 
-        // Trigger post-processing
+        
         try {
             console.log(`Starting post-processing for session ${guildId}...`);
             const outputFiles = await import('./PostProcessor').then(async (mod) => {
@@ -214,11 +214,11 @@ export class RecordingManager {
                         files: attachments
                     });
 
-                    // Cleanup
-                    // fs.rmSync(session.pipeline.getSessionDir(), { recursive: true, force: true }); 
-                    // Keep session dir for debugging or manual recovery if needed, or delete it.
-                    // User didn't specify, but usually good to keep for a bit or delete.
-                    // I'll leave it as is for now.
+                    
+                    
+                    
+                    
+                    
 
                 } catch (sendError) {
                     console.error('Failed to send recording files:', sendError);
@@ -243,7 +243,7 @@ export class RecordingManager {
         const minutes = Math.floor((durationMs % 3600000) / 60000);
         const seconds = Math.floor((durationMs % 60000) / 1000);
 
-        // Calculate current size
+        
         let currentSize = 0;
         try {
             const files = fs.readdirSync(session.pipeline.getSessionDir());

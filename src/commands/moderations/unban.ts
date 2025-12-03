@@ -1,6 +1,4 @@
-/**
- * Unban Command - Unban a user from the server
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -46,11 +44,11 @@ export async function execute(
   const reason = interaction.options.getString('reason') || 'No reason provided';
   const guild = interaction.guild!;
 
-  // Check if user is banned
+  
   try {
     const ban = await guild.bans.fetch(userId);
 
-    // Unban the user
+    
     await guild.bans.remove(userId, reason);
 
     const embed = createModerationEmbed(
@@ -62,7 +60,7 @@ export async function execute(
 
     await interaction.editReply({ embeds: [embed] });
 
-    // Log case
+    
     const modCase = await services.caseService.createCase({
       guildId: guild.id,
       targetId: userId,
@@ -71,7 +69,7 @@ export async function execute(
       reason,
     });
 
-    // Send to logging channel
+    
     await services.loggingService.logModeration(guild.id, {
       action: 'Unban',
       target: ban.user,

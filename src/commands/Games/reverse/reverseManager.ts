@@ -24,7 +24,7 @@ export class ReverseGameManager {
     private generateText(difficulty: string, charset: string): string {
         const wordsList = ['sun', 'moon', 'star', 'sky', 'cloud', 'rain', 'snow', 'wind', 'fire', 'ice', 'tree', 'flower', 'leaf', 'root', 'seed', 'bird', 'fish', 'cat', 'dog', 'wolf', 'lion', 'tiger', 'bear', 'code', 'data', 'byte', 'bit', 'web', 'net', 'app', 'bot', 'chat', 'game', 'play', 'win', 'lose', 'run', 'jump', 'walk', 'talk', 'sing', 'dance', 'read', 'write', 'draw', 'paint', 'cook', 'eat', 'drink', 'sleep', 'dream', 'wake', 'live', 'love', 'hope', 'wish', 'want', 'need', 'have', 'give', 'take', 'make', 'do', 'go', 'come', 'stay', 'leave', 'stop', 'start', 'end', 'fast', 'slow', 'hot', 'cold', 'warm', 'cool', 'dry', 'wet', 'hard', 'soft', 'big', 'small', 'tall', 'short', 'long', 'wide', 'narrow', 'high', 'low', 'deep', 'shallow', 'light', 'dark', 'bright', 'dim', 'loud', 'quiet', 'good', 'bad', 'happy', 'sad', 'angry', 'calm', 'brave', 'fear', 'joy', 'pain', 'rich', 'poor', 'free', 'busy', 'idle', 'lazy', 'smart', 'dumb', 'wise', 'fool', 'kind', 'mean', 'nice', 'rude', 'polite', 'honest', 'false', 'true', 'real', 'fake', 'new', 'old', 'young', 'fresh', 'stale', 'clean', 'dirty', 'neat', 'messy', 'safe', 'danger', 'peace', 'war', 'fight', 'peace', 'friend', 'enemy', 'hero', 'villain', 'king', 'queen', 'prince', 'lord', 'lady', 'god', 'devil', 'angel', 'demon', 'ghost', 'spirit', 'soul', 'mind', 'body', 'heart', 'blood', 'bone', 'skin', 'hair', 'eye', 'ear', 'nose', 'mouth', 'hand', 'foot', 'arm', 'leg', 'head', 'face', 'back', 'chest', 'belly', 'waist', 'hip', 'knee', 'ankle', 'toe', 'finger', 'thumb', 'nail', 'tooth', 'tongue', 'lip', 'chin', 'cheek', 'brow', 'lash', 'lid', 'pupil', 'iris', 'lens', 'retina', 'nerve', 'brain', 'skull', 'spine', 'rib', 'lung', 'liver', 'kidney', 'stomach', 'gut', 'bowel', 'bladder', 'womb', 'egg', 'sperm', 'cell', 'gene', 'dna', 'rna', 'atom', 'ion', 'bond', 'acid', 'base', 'salt', 'sugar', 'fat', 'oil', 'wax', 'soap', 'dye', 'ink', 'glue', 'clay', 'sand', 'dust', 'dirt', 'mud', 'rock', 'stone', 'gem', 'jewel', 'gold', 'silver', 'copper', 'iron', 'steel', 'metal', 'wood', 'glass', 'paper', 'cloth', 'silk', 'wool', 'cotton', 'linen', 'hemp', 'jute', 'nylon', 'rayon', 'plastic', 'rubber', 'leather', 'fur', 'hide', 'skin', 'shell', 'bone', 'horn', 'tusk', 'claw', 'beak', 'wing', 'fin', 'tail', 'scale', 'feather', 'hair', 'wool', 'fur', 'down', 'fleece', 'pelt', 'hide', 'skin', 'leather', 'suede', 'velvet', 'satin', 'silk', 'lace', 'mesh', 'net', 'web', 'gauze', 'felt', 'flannel', 'tweed', 'denim', 'canvas', 'linen', 'cotton', 'wool', 'silk', 'rayon', 'nylon', 'polyester', 'acrylic', 'spandex', 'lycra', 'latex', 'rubber', 'plastic', 'vinyl', 'leather', 'fur', 'feather', 'down', 'hair', 'bristle', 'fiber', 'thread', 'yarn', 'string', 'rope', 'cord', 'cable', 'wire', 'chain', 'band', 'strap', 'belt', 'tape', 'ribbon', 'lace', 'braid', 'knot', 'loop', 'coil', 'spiral', 'circle', 'ring', 'disk', 'ball', 'sphere', 'globe', 'orb', 'cube', 'block', 'brick', 'tile', 'slab', 'sheet', 'plate', 'panel', 'board', 'plank', 'beam', 'post', 'pole', 'rod', 'stick', 'staff', 'cane', 'wand', 'bat', 'club', 'mace', 'axe', 'sword', 'knife', 'spear', 'arrow', 'bow', 'gun', 'bomb', 'mine', 'trap', 'net', 'cage', 'jail', 'cell', 'room', 'hall', 'wall', 'floor', 'roof', 'door', 'gate', 'window', 'glass', 'pane', 'frame', 'sash', 'sill', 'step', 'stair', 'ramp', 'lift', 'hoist', 'crane', 'jack', 'pump', 'fan', 'blower', 'vent', 'pipe', 'tube', 'hose', 'duct', 'drain', 'sewer', 'sink', 'basin', 'tub', 'bath', 'shower', 'toilet', 'seat', 'bench', 'chair', 'stool', 'sofa', 'couch', 'bed', 'cot', 'crib', 'cradle', 'mat', 'rug', 'carpet', 'floor', 'ground', 'earth', 'soil', 'dirt', 'dust', 'sand', 'mud', 'clay', 'rock', 'stone', 'pebble', 'gravel', 'boulder', 'cliff', 'hill', 'mount', 'peak', 'ridge', 'slope', 'valley', 'plain', 'field', 'meadow', 'pasture', 'grass', 'weed', 'herb', 'shrub', 'bush', 'tree', 'wood', 'forest', 'jungle', 'swamp', 'marsh', 'bog', 'fen', 'moor', 'heath', 'desert', 'dune', 'oasis', 'beach', 'coast', 'shore', 'bank', 'edge', 'side', 'rim', 'lip', 'border', 'bound', 'limit', 'end', 'start', 'begin', 'finish', 'stop', 'halt', 'pause', 'wait', 'stay', 'go', 'come', 'move', 'run', 'walk', 'fly', 'swim', 'dive', 'jump', 'leap', 'hop', 'skip', 'dance', 'spin', 'turn', 'roll', 'slide', 'glide', 'drift', 'float', 'sink', 'fall', 'drop', 'rise', 'lift', 'climb', 'crawl', 'creep', 'sneak', 'hide', 'seek', 'find', 'lose', 'keep', 'hold', 'carry', 'bear', 'bring', 'take', 'give', 'send', 'get', 'buy', 'sell', 'pay', 'cost', 'price', 'value', 'worth', 'cheap', 'dear', 'rich', 'poor', 'money', 'cash', 'coin', 'note', 'check', 'card', 'bank', 'fund', 'stock', 'share', 'bond', 'loan', 'debt', 'tax', 'fee', 'fine', 'bill', 'rate', 'rent', 'wage', 'pay', 'earn', 'gain', 'loss', 'profit', 'trade', 'deal', 'sale', 'shop', 'store', 'mart', 'mall', 'market', 'fair', 'show', 'expo', 'fete', 'gala', 'party', 'ball', 'prom', 'disco', 'club', 'pub', 'bar', 'cafe', 'diner', 'hotel', 'motel', 'inn', 'lodge', 'camp', 'tent', 'hut', 'shed', 'barn', 'farm', 'ranch', 'house', 'home', 'flat', 'room', 'hall', 'loft', 'attic', 'cellar', 'base', 'roof', 'wall', 'floor', 'door', 'gate', 'fence', 'hedge', 'yard', 'lawn', 'garden', 'park', 'plaza', 'square', 'street', 'road', 'lane', 'path', 'track', 'trail', 'route', 'way', 'map', 'chart', 'plan', 'plot', 'grid', 'zone', 'area', 'region', 'land', 'state', 'town', 'city', 'urban', 'rural', 'local', 'global', 'world', 'earth', 'planet', 'star', 'sun', 'moon', 'sky', 'space', 'void', 'null', 'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 
-        // Difficulty now determines word length
+        
         let minLen = 3;
         let maxLen = 5;
         if (difficulty === 'Medium') { minLen = 6; maxLen = 8; }
@@ -32,7 +32,7 @@ export class ReverseGameManager {
 
         let filteredWords = wordsList.filter(w => w.length >= minLen && w.length <= maxLen);
         if (filteredWords.length === 0) {
-            // Fallback if no words match (unlikely given the list)
+            
             filteredWords = wordsList;
         }
 
@@ -49,7 +49,7 @@ export class ReverseGameManager {
         const text = this.generateText(difficulty, charset);
         const reversed = text.split('').reverse().join('');
 
-        // Generate Image
+        
         const attachment = await ReverseCanvas.generateImage(text);
 
         const embed = new EmbedBuilder()
@@ -63,7 +63,7 @@ export class ReverseGameManager {
             files: [attachment]
         });
 
-        // DM the starter
+        
         try {
             await interaction.user.send(`Your answer: || ${reversed} ||`);
         } catch (e) {
@@ -87,13 +87,13 @@ export class ReverseGameManager {
         if (time > 0) {
             setTimeout(async () => {
                 try {
-                    // Check if game is still active
+                    
                     if (!this.activeGames.has(channelId)) return;
 
                     await interaction.deleteReply();
                 } catch (error) {
                     console.error('Error in Reverse Game timeout:', error);
-                    // Don't delete game here, just failed to delete message
+                    
                 }
             }, time * 1000);
         }
@@ -135,9 +135,9 @@ export class ReverseGameManager {
         const game = this.activeGames.get(message.channelId);
         if (!game || !game.isActive || message.author.bot) return;
 
-        const content = message.content.trim(); // Keep case for now, but user said case-insensitive default.
+        const content = message.content.trim(); 
 
-        // "Case sensitivity: recommend case-insensitive matching to avoid failing due to capitalization; but you can make it exact-case if desired. (Default: case-insensitive.)"
+        
         if (content.toLowerCase() === game.reversedText.toLowerCase()) {
             game.isActive = false;
             this.activeGames.delete(message.channelId);

@@ -1,6 +1,4 @@
-/**
- * SetLimit Command - Configure action limits
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -64,7 +62,7 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   services: { configService: ConfigService }
 ): Promise<void> {
-  // Permission Check: Role > Bot
+  
   if (!await checkCommandPermission(interaction, { ownerOnly: false })) return;
 
   await interaction.deferReply();
@@ -84,7 +82,7 @@ export async function execute(
   const windowMs = windowSeconds * 1000;
   const guildId = interaction.guildId!;
 
-  // Validate that anti-nuke is enabled
+  
   const config = await services.configService.getConfig(guildId);
   if (!config?.enabled) {
     await interaction.editReply({
@@ -93,7 +91,7 @@ export async function execute(
     return;
   }
 
-  // Check if this protection is active
+  
   if (!config.protections.includes(action)) {
     const embed = new EmbedBuilder()
       .setTitle('⚠️ Warning')
@@ -106,7 +104,7 @@ export async function execute(
     await interaction.followUp({ embeds: [embed], ephemeral: true });
   }
 
-  // Warn about very short windows (only if limit > 0)
+  
   if (limit > 0 && windowSeconds < 5) {
     const embed = new EmbedBuilder()
       .setTitle('⚠️ Short Time Window')
@@ -118,10 +116,10 @@ export async function execute(
     await interaction.followUp({ embeds: [embed], ephemeral: true });
   }
 
-  // Set the limit
+  
   await services.configService.setLimit(guildId, action, limit, windowMs);
 
-  // Determine effect string
+  
   let effectString = '';
   if (limit === 0) {
     effectString = `**Strict Mode:** Users are **not allowed** to ${formatActionName(action).toLowerCase()}. Any attempt will trigger the punishment immediately.`;
@@ -129,7 +127,7 @@ export async function execute(
     effectString = `Users performing more than **${limit}** ${formatActionName(action).toLowerCase()} within **${formatDurationVerbose(windowSeconds)}** will trigger the configured punishment.`;
   }
 
-  // Create success embed
+  
   const embed = new EmbedBuilder()
     .setTitle('<:tcet_tick:1437995479567962184> Limit Set')
     .setDescription(`Action limit has been configured successfully.`)
@@ -149,7 +147,7 @@ export async function execute(
     })
     .setTimestamp();
 
-  // Add warning for high window time (only if limit > 0)
+  
   if (limit > 0 && windowSeconds > 60) {
     embed.addFields({
       name: '⚠️ Recommendation',
@@ -158,7 +156,7 @@ export async function execute(
     });
   }
 
-  // Special recommendation for dangerous actions if limit > 0
+  
   const dangerousActions = [ProtectionAction.ADD_BOTS, ProtectionAction.GIVE_ADMIN_ROLE];
   if (dangerousActions.includes(action) && limit > 0) {
     embed.addFields({
@@ -168,7 +166,7 @@ export async function execute(
     });
   }
 
-  // Check if punishment is configured
+  
   const punishment = await services.configService.getPunishment(guildId, action);
   if (!punishment) {
     embed.addFields({

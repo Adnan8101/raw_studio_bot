@@ -34,9 +34,9 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
 
         const content = message.content.trim();
         const args = content.split(/ +/);
-        args.shift(); // Remove command
+        args.shift(); 
 
-        // Check for reply first
+        
         if (message.reference && message.reference.messageId) {
             try {
                 const repliedMessage = await message.channel.messages.fetch(message.reference.messageId);
@@ -46,20 +46,20 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
             } catch (e) { }
         }
 
-        // Check for mentions or ID/Fuzzy if no reply or reply didn't yield member
+        
         if (!targetMember && args.length > 0) {
             const arg = args[0];
 
-            // Try mention regex
+            
             const mentionMatch = arg.match(/^<@!?(\d{17,19})>$/);
             if (mentionMatch) {
                 targetMember = await message.guild?.members.fetch(mentionMatch[1]).catch(() => null) || null;
             }
-            // Try ID
+            
             else if (arg.match(/^\d{17,19}$/)) {
                 targetMember = await message.guild?.members.fetch(arg).catch(() => null) || null;
             }
-            // Try Fuzzy
+            
             else {
                 try {
                     const fetchedMember = await message.guild!.members.fetch({ query: arg, limit: 1 });
@@ -94,7 +94,7 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
             }
         }
     } else {
-        // Not in VC
+        
         if (isSlash) {
             await interaction.reply({ content: 'User is not in a voice channel.', flags: MessageFlags.Ephemeral });
         }

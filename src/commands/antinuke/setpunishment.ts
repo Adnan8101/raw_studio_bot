@@ -1,6 +1,4 @@
-/**
- * SetPunishment Command - Configure punishments for actions
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -50,7 +48,7 @@ export const data = new SlashCommandBuilder()
       .setDescription('Duration in seconds (required for timeout)')
       .setRequired(false)
       .setMinValue(60)
-      .setMaxValue(2419200) // 28 days max
+      .setMaxValue(2419200) 
   );
 
 export const slashCommand: SlashCommand = {
@@ -68,7 +66,7 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   services: { configService: ConfigService }
 ): Promise<void> {
-  // Permission Check: Role > Bot
+  
   if (!await checkCommandPermission(interaction, { ownerOnly: false })) return;
 
   await interaction.deferReply();
@@ -81,7 +79,7 @@ export async function execute(
   const guild = interaction.guild!;
   const botMember = guild.members.me!;
 
-  // Validate timeout duration
+  
   if (punishment === PunishmentType.TIMEOUT && !durationSeconds) {
     await interaction.editReply({
       content: '❌ Duration in seconds is required for timeout punishment.',
@@ -89,7 +87,7 @@ export async function execute(
     return;
   }
 
-  // Validate bot permissions
+  
   const permissionWarnings: string[] = [];
 
   if (punishment === PunishmentType.BAN && !botMember.permissions.has(PermissionFlagsBits.BanMembers)) {
@@ -117,7 +115,7 @@ export async function execute(
     await interaction.followUp({ embeds: [embed], ephemeral: true });
   }
 
-  // Validate anti-nuke is enabled
+  
   const config = await services.configService.getConfig(guildId);
   if (!config?.enabled) {
     await interaction.editReply({
@@ -126,7 +124,7 @@ export async function execute(
     return;
   }
 
-  // Check if this protection is active
+  
   if (!config.protections.includes(action)) {
     const embed = new EmbedBuilder()
       .setTitle('⚠️ Warning')
@@ -139,14 +137,14 @@ export async function execute(
     await interaction.followUp({ embeds: [embed], ephemeral: true });
   }
 
-  // Set the punishment
+  
   await services.configService.setPunishment(guildId, {
     action,
     punishment,
     durationSeconds: durationSeconds ?? undefined,
   });
 
-  // Create success embed
+  
   const embed = new EmbedBuilder()
     .setTitle('<:tcet_tick:1437995479567962184> Punishment Configured')
     .setDescription(`When users exceed the limit for this action, they will be punished.`)
@@ -168,7 +166,7 @@ export async function execute(
     });
   }
 
-  // Add enforcement description
+  
   const limit = await services.configService.getLimit(guildId, action);
   if (limit) {
     embed.addFields({

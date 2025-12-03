@@ -30,25 +30,25 @@ export class MemoryGameManager {
             return false;
         }
 
-        // Generate sequence
+        
         const sequence: string[] = [];
         for (let i = 0; i < emojiCount; i++) {
             sequence.push(this.emojis[Math.floor(Math.random() * this.emojis.length)]);
         }
         const sequenceString = sequence.join('');
 
-        // Create Canvas
+        
         const canvas = createCanvas(800, 200);
         const ctx = canvas.getContext('2d');
 
-        // Background
-        ctx.fillStyle = '#2b2d31'; // Discord dark theme background
+        
+        ctx.fillStyle = '#2b2d31'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Draw Emojis using Twemoji images
+        
         const spacing = 100;
         const totalWidth = emojiCount * spacing;
-        const startX = (canvas.width - totalWidth) / 2 + (spacing / 2); // Center it
+        const startX = (canvas.width - totalWidth) / 2 + (spacing / 2); 
 
         const loadPromises = sequence.map(async (emoji, index) => {
             try {
@@ -69,7 +69,7 @@ export class MemoryGameManager {
         const embed = new EmbedBuilder()
             .setDescription(`**Memorize these emojis! You have ${time} seconds.**`)
             .setImage('attachment://memory_sequence.png');
-        // No color set for "colorless" look (defaults to role color or dark grey)
+        
 
         await interaction.reply({
             embeds: [embed],
@@ -79,7 +79,7 @@ export class MemoryGameManager {
         const gameState: MemoryGameState = {
             channelId,
             sequence: sequenceString,
-            isActive: true, // Active immediately
+            isActive: true, 
             startTime: Date.now(),
             emojiCount,
             displayTime: time
@@ -87,7 +87,7 @@ export class MemoryGameManager {
 
         this.activeGames.set(channelId, gameState);
 
-        // Set timeout to delete image and start listening
+        
         setTimeout(async () => {
             try {
                 await interaction.deleteReply();
@@ -102,11 +102,11 @@ export class MemoryGameManager {
                         await (channel as any).send({ embeds: [embed] });
                     }
 
-                    // Activate game for listening
+                    
                     const game = this.activeGames.get(channelId);
                     if (game) {
                         game.isActive = true;
-                        // Game now runs indefinitely until winner or manual stop
+                        
                     }
                 }
             } catch (error) {
@@ -150,7 +150,7 @@ export class MemoryGameManager {
 
         const content = message.content.trim();
 
-        // Normalize strings for comparison (remove variation selectors and whitespace)
+        
         const normalize = (str: string) => str.replace(/[\uFE0F\s]/g, '');
 
         const normalizedContent = normalize(content);
@@ -158,9 +158,9 @@ export class MemoryGameManager {
 
         console.log(`[Memory Game] Expected: ${normalizedSequence} (${game.sequence}), Received: ${normalizedContent} (${content})`);
 
-        // Exact match check
+        
         if (normalizedContent === normalizedSequence) {
-            // WINNER
+            
             game.isActive = false;
             this.activeGames.delete(message.channelId);
 

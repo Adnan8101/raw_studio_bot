@@ -1,6 +1,4 @@
-/**
- * Purge Command - Bulk delete messages from a channel
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -51,7 +49,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Determine mode and amount
+  
   let mode: 'all' | 'bots' | 'human' = 'all';
   let amount: number | null = null;
 
@@ -62,13 +60,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       amount = interaction.options.getInteger('amount', true);
     }
   } catch {
-    // For prefix: check if first arg is a subcommand or a number
+    
     const firstArg = interaction.options.getString('mode');
     if (firstArg === 'bots' || firstArg === 'human') {
       mode = firstArg;
       amount = interaction.options.getInteger('amount');
     } else {
-      // Direct number
+      
       amount = interaction.options.getInteger('amount');
     }
   }
@@ -88,7 +86,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   amount = Math.max(1, Math.min(100, amount));
 
-  // Permission checks for bot
+  
   const botMember = interaction.guild?.members.me;
   if (!botMember) {
     const errorEmbed = new EmbedBuilder()
@@ -117,7 +115,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     const messagesArray = Array.from(toDelete.values()).slice(0, amount);
 
-    // Bulk delete - Discord ignores messages older than 14 days when using bulkDelete
+    
     const bulkDeletable = messagesArray.filter(m => Date.now() - m.createdTimestamp < 14 * 24 * 60 * 60 * 1000);
     const older = messagesArray.filter(m => Date.now() - m.createdTimestamp >= 14 * 24 * 60 * 60 * 1000);
 

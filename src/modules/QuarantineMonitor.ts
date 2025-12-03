@@ -23,11 +23,11 @@ export class QuarantineMonitor {
 
             if (!config || !config.roleId) return;
 
-            // Check if role exists
+            
             const role = await channel.guild.roles.fetch(config.roleId).catch(() => null);
             if (!role) return;
 
-            // Deny ViewChannel for the quarantine role
+            
             await channel.permissionOverwrites.create(role, {
                 ViewChannel: false,
                 SendMessages: false,

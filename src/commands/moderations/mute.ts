@@ -1,6 +1,4 @@
-/**
- * Mute Command - Timeout a member
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -55,7 +53,7 @@ export async function execute(
   const guild = interaction.guild!;
   const moderator = interaction.member as any;
 
-  // Parse duration
+  
   const duration = parseDuration(durationStr);
   if (!duration) {
     const errorEmbed = createErrorEmbed('Invalid duration format. Use formats like: 5s, 10m, 1h, 2d');
@@ -63,7 +61,7 @@ export async function execute(
     return;
   }
 
-  // Max 28 days
+  
   const maxDuration = 28 * 24 * 60 * 60 * 1000;
   if (duration > maxDuration) {
     const errorEmbed = createErrorEmbed('Duration cannot exceed 28 days.');
@@ -71,7 +69,7 @@ export async function execute(
     return;
   }
 
-  // Get member
+  
   let target;
   try {
     target = await guild.members.fetch(user.id);
@@ -81,7 +79,7 @@ export async function execute(
     return;
   }
 
-  // Check permissions
+  
   const moderatorCheck = canModerate(moderator, target, PermissionFlagsBits.ModerateMembers);
   if (!moderatorCheck.allowed) {
     const errorEmbed = createErrorEmbed(moderatorCheck.reason || 'You cannot moderate this user.');
@@ -96,7 +94,7 @@ export async function execute(
     return;
   }
 
-  // Perform timeout
+  
   try {
     await target.timeout(duration, reason);
 
@@ -110,7 +108,7 @@ export async function execute(
 
     await interaction.editReply({ embeds: [embed] });
 
-    // Log case
+    
     const modCase = await services.caseService.createCase({
       guildId: guild.id,
       targetId: target.id,
@@ -120,7 +118,7 @@ export async function execute(
       metadata: { duration: formatDuration(duration) },
     });
 
-    // Send to logging channel
+    
     await services.loggingService.logModeration(guild.id, {
       action: 'Mute',
       target: target.user,

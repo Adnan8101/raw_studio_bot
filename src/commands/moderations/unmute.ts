@@ -1,6 +1,4 @@
-/**
- * Unmute Command - Remove timeout from a member
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -46,7 +44,7 @@ export async function execute(
   const reason = interaction.options.getString('reason') || 'No reason provided';
   const guild = interaction.guild!;
 
-  // Get member
+  
   let target;
   try {
     target = await guild.members.fetch(user.id);
@@ -56,14 +54,14 @@ export async function execute(
     return;
   }
 
-  // Check if member is muted
+  
   if (!target.isCommunicationDisabled()) {
     const errorEmbed = createErrorEmbed('This member is not muted.');
     await interaction.editReply({ embeds: [errorEmbed] });
     return;
   }
 
-  // Remove timeout
+  
   try {
     await target.timeout(null, reason);
 
@@ -76,7 +74,7 @@ export async function execute(
 
     await interaction.editReply({ embeds: [embed] });
 
-    // Log case
+    
     const modCase = await services.caseService.createCase({
       guildId: guild.id,
       targetId: target.id,
@@ -85,7 +83,7 @@ export async function execute(
       reason,
     });
 
-    // Send to logging channel
+    
     await services.loggingService.logModeration(guild.id, {
       action: 'Unmute',
       target: target.user,

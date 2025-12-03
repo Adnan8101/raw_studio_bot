@@ -54,7 +54,7 @@ export const handleVowelsCommand = async (interaction: ChatInputCommandInteracti
 
         if (subcommand === 'start') {
             const difficulty = options.getString('difficulty') || 'Easy';
-            const time = options.getInteger('time') ?? 0; // Default 0 (unlimited)
+            const time = options.getInteger('time') ?? 0; 
             const category = options.getString('category') || 'mixed';
 
             const manager = getVowelsGameManager(interaction.client);

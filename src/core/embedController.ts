@@ -13,9 +13,7 @@ export class EmbedController {
     return this.botName;
   }
 
-  /**
-   * Create the main setup wizard embed.
-   */
+  
   static createSetupWizardEmbed(data: Partial<PanelData>, isEdit: boolean = false): EmbedBuilder {
     const title = isEdit
       ? '<:module:1437997093753983038> Ticket Panel Editor'
@@ -92,9 +90,9 @@ export class EmbedController {
       .setFooter({ text: `Powered by ${EmbedController.botName} • ${new Date().toLocaleString()}` })
       .setTimestamp();
 
-    // Add edit summary if there are changes
+    
     if (data.editChanges && data.editChanges.length > 0) {
-      const changesPreview = data.editChanges.slice(-5).join('\n'); // Show last 5 changes
+      const changesPreview = data.editChanges.slice(-5).join('\n'); 
       embed.addFields({
         name: `📝 Recent Changes (${data.editChanges.length} total)`,
         value: `\`\`\`\n${changesPreview}\n\`\`\``,
@@ -105,9 +103,7 @@ export class EmbedController {
     return embed;
   }
 
-  /**
-   * Create channel setup embed
-   */
+  
   static createChannelSetupEmbed(data: Partial<PanelData>): EmbedBuilder {
     const embed = new EmbedBuilder()
       .setTitle('<:zicons_newschannel:1437846918318526536> Channel Setup')
@@ -152,9 +148,7 @@ export class EmbedController {
     return embed;
   }
 
-  /**
-   * Create permissions configuration embed
-   */
+  
   static createExtraConfigEmbed(data: Partial<PanelData>): EmbedBuilder {
     const embed = new EmbedBuilder()
       .setTitle('<:pb_utils:1437999137919340546> Extra Configuration')
@@ -199,9 +193,7 @@ export class EmbedController {
     return embed;
   }
 
-  /**
-   * Create panel list embed with stats
-   */
+  
   static createPanelListEmbed(panels: PanelData[]): EmbedBuilder {
     const embed = new EmbedBuilder()
       .setTitle(' Configured Ticket Panels')
@@ -225,9 +217,7 @@ export class EmbedController {
     return embed;
   }
 
-  /**
-   * Create ticket welcome embed
-   */
+  
   static createTicketWelcomeEmbed(
     owner: string,
     staffRole: string,
@@ -257,7 +247,7 @@ export class EmbedController {
       )
       .setTimestamp();
 
-    // Add custom questions if any
+    
     if (panel.customQuestions && panel.customQuestions.length > 0) {
       embed.addFields({
         name: 'Questions',
@@ -269,9 +259,7 @@ export class EmbedController {
     return embed;
   }
 
-  /**
-   * Create ticket closed embed
-   */
+  
   static createTicketClosedEmbed(closedBy: string): EmbedBuilder {
     return new EmbedBuilder()
       .setTitle('<:tcet_cross:1437995480754946178> Ticket Closed')
@@ -287,9 +275,7 @@ export class EmbedController {
       .setTimestamp();
   }
 
-  /**
-   * Debounced embed update
-   */
+  
   static debouncedUpdate(key: string, callback: () => void, delay: number = 500): void {
     const existing = this.debounceTimers.get(key);
     if (existing) {
@@ -302,7 +288,7 @@ export class EmbedController {
       } catch (error) {
         console.error('[EmbedController] Debounced callback error:', error);
       } finally {
-        // Always clean up timer, even if callback throws
+        
         this.debounceTimers.delete(key);
       }
     }, delay);
@@ -310,9 +296,7 @@ export class EmbedController {
     this.debounceTimers.set(key, timer);
   }
 
-  /**
-   * Clear all debounce timers (cleanup)
-   */
+  
   static clearAllTimers(): void {
     for (const [key, timer] of this.debounceTimers.entries()) {
       clearTimeout(timer);

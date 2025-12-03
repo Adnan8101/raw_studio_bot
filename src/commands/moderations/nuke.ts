@@ -1,6 +1,4 @@
-/**
- * Nuke Command - Delete and recreate a channel with all settings
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -39,7 +37,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Check bot permissions
+  
   const botMember = interaction.guild.members.me;
   if (!botMember?.permissions.has(PermissionFlagsBits.ManageChannels)) {
     const errorEmbed = createErrorEmbed('I need the **Manage Channels** permission to nuke channels.');
@@ -47,7 +45,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Create confirmation embed
+  
   const confirmEmbed = new EmbedBuilder()
     .setColor(EmbedColors.WARNING)
     .setTitle(`${CustomEmojis.CAUTION} Channel Nuke Confirmation`)
@@ -58,7 +56,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setFooter({ text: 'You have 30 seconds to confirm' })
     .setTimestamp();
 
-  // Create buttons
+  
   const row = new ActionRowBuilder<ButtonBuilder>()
     .addComponents(
       new ButtonBuilder()
@@ -79,7 +77,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     fetchReply: true,
   });
 
-  // Wait for button interaction
+  
   try {
     const buttonInteraction = await response.awaitMessageComponent({
       filter: i => i.user.id === interaction.user.id && (i.customId.startsWith('nuke_confirm_') || i.customId.startsWith('nuke_cancel_')),
@@ -92,14 +90,14 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return;
     }
 
-    // User confirmed - proceed with nuke
+    
     const processingEmbed = createWarningEmbed('Nuking channel in 3 seconds...');
     await buttonInteraction.update({ embeds: [processingEmbed], components: [] });
 
-    // Wait 3 seconds
+    
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    // Save channel settings
+    
     const channelData = {
       name: channel.name,
       type: channel.type,
@@ -116,10 +114,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       })),
     };
 
-    // Delete the channel
+    
     await channel.delete(`Nuked by ${interaction.user.tag}`);
 
-    // Create new channel
+    
     const newChannel = await interaction.guild.channels.create({
       name: channelData.name,
       type: channelData.type,
@@ -137,7 +135,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       reason: `Channel nuked by ${interaction.user.tag}`,
     });
 
-    // Send completion message in new channel
+    
     if (newChannel.isTextBased()) {
       const successEmbed = createSuccessEmbed(`Channel nuked successfully.`);
 
@@ -145,7 +143,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
   } catch (error: any) {
     if (error.message?.includes('time')) {
-      // Timeout
+      
       const timeoutEmbed = createErrorEmbed('Confirmation timed out. Channel nuke cancelled.');
       await interaction.editReply({ embeds: [timeoutEmbed], components: [] });
     } else {
@@ -155,7 +153,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       try {
         await interaction.editReply({ embeds: [errorEmbed], components: [] });
       } catch {
-        // Channel might have been deleted
+        
       }
     }
   }

@@ -1,6 +1,4 @@
-/**
- * Logs Command - Configure logging channels
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -91,7 +89,7 @@ async function handleModChannel(
 
   const textChannel = channel as TextChannel;
 
-  // Check bot permissions in the channel
+  
   const botMember = interaction.guild!.members.me!;
   const permissions = textChannel.permissionsFor(botMember);
 
@@ -107,10 +105,10 @@ async function handleModChannel(
     return;
   }
 
-  // Set the channel
+  
   await services.loggingService.setModChannel(guildId, channel.id);
 
-  // Send test message
+  
   const testEmbed = createSuccessEmbed('Moderation Logs Configured')
     .setTitle(`${CustomEmojis.TICK} Moderation Logs Configured`)
     .setDescription('This channel will now receive moderation action logs.')
@@ -125,7 +123,7 @@ async function handleModChannel(
     return;
   }
 
-  // Success response
+  
   const embed = createSuccessEmbed('Mod Logs Configured')
     .setTitle(`${CustomEmojis.TICK} Mod Logs Configured`)
     .setDescription(`Moderation logs will be sent to ${channel}`)
@@ -154,7 +152,7 @@ async function handleSecurityChannel(
 
   const textChannel = channel as TextChannel;
 
-  // Check bot permissions in the channel
+  
   const botMember = interaction.guild!.members.me!;
   const permissions = textChannel.permissionsFor(botMember);
 
@@ -170,10 +168,10 @@ async function handleSecurityChannel(
     return;
   }
 
-  // Set the channel
+  
   await services.loggingService.setSecurityChannel(guildId, channel.id);
 
-  // Send test message
+  
   const testEmbed = createSuccessEmbed('Security Logs Configured')
     .setTitle(`${CustomEmojis.TICK} Security Logs Configured`)
     .setDescription('This channel will now receive anti-nuke and security event logs.')
@@ -189,7 +187,7 @@ async function handleSecurityChannel(
     return;
   }
 
-  // Success response
+  
   const embed = createSuccessEmbed('Security Logs Configured')
     .setTitle(`${CustomEmojis.TICK} Security Logs Configured`)
     .setDescription(`Security logs will be sent to ${channel}`)

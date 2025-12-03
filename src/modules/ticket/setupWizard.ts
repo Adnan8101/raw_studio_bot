@@ -23,38 +23,35 @@ import { InteractionHandler } from '../../core/interactionRouter';
 import { ErrorHandler } from '../../core/errorHandler';
 
 export class SetupWizardHandler implements InteractionHandler {
-  /**
-   * Helper function to safely set emoji on a button
-   * Returns the button for chaining
-   */
+  
   private safeSetEmoji(button: ButtonBuilder, emoji: string | undefined): ButtonBuilder {
     if (!emoji) {
       return button;
     }
 
     try {
-      // Try to parse custom emoji format: <:name:id> or <a:name:id>
+      
       const customEmojiMatch = emoji.match(/^<a?:(\w+):(\d+)>$/);
 
       if (customEmojiMatch) {
-        // Custom emoji - extract ID
+        
         const emojiId = customEmojiMatch[2];
         const emojiName = customEmojiMatch[1];
         const isAnimated = emoji.startsWith('<a:');
 
-        // Set custom emoji with ID
+        
         button.setEmoji({
           id: emojiId,
           name: emojiName,
           animated: isAnimated
         });
       } else {
-        // Unicode emoji or invalid format - just set it directly
-        // Discord.js will handle unicode emojis
+        
+        
         button.setEmoji(emoji);
       }
     } catch (error) {
-      // If setting emoji fails, just continue without it
+      
     }
 
     return button;
@@ -192,14 +189,14 @@ export class SetupWizardHandler implements InteractionHandler {
           await this.handleOwnerCloseSelect(interaction as StringSelectMenuInteraction, client, userId);
           break;
         case 'set-color':
-          // Legacy support or if user clicks old button
+          
           await this.showEmbedColorModal(interaction, client, userId);
           break;
         case 'set-embed-color':
           await this.showEmbedColorModal(interaction, client, userId);
           break;
         case 'modal-color':
-          // Legacy support
+          
           await this.handleEmbedColorModal(interaction as ModalSubmitInteraction, client, userId);
           break;
         case 'modal-embed-color':
@@ -242,7 +239,7 @@ export class SetupWizardHandler implements InteractionHandler {
       return autosave.data;
     }
 
-    // Create default autosave
+    
     const defaultData: Partial<PanelData> = {
       label: 'Open Ticket',
       emoji: '<:module:1437997093753983038>',
@@ -274,7 +271,7 @@ export class SetupWizardHandler implements InteractionHandler {
   private addEditChange(data: Partial<PanelData>, field: string, oldValue: any, newValue: any): void {
     if (!data.editChanges) data.editChanges = [];
 
-    // Format git-style change message
+    
     const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     const change = `[${timestamp}] Modified ${field}: "${oldValue || 'empty'}" → "${newValue}"`;
     data.editChanges.push(change);
@@ -429,7 +426,7 @@ export class SetupWizardHandler implements InteractionHandler {
 
     const components: any[] = [row1, row2, row3];
 
-    // Add delete question dropdown if there are questions
+    
     if (data.customQuestions && data.customQuestions.length > 0) {
       const deleteRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
         new StringSelectMenuBuilder()
@@ -449,7 +446,7 @@ export class SetupWizardHandler implements InteractionHandler {
       components.push(deleteRow);
     }
 
-    // Always add back button as last component (limit is 5 total)
+    
     if (components.length < 5) {
       components.push(row4);
     }
@@ -472,7 +469,7 @@ export class SetupWizardHandler implements InteractionHandler {
       .setRequired(true)
       .setMaxLength(100);
 
-    // Auto-load current value if editing
+    
     if (data.name) {
       nameInput.setValue(data.name);
     }
@@ -497,7 +494,7 @@ export class SetupWizardHandler implements InteractionHandler {
       .setRequired(true)
       .setMaxLength(500);
 
-    // Auto-load current value if editing
+    
     if (data.description) {
       descInput.setValue(data.description);
     }
@@ -522,7 +519,7 @@ export class SetupWizardHandler implements InteractionHandler {
       .setRequired(true)
       .setMaxLength(1000);
 
-    // Auto-load current value if editing
+    
     if (data.openMessage) {
       msgInput.setValue(data.openMessage);
     }
@@ -618,7 +615,7 @@ export class SetupWizardHandler implements InteractionHandler {
       .setRequired(true)
       .setMaxLength(7);
 
-    // Auto-load current value if editing
+    
     if (data.embedColor) {
       colorInput.setValue(data.embedColor);
     }
@@ -631,7 +628,7 @@ export class SetupWizardHandler implements InteractionHandler {
   async handleEmbedColorModal(interaction: ModalSubmitInteraction, client: BotClient, userId: string): Promise<void> {
     let color = interaction.fields.getTextInputValue('color');
 
-    // Validate hex code
+    
     if (!color.startsWith('#')) {
       color = `#${color}`;
     }
@@ -640,7 +637,7 @@ export class SetupWizardHandler implements InteractionHandler {
     if (!hexRegex.test(color)) {
       await interaction.reply({
         content: '<:tcet_cross:1437995480754946178> Invalid hex color code. Please use format like #FF0000.',
-        flags: 1 << 6 // MessageFlags.Ephemeral
+        flags: 1 << 6 
       });
       return;
     }
@@ -707,7 +704,7 @@ export class SetupWizardHandler implements InteractionHandler {
     const data = await this.getOrCreateAutosave(client, userId);
     const index = parseInt(interaction.values[0]);
 
-    // Delete from both arrays
+    
     if (data.questions && data.questions[index] !== undefined) {
       data.questions.splice(index, 1);
     }
@@ -731,9 +728,9 @@ export class SetupWizardHandler implements InteractionHandler {
       return;
     }
 
-    // Load panel data into autosave for editing
+    
     const autosaveData: Partial<PanelData> = {
-      id: panel.id, // Keep the panel ID for updating
+      id: panel.id, 
       name: panel.name,
       channel: panel.channel,
       openCategory: panel.openCategory,
@@ -747,7 +744,7 @@ export class SetupWizardHandler implements InteractionHandler {
       description: panel.description,
       openMessage: panel.openMessage,
       questions: panel.questions,
-      customQuestions: panel.customQuestions, // Include custom questions for editing
+      customQuestions: panel.customQuestions, 
       claimable: panel.claimable,
       enabled: panel.enabled,
       userPermissions: panel.userPermissions || [],
@@ -756,7 +753,7 @@ export class SetupWizardHandler implements InteractionHandler {
 
     this.saveAutosave(client, userId, autosaveData);
 
-    // Show the main setup wizard with loaded data
+    
     await this.showMainMenu(interaction, client, userId);
   }
 
@@ -796,7 +793,7 @@ export class SetupWizardHandler implements InteractionHandler {
 
     const data = await this.getOrCreateAutosave(client, userId);
 
-    // Store the pending question in autosave temporarily
+    
     data.pendingQuestion = question;
     this.saveAutosave(client, userId, data);
 
@@ -807,7 +804,7 @@ export class SetupWizardHandler implements InteractionHandler {
   async showQuestionConfirmation(interaction: any, client: BotClient, userId: string, question: string): Promise<void> {
     const data = await this.getOrCreateAutosave(client, userId);
 
-    // Create an embed showing the captured question
+    
     const embed = new EmbedBuilder()
       .setTitle('<:tcet_tick:1437995479567962184> Question Captured')
       .setDescription('**Your question:**\n' + question + '\n\nPlease select the question type:')
@@ -845,19 +842,19 @@ export class SetupWizardHandler implements InteractionHandler {
       return;
     }
 
-    // Initialize customQuestions if not exists
+    
     if (!data.customQuestions) data.customQuestions = [];
 
-    // Also keep legacy questions array for backward compatibility
+    
     if (!data.questions) data.questions = [];
 
-    // Add to customQuestions array as primary
+    
     data.customQuestions.push({ text: question, type: 'primary' });
 
-    // Add to legacy questions array (text only)
+    
     data.questions.push(question);
 
-    // Clear pending question
+    
     delete data.pendingQuestion;
 
     this.saveAutosave(client, userId, data);
@@ -873,19 +870,19 @@ export class SetupWizardHandler implements InteractionHandler {
       return;
     }
 
-    // Initialize customQuestions if not exists
+    
     if (!data.customQuestions) data.customQuestions = [];
 
-    // Also keep legacy questions array for backward compatibility
+    
     if (!data.questions) data.questions = [];
 
-    // Add to customQuestions array as optional
+    
     data.customQuestions.push({ text: question, type: 'optional' });
 
-    // Add to legacy questions array (text only)
+    
     data.questions.push(question);
 
-    // Clear pending question
+    
     delete data.pendingQuestion;
 
     this.saveAutosave(client, userId, data);
@@ -895,7 +892,7 @@ export class SetupWizardHandler implements InteractionHandler {
   async handleQuestionBack(interaction: any, client: BotClient, userId: string): Promise<void> {
     const data = await this.getOrCreateAutosave(client, userId);
 
-    // Clear pending question without saving it
+    
     delete data.pendingQuestion;
     this.saveAutosave(client, userId, data);
 
@@ -916,7 +913,7 @@ export class SetupWizardHandler implements InteractionHandler {
   async finishSetup(interaction: any, client: BotClient, userId: string): Promise<void> {
     const data = await this.getOrCreateAutosave(client, userId);
 
-    // Validate required fields
+    
     if (!data.name || !data.channel || !data.openCategory || !data.staffRole) {
       await interaction.editReply({
         content: '<:tcet_cross:1437995480754946178> Please fill in all required fields: Panel Name, Channel, Open Category, and Staff Role.',
@@ -926,15 +923,15 @@ export class SetupWizardHandler implements InteractionHandler {
       return;
     }
 
-    // Check if this is an edit (has existing panel ID) or new panel
+    
     const isEdit = !!data.id && data.id.startsWith('panel:');
     let panelId = isEdit ? data.id : await client.db.generatePanelId();
 
-    // Create complete panel data
+    
     const panel: PanelData = {
       id: panelId!,
       type: 'panel',
-      guildId: interaction.guildId || undefined, // Store guild ID
+      guildId: interaction.guildId || undefined, 
       name: data.name,
       channel: data.channel,
       openCategory: data.openCategory,
@@ -959,13 +956,13 @@ export class SetupWizardHandler implements InteractionHandler {
       staffPermissions: data.staffPermissions || [],
     };
 
-    // Save panel
+    
     await client.db.save(panel);
 
-    // Delete autosave
+    
     await client.db.deleteAutosave(userId);
 
-    // Deploy or update panel message
+    
     try {
       if (!panel.channel) {
         throw new Error('Panel channel is not defined');
@@ -973,7 +970,7 @@ export class SetupWizardHandler implements InteractionHandler {
 
       const channel = await client.channels.fetch(panel.channel);
       if (channel?.isTextBased() && 'send' in channel) {
-        // Create simple embed with panel description
+        
         const embed = new EmbedBuilder()
           .setTitle(`${panel.emoji} ${panel.name}`)
           .setDescription(panel.description)
@@ -981,7 +978,7 @@ export class SetupWizardHandler implements InteractionHandler {
           .setFooter({ text: 'Click the button below to open a ticket' })
           .setTimestamp();
 
-        // Map color string to ButtonStyle
+        
         const colorMap: Record<string, ButtonStyle> = {
           'Primary': ButtonStyle.Primary,
           'Secondary': ButtonStyle.Secondary,
@@ -995,23 +992,23 @@ export class SetupWizardHandler implements InteractionHandler {
           .setLabel(panel.label)
           .setStyle(buttonStyle);
 
-        // Safely set emoji using the helper function
+        
         this.safeSetEmoji(ticketButton, panel.emoji);
 
         const button = new ActionRowBuilder<ButtonBuilder>().addComponents(ticketButton);
 
-        // If editing and message exists, try to edit it, otherwise send new message
+        
         if (isEdit && panel.messageId) {
           try {
             const message = await channel.messages.fetch(panel.messageId);
             await message.edit({ embeds: [embed], components: [button] });
           } catch {
-            // Message not found, ask user if they want to send a new one
+            
             await this.askToSendNewMessage(interaction, client, userId, panel);
             return;
           }
         } else {
-          // New panel, send message
+          
           const message = await channel.send({ embeds: [embed], components: [button] });
           panel.messageId = message.id;
           await client.db.save(panel);
@@ -1317,7 +1314,7 @@ export class SetupWizardHandler implements InteractionHandler {
       .setRequired(true)
       .setMaxLength(80);
 
-    // Auto-load current value if editing
+    
     if (data.label) {
       labelInput.setValue(data.label);
     }
@@ -1328,7 +1325,7 @@ export class SetupWizardHandler implements InteractionHandler {
   }
 
   async showEmojiModal(interaction: ButtonInteraction, client: BotClient, userId: string): Promise<void> {
-    // Instead of modal, send an embed asking for emoji
+    
     const backButton = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
         .setCustomId('wizard:cancel-emoji:setup')
@@ -1342,7 +1339,7 @@ export class SetupWizardHandler implements InteractionHandler {
       components: [backButton]
     });
 
-    // Check if channel is a TextChannel
+    
     if (!interaction.channel || !(interaction.channel instanceof TextChannel)) {
       await interaction.editReply({
         content: '<:tcet_cross:1437995480754946178> This command can only be used in a text channel.',
@@ -1352,7 +1349,7 @@ export class SetupWizardHandler implements InteractionHandler {
       return;
     }
 
-    // Create message collector
+    
     const filter = (m: Message) => m.author.id === userId;
     const collector = interaction.channel.createMessageCollector({
       filter,
@@ -1375,10 +1372,10 @@ export class SetupWizardHandler implements InteractionHandler {
     collector.on('collect', async (msg: Message) => {
       const emoji = msg.content.trim();
 
-      // Delete user's message
+      
       await msg.delete().catch(() => { });
 
-      // Check if it's a custom emoji
+      
       const customEmojiMatch = emoji.match(/^<a?:(\w+):(\d+)>$/);
 
       if (customEmojiMatch) {
@@ -1386,12 +1383,12 @@ export class SetupWizardHandler implements InteractionHandler {
         const emojiName = customEmojiMatch[1];
         const isAnimated = emoji.startsWith('<a:');
 
-        // Check if emoji is from this server
+        
         const guild = msg.guild;
         const emojiExists = guild?.emojis.cache.has(emojiId);
 
         if (!emojiExists) {
-          // Emoji is from another server - ask to steal it
+          
           const stealEmbed = new EmbedBuilder()
             .setTitle('⚠️ External Emoji Detected')
             .setDescription(`The emoji ${emoji} is not from this server.\n\nI need to upload it to this server to use it. Would you like me to continue?`)
@@ -1417,12 +1414,12 @@ export class SetupWizardHandler implements InteractionHandler {
         }
       }
 
-      // Emoji is valid (unicode or from this server)
+      
       const data = await this.getOrCreateAutosave(client, userId);
       data.emoji = emoji;
       this.saveAutosave(client, userId, data);
 
-      // Show button menu again
+      
       await this.showButtonMenu({ editReply: interaction.editReply.bind(interaction) }, client, userId);
     });
 
@@ -1443,10 +1440,10 @@ export class SetupWizardHandler implements InteractionHandler {
     const isAnimated = parts[4] === 'true';
 
     try {
-      // Fetch the emoji URL
+      
       const emojiUrl = `https://cdn.discordapp.com/emojis/${emojiId}.${isAnimated ? 'gif' : 'png'}`;
 
-      // Upload emoji to server
+      
       const guild = interaction.guild;
       if (!guild) {
         await interaction.editReply({
@@ -1462,19 +1459,19 @@ export class SetupWizardHandler implements InteractionHandler {
         name: emojiName,
       });
 
-      // Save emoji to autosave
+      
       const data = await this.getOrCreateAutosave(client, userId);
       data.emoji = `<${isAnimated ? 'a' : ''}:${createdEmoji.name}:${createdEmoji.id}>`;
       this.saveAutosave(client, userId, data);
 
-      // Show success message and go back to button menu
+      
       await interaction.editReply({
         content: `<:tcet_tick:1437995479567962184> Emoji **:${emojiName}:** uploaded successfully!`,
         embeds: [],
         components: [],
       });
 
-      // Wait a moment then show button menu
+      
       setTimeout(async () => {
         await this.showButtonMenu(interaction, client, userId);
       }, 1500);
@@ -1495,7 +1492,7 @@ export class SetupWizardHandler implements InteractionHandler {
       components: [],
     });
 
-    // Wait a moment then show button menu
+    
     setTimeout(async () => {
       await this.showButtonMenu(interaction, client, userId);
     }, 1000);
@@ -1521,7 +1518,7 @@ export class SetupWizardHandler implements InteractionHandler {
         .setStyle(ButtonStyle.Danger)
     );
 
-    // Save panel temporarily in autosave for later use
+    
     const autosave = await client.db.getAutosave(userId);
     if (autosave) {
       autosave.tempPanel = panel;
@@ -1564,7 +1561,7 @@ export class SetupWizardHandler implements InteractionHandler {
           .setFooter({ text: 'Click the button below to open a ticket' })
           .setTimestamp();
 
-        // Map color string to ButtonStyle
+        
         const colorMap = {
           'Primary': ButtonStyle.Primary,
           'Secondary': ButtonStyle.Secondary,
@@ -1585,7 +1582,7 @@ export class SetupWizardHandler implements InteractionHandler {
         panel.messageId = message.id;
         await client.db.save(panel);
 
-        // Clean up autosave
+        
         await client.db.deleteAutosave(userId);
 
         await interaction.editReply({
@@ -1614,9 +1611,9 @@ export class SetupWizardHandler implements InteractionHandler {
     });
   }
 
-  // ============================================
-  // PERMISSIONS MODULE
-  // ============================================
+  
+  
+  
 
   private getAllChannelPermissions(): { label: string; value: string; description: string }[] {
     return [
@@ -1743,7 +1740,7 @@ export class SetupWizardHandler implements InteractionHandler {
       .setFooter({ text: 'Select from the dropdown below' })
       .setTimestamp();
 
-    // Create options with checkmarks for selected permissions
+    
     const options = allPermissions.map(perm => ({
       label: (currentPermissions.includes(perm.value) ? '✅ ' : '') + perm.label,
       value: perm.value,
@@ -1791,7 +1788,7 @@ export class SetupWizardHandler implements InteractionHandler {
       .setFooter({ text: 'Select from the dropdown below' })
       .setTimestamp();
 
-    // Create options with checkmarks for selected permissions
+    
     const options = allPermissions.map(perm => ({
       label: (currentPermissions.includes(perm.value) ? '✅ ' : '') + perm.label,
       value: perm.value,
@@ -1891,7 +1888,7 @@ export class SetupWizardHandler implements InteractionHandler {
   }
 
   async applyUserSuggestions(interaction: any, client: BotClient, userId: string): Promise<void> {
-    // Ensure interaction is deferred
+    
     if (!interaction.deferred && !interaction.replied) {
       await interaction.deferUpdate().catch(() => { });
     }
@@ -1904,7 +1901,7 @@ export class SetupWizardHandler implements InteractionHandler {
   }
 
   async applyStaffSuggestions(interaction: any, client: BotClient, userId: string): Promise<void> {
-    // Ensure interaction is deferred
+    
     if (!interaction.deferred && !interaction.replied) {
       await interaction.deferUpdate().catch(() => { });
     }
@@ -1917,7 +1914,7 @@ export class SetupWizardHandler implements InteractionHandler {
   }
 
   async applyAllSuggestions(interaction: any, client: BotClient, userId: string): Promise<void> {
-    // Ensure interaction is deferred
+    
     if (!interaction.deferred && !interaction.replied) {
       await interaction.deferUpdate().catch(() => { });
     }

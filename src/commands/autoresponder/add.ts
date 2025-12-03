@@ -1,6 +1,4 @@
-/**
- * Add Auto-Responder Subcommand
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -19,7 +17,7 @@ export async function handleAdd(
 ): Promise<void> {
   const trigger = interaction.options.getString('trigger', true);
 
-  // Create modal for response input
+  
   const modal = new ModalBuilder()
     .setCustomId(`ar_add_${trigger}_${Date.now()}`)
     .setTitle('Add Auto-Responder');
@@ -37,16 +35,16 @@ export async function handleAdd(
 
   await interaction.showModal(modal);
 
-  // Wait for modal submission
+  
   try {
     const submitted = await interaction.awaitModalSubmit({
-      time: 300000, // 5 minutes
+      time: 300000, 
       filter: i => i.customId.startsWith('ar_add_') && i.user.id === interaction.user.id,
     });
 
     const response = submitted.fields.getTextInputValue('response');
 
-    // Add auto-responder
+    
     await services.autoResponderService.addAutoResponder(
       interaction.guildId!,
       trigger,
@@ -67,7 +65,7 @@ export async function handleAdd(
 
     await submitted.reply({ embeds: [embed], ephemeral: true });
   } catch (error) {
-    // Modal timed out or error occurred
+    
     console.error('Error in add auto-responder:', error);
   }
 }

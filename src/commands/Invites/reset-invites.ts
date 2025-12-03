@@ -7,6 +7,7 @@ import {
 } from 'discord.js';
 import { SlashCommand, PrefixCommand } from '../../types';
 import { DatabaseManager } from '../../utils/DatabaseManager';
+import { createSuccessEmbed, createErrorEmbed, COLORS, ICONS } from '../../utils/embeds';
 
 const slashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
@@ -17,7 +18,7 @@ const slashCommand: SlashCommand = {
         .setDescription('The user to reset invites for')
         .setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-  category: 'invites_welcome',
+  category: 'Invites',
   syntax: '/reset-invites <user>',
   permission: 'Administrator',
   example: '/reset-invites @Tai',
@@ -27,45 +28,42 @@ const slashCommand: SlashCommand = {
     const guild = interaction.guild;
 
     if (!guild) {
-      await interaction.reply({ content: 'This command can only be used in a server!', ephemeral: true });
+      await interaction.reply({ embeds: [createErrorEmbed('This command can only be used in a server!')], ephemeral: true });
       return;
     }
 
     try {
       const db = DatabaseManager.getInstance();
 
-      // Get current invite counts before resetting
+      
       const currentNormalInvites = await db.getUserInviteCount(guild.id, targetUser.id);
       const currentBonusInvites = await db.getUserBonusInvites(guild.id, targetUser.id);
       const currentLeftInvites = await db.getUserLeftCount(guild.id, targetUser.id);
       const currentFakeInvites = await db.getUserFakeCount(guild.id, targetUser.id);
 
-      // Reset all invites
+      
       const resetResult = await db.resetUserInvites(guild.id, targetUser.id);
 
-      const embed = new EmbedBuilder()
-        .setColor(0xFF0000)
-        .setTitle('🔄 Invites Reset Successfully')
-        .setDescription(
-          `All invites have been reset for ${targetUser.toString()}\n\n` +
-          `**User:** ${targetUser.username}\n` +
-          `**Previous Normal Invites:** ${currentNormalInvites}\n` +
-          `**Previous Bonus Invites:** ${currentBonusInvites}\n` +
-          `**Previous Left Invites:** ${currentLeftInvites}\n` +
-          `**Previous Fake Invites:** ${currentFakeInvites}\n` +
-          `**Total Reset:** ${resetResult.normalRemoved + resetResult.bonusRemoved}\n\n` +
-          `**Current Invites:** 0 (0 normal, 0 left, 0 fake, 0 bonus)\n` +
-          `**Reset By:** ${interaction.user.username}`
-        )
+      const embed = createSuccessEmbed(
+        `All invites have been reset for ${targetUser.toString()}\n\n` +
+        `**User:** ${targetUser.username}\n` +
+        `**Previous Normal Invites:** ${currentNormalInvites}\n` +
+        `**Previous Bonus Invites:** ${currentBonusInvites}\n` +
+        `**Previous Left Invites:** ${currentLeftInvites}\n` +
+        `**Previous Fake Invites:** ${currentFakeInvites}\n` +
+        `**Total Reset:** ${resetResult.normalRemoved + resetResult.bonusRemoved}\n\n` +
+        `**Current Invites:** 0 (0 normal, 0 left, 0 fake, 0 bonus)\n` +
+        `**Reset By:** ${interaction.user.username}`
+      )
+        .setTitle('Invites Reset Successfully')
         .setThumbnail(targetUser.displayAvatarURL())
-        .setTimestamp()
         .setFooter({ text: 'Invite Management' });
 
       await interaction.reply({ embeds: [embed] });
     } catch (error) {
       console.error('Error resetting invites:', error);
       await interaction.reply({
-        content: 'An error occurred while resetting invites.',
+        embeds: [createErrorEmbed('An error occurred while resetting invites.')],
         ephemeral: true
       });
     }
@@ -83,17 +81,17 @@ const prefixCommand: PrefixCommand = {
   async execute(message: Message, args: string[]): Promise<void> {
     const guild = message.guild;
     if (!guild) {
-      await message.reply('This command can only be used in a server!');
+      await message.reply({ embeds: [createErrorEmbed('This command can only be used in a server!')] });
       return;
     }
 
     if (!message.member?.permissions.has(PermissionFlagsBits.Administrator)) {
-      await message.reply('❌ You need Administrator permissions to use this command!');
+      await message.reply({ embeds: [createErrorEmbed('You need Administrator permissions to use this command!')] });
       return;
     }
 
     if (args.length === 0) {
-      await message.reply('Please provide a user! Usage: `reset-invites <user>`');
+      await message.reply({ embeds: [createErrorEmbed('Please provide a user! Usage: `reset-invites <user>`')] });
       return;
     }
 
@@ -103,43 +101,40 @@ const prefixCommand: PrefixCommand = {
     try {
       const member = await guild.members.fetch(userId).catch(() => null);
       if (!member) {
-        await message.reply('User not found in this server!');
+        await message.reply({ embeds: [createErrorEmbed('User not found in this server!')] });
         return;
       }
 
       const db = DatabaseManager.getInstance();
 
-      // Get current invite counts before resetting
+      
       const currentNormalInvites = await db.getUserInviteCount(guild.id, member.id);
       const currentBonusInvites = await db.getUserBonusInvites(guild.id, member.id);
       const currentLeftInvites = await db.getUserLeftCount(guild.id, member.id);
       const currentFakeInvites = await db.getUserFakeCount(guild.id, member.id);
 
-      // Reset all invites
+      
       const resetResult = await db.resetUserInvites(guild.id, member.id);
 
-      const embed = new EmbedBuilder()
-        .setColor(0xFF0000)
-        .setTitle('🔄 Invites Reset Successfully')
-        .setDescription(
-          `All invites have been reset for ${member.toString()}\n\n` +
-          `**User:** ${member.user.username}\n` +
-          `**Previous Normal Invites:** ${currentNormalInvites}\n` +
-          `**Previous Bonus Invites:** ${currentBonusInvites}\n` +
-          `**Previous Left Invites:** ${currentLeftInvites}\n` +
-          `**Previous Fake Invites:** ${currentFakeInvites}\n` +
-          `**Total Reset:** ${resetResult.normalRemoved + resetResult.bonusRemoved}\n\n` +
-          `**Current Invites:** 0 (0 normal, 0 left, 0 fake, 0 bonus)\n` +
-          `**Reset By:** ${message.author.username}`
-        )
+      const embed = createSuccessEmbed(
+        `All invites have been reset for ${member.toString()}\n\n` +
+        `**User:** ${member.user.username}\n` +
+        `**Previous Normal Invites:** ${currentNormalInvites}\n` +
+        `**Previous Bonus Invites:** ${currentBonusInvites}\n` +
+        `**Previous Left Invites:** ${currentLeftInvites}\n` +
+        `**Previous Fake Invites:** ${currentFakeInvites}\n` +
+        `**Total Reset:** ${resetResult.normalRemoved + resetResult.bonusRemoved}\n\n` +
+        `**Current Invites:** 0 (0 normal, 0 left, 0 fake, 0 bonus)\n` +
+        `**Reset By:** ${message.author.username}`
+      )
+        .setTitle('Invites Reset Successfully')
         .setThumbnail(member.user.displayAvatarURL())
-        .setTimestamp()
         .setFooter({ text: 'Invite Management' });
 
       await message.reply({ embeds: [embed] });
     } catch (error) {
       console.error('Error resetting invites:', error);
-      await message.reply('An error occurred while resetting invites.');
+      await message.reply({ embeds: [createErrorEmbed('An error occurred while resetting invites.')] });
     }
   },
 };

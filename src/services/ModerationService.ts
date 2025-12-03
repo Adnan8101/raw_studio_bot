@@ -1,6 +1,4 @@
-/**
- * ModerationService - Handles moderation actions like warn, mute, quarantine
- */
+
 
 import { PrismaClient } from '@prisma/client';
 
@@ -21,9 +19,7 @@ export interface QuarantineConfigData {
 export class ModerationService {
   constructor(private prisma: PrismaClient) {}
 
-  /**
-   * Add a warning to a user
-   */
+  
   async addWarn(guildId: string, userId: string, moderatorId: string, reason?: string): Promise<WarnEntry> {
     const warn = await this.prisma.warn.create({
       data: {
@@ -44,9 +40,7 @@ export class ModerationService {
     };
   }
 
-  /**
-   * Get all warnings for a user in a guild
-   */
+  
   async getWarns(guildId: string, userId: string): Promise<WarnEntry[]> {
     const warns = await this.prisma.warn.findMany({
       where: { guildId, userId },
@@ -63,18 +57,14 @@ export class ModerationService {
     }));
   }
 
-  /**
-   * Get total warn count for a user
-   */
+  
   async getWarnCount(guildId: string, userId: string): Promise<number> {
     return await this.prisma.warn.count({
       where: { guildId, userId },
     });
   }
 
-  /**
-   * Remove a specific warning
-   */
+  
   async removeWarn(warnId: string): Promise<boolean> {
     try {
       await this.prisma.warn.delete({
@@ -86,9 +76,7 @@ export class ModerationService {
     }
   }
 
-  /**
-   * Clear all warnings for a user
-   */
+  
   async clearWarns(guildId: string, userId: string): Promise<number> {
     const result = await this.prisma.warn.deleteMany({
       where: { guildId, userId },
@@ -96,9 +84,7 @@ export class ModerationService {
     return result.count;
   }
 
-  /**
-   * Setup quarantine configuration for a guild
-   */
+  
   async setupQuarantine(guildId: string, roleId: string, accessChannelId: string): Promise<void> {
     await this.prisma.quarantineConfig.upsert({
       where: { guildId },
@@ -114,9 +100,7 @@ export class ModerationService {
     });
   }
 
-  /**
-   * Get quarantine configuration for a guild
-   */
+  
   async getQuarantineConfig(guildId: string): Promise<QuarantineConfigData | null> {
     const config = await this.prisma.quarantineConfig.findUnique({
       where: { guildId },
@@ -130,9 +114,7 @@ export class ModerationService {
     };
   }
 
-  /**
-   * Remove quarantine configuration
-   */
+  
   async removeQuarantineConfig(guildId: string): Promise<boolean> {
     try {
       await this.prisma.quarantineConfig.delete({

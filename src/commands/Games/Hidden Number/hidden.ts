@@ -54,7 +54,7 @@ export const handleHiddenNumberCommand = async (interaction: ChatInputCommandInt
             const channel = options.getChannel('channel') || interaction.channel;
 
             const manager = getHiddenNumberGameManager(interaction.client);
-            // startGame handles the reply
+            
             const success = await manager.startGame(interaction, difficulty, time, channel);
 
             if (!success) {
@@ -62,7 +62,7 @@ export const handleHiddenNumberCommand = async (interaction: ChatInputCommandInt
             }
         } else if (subcommand === 'end') {
             const manager = getHiddenNumberGameManager(interaction.client);
-            // stopGame handles the reply if successful
+            
             const success = await manager.stopGame(interaction);
 
             if (!success) {

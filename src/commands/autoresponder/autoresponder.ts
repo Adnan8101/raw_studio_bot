@@ -1,6 +1,4 @@
-/**
- * Auto-Responder Command - /autoresponder add, list, edit, delete, toggle
- */
+
 
 import {
   ChatInputCommandInteraction,

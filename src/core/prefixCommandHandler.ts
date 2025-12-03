@@ -2,33 +2,31 @@ import { Message, PermissionFlagsBits, EmbedBuilder } from 'discord.js';
 import { BotClient } from './client';
 
 export class PrefixCommandHandler {
-  /**
-   * Handle prefix commands from messages
-   */
+  
   async handleMessage(message: Message, client: BotClient): Promise<void> {
-    // Ignore bots
+    
     if (message.author.bot) return;
 
-    // Ignore DMs
+    
     if (!message.guild) return;
 
-    // Get guild-specific prefix (now cached)
+    
     const prefix = await client.db.getPrefix(message.guild.id);
 
-    // Check if message starts with prefix
+    
     if (!message.content.startsWith(prefix)) return;
 
-    // Parse command and args
+    
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const commandName = args.shift()?.toLowerCase();
 
     if (!commandName) return;
 
-    // Get member for permission checks
+    
     const member = message.member;
     if (!member) return;
 
-    // Add immediate reaction for instant feedback
+    
     const reactionPromise = message.react('⏳').catch(() => { });
 
     try {
@@ -37,46 +35,46 @@ export class PrefixCommandHandler {
           await this.handleTicketCommand(message, args, client);
           break;
         case 'setprefix':
-          // Admin only
+          
           if (!member.permissions.has(PermissionFlagsBits.Administrator)) {
-            return; // Silently ignore non-admin
+            return; 
           }
           await this.handleSetPrefix(message, args, client);
           break;
         case 'ping':
-          // Admin only
+          
           if (!member.permissions.has(PermissionFlagsBits.Administrator)) {
-            return; // Silently ignore non-admin
+            return; 
           }
           await this.handlePing(message, client);
           break;
         case 'about':
-          // Admin only
+          
           if (!member.permissions.has(PermissionFlagsBits.Administrator)) {
-            return; // Silently ignore non-admin
+            return; 
           }
           await this.handleAbout(message, client);
           break;
         case 'status':
-          // Admin only
+          
           if (!member.permissions.has(PermissionFlagsBits.Administrator)) {
-            return; // Silently ignore non-admin
+            return; 
           }
           await this.handleStatus(message, client);
           break;
         case 'help':
-          // Admin only
+          
           if (!member.permissions.has(PermissionFlagsBits.Administrator)) {
-            return; // Silently ignore non-admin
+            return; 
           }
           await this.handleHelp(message, client, prefix);
           break;
         default:
-          // Unknown command, ignore
+          
           break;
       }
 
-      // Remove hourglass reaction after processing
+      
       await reactionPromise.then(() => message.reactions.cache.get('⏳')?.users.remove(client.user?.id).catch(() => { }));
     } catch (error) {
       await message.reply({
@@ -85,25 +83,23 @@ export class PrefixCommandHandler {
     }
   }
 
-  /**
-   * Handle ticket command
-   */
+  
   private async handleTicketCommand(message: Message, args: string[], client: BotClient): Promise<void> {
     const subcommand = args[0]?.toLowerCase();
     const subcommand2 = args[1]?.toLowerCase();
 
-    // Check permissions for most commands
+    
     const member = message.member;
     if (!member) return;
 
     const hasPerms = member.permissions.has(PermissionFlagsBits.ManageChannels);
     const isAdmin = member.permissions.has(PermissionFlagsBits.Administrator);
 
-    // Check if it's a panel command (ticket panel setup/edit/delete/list)
+    
     if (subcommand === 'panel') {
-      // Panel commands require admin
+      
       if (!isAdmin) {
-        // Silently ignore non-admin messages for panel commands
+        
         return;
       }
 
@@ -159,7 +155,7 @@ export class PrefixCommandHandler {
           await message.reply('<:tcet_cross:1437995480754946178> You need **Manage Channels** permission to use this command.');
           return;
         }
-        // Check if in ticket channel
+        
         const tickets = await client.db.getAllTickets();
         const isTicketChannel = tickets.some(t => t.channelId === message.channel.id);
         if (!isTicketChannel) {
@@ -174,14 +170,12 @@ export class PrefixCommandHandler {
     }
   }
 
-  /**
-   * Handle ticket close
-   */
+  
   private async handleTicketClose(message: Message, client: BotClient): Promise<void> {
     const channel = message.channel;
     if (!channel.isTextBased()) return;
 
-    // Find ticket
+    
     const tickets = await client.db.getAllTickets();
     const ticket = tickets.find(t => t.channelId === channel.id);
 
@@ -195,11 +189,11 @@ export class PrefixCommandHandler {
       return;
     }
 
-    // Import and use TicketHandler
+    
     const { TicketHandler } = await import('../modules/ticket/ticketHandler');
     const handler = new TicketHandler();
 
-    // Create a pseudo-interaction object
+    
     const pseudoInteraction = {
       user: message.author,
       member: message.member,
@@ -216,9 +210,7 @@ export class PrefixCommandHandler {
     await handler.closeTicket(pseudoInteraction, client, ticket.id);
   }
 
-  /**
-   * Handle ticket reopen
-   */
+  
   private async handleTicketReopen(message: Message, client: BotClient): Promise<void> {
     const channel = message.channel;
     if (!channel.isTextBased()) return;
@@ -255,9 +247,7 @@ export class PrefixCommandHandler {
     await handler.reopenTicket(pseudoInteraction, client, ticket.id);
   }
 
-  /**
-   * Handle ticket claim
-   */
+  
   private async handleTicketClaim(message: Message, client: BotClient): Promise<void> {
     const channel = message.channel;
     if (!channel.isTextBased()) return;
@@ -289,9 +279,7 @@ export class PrefixCommandHandler {
     await handler.claimTicket(pseudoInteraction, client, ticket.id);
   }
 
-  /**
-   * Handle ticket unclaim
-   */
+  
   private async handleTicketUnclaim(message: Message, client: BotClient): Promise<void> {
     const channel = message.channel;
     if (!channel.isTextBased()) return;
@@ -323,9 +311,7 @@ export class PrefixCommandHandler {
     await handler.unclaimTicket(pseudoInteraction, client, ticket.id);
   }
 
-  /**
-   * Handle ticket rename
-   */
+  
   private async handleTicketRename(message: Message, args: string[], client: BotClient): Promise<void> {
     if (args.length === 0) {
       await message.reply('<:tcet_cross:1437995480754946178> Please provide a new name for the ticket.');
@@ -345,9 +331,7 @@ export class PrefixCommandHandler {
     }
   }
 
-  /**
-   * Handle ticket delete
-   */
+  
   private async handleTicketDelete(message: Message, client: BotClient): Promise<void> {
     const channel = message.channel;
     const tickets = await client.db.getAllTickets();
@@ -368,9 +352,7 @@ export class PrefixCommandHandler {
     }, 3000);
   }
 
-  /**
-   * Handle ticket add user
-   */
+  
   private async handleTicketAdd(message: Message, args: string[], client: BotClient): Promise<void> {
     if (args.length === 0 || !message.mentions.users.first()) {
       await message.reply('<:tcet_cross:1437995480754946178> Please mention a user to add to the ticket.');
@@ -398,9 +380,7 @@ export class PrefixCommandHandler {
     }
   }
 
-  /**
-   * Handle setprefix command
-   */
+  
   private async handleSetPrefix(message: Message, args: string[], client: BotClient): Promise<void> {
     const member = message.member;
     if (!member?.permissions.has(PermissionFlagsBits.ManageGuild)) {
@@ -424,9 +404,7 @@ export class PrefixCommandHandler {
     await message.reply(`<:tcet_tick:1437995479567962184> Prefix changed to \`${newPrefix}\`\n\nExample: \`${newPrefix}ticket close\``);
   }
 
-  /**
-   * Handle ping command
-   */
+  
   private async handlePing(message: Message, client: BotClient): Promise<void> {
     const sent = await message.reply('🏓 Pinging...');
     const latency = sent.createdTimestamp - message.createdTimestamp;
@@ -434,9 +412,7 @@ export class PrefixCommandHandler {
     await sent.edit(`🏓 Pong!\n- Latency: ${latency}ms\n- API Ping: ${apiPing}ms`);
   }
 
-  /**
-   * Handle about command
-   */
+  
   private async handleAbout(message: Message, client: BotClient): Promise<void> {
     const embed = new EmbedBuilder()
       .setTitle(`<:module:1437997093753983038> ${client.user?.username || 'Ticket Bot'} 2.0`)
@@ -453,16 +429,14 @@ export class PrefixCommandHandler {
     await message.reply({ embeds: [embed] });
   }
 
-  /**
-   * Handle status command
-   */
+  
   private async handleStatus(message: Message, client: BotClient): Promise<void> {
-    // Filter by current guild
+    
     const guildId = message.guildId || undefined;
     const panels = await client.db.getAllPanels(guildId);
     const tickets = await client.db.getAllTickets();
 
-    // Filter tickets by guild (match panels from this guild)
+    
     const guildPanelIds = new Set(panels.map(p => p.id));
     const guildTickets = tickets.filter(t => guildPanelIds.has(t.panelId));
     const openTickets = guildTickets.filter(t => t.state === 'open').length;
@@ -485,9 +459,7 @@ export class PrefixCommandHandler {
     await message.reply({ embeds: [embed] });
   }
 
-  /**
-   * Handle purge command
-   */
+  
   private async handleHelp(message: Message, client: BotClient, prefix: string): Promise<void> {
     const embed = new EmbedBuilder()
       .setTitle('<:module:1437997093753983038> Command Help')

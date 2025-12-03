@@ -2,6 +2,7 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { GiveawayManager } from '../../services/GiveawayManager';
 import { createSuccessEmbed, createErrorEmbed } from '../../utils/embedHelpers';
+import { PrefixCommand } from '../../types';
 
 export const category = 'giveaways';
 
@@ -28,3 +29,31 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         await interaction.editReply({ embeds: [createErrorEmbed('Failed to reroll giveaway (maybe no valid participants).')] });
     }
 }
+
+export const prefixExecute = async (interaction: any) => {
+    const args = interaction.args;
+    if (args.length < 1) {
+        await interaction.reply({ embeds: [createErrorEmbed('Usage: `!greroll <message_id>`')] });
+        return;
+    }
+
+    const messageId = args[0];
+    const manager = GiveawayManager.getInstance(interaction.client);
+
+    const winners = await manager.reroll(messageId);
+
+    if (winners.length > 0) {
+        await interaction.reply({ embeds: [createSuccessEmbed(`Giveaway rerolled. New Winner: ${winners.map((id: string) => `<@${id}>`).join(', ')}`)] });
+    } else {
+        await interaction.reply({ embeds: [createErrorEmbed('Failed to reroll giveaway (maybe no valid participants).')] });
+    }
+};
+
+export const prefixCommand: PrefixCommand = {
+    name: 'greroll',
+    description: 'Reroll a giveaway winner',
+    usage: 'greroll <message_id>',
+    aliases: ['gredo'],
+    permissions: [PermissionFlagsBits.ManageGuild],
+    execute: prefixExecute
+};

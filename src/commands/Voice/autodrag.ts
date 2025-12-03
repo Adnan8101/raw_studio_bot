@@ -29,7 +29,7 @@ export const prefixCommand = {
 };
 
 export async function execute(interaction: ChatInputCommandInteraction | any) {
-    // Check if it's a slash command or prefix command
+    
     const isSlash = interaction.isChatInputCommand?.();
     const db = DatabaseManager.getInstance();
 
@@ -52,14 +52,14 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
             return;
         }
     } else {
-        // Prefix command logic (!ad)
+        
         const message = interaction.message as Message;
         if (!message) return;
 
         member = message.member!;
         const content = message.content.trim();
         const args = content.split(/ +/);
-        args.shift(); // Remove command name
+        args.shift(); 
 
         if (args.length === 0 && !message.reference) {
             await interaction.reply({ embeds: [createErrorEmbed('Usage: !ad <user> [channel]')] });
@@ -69,7 +69,7 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
         let userArg: string | undefined;
         let channelArg: string | undefined;
 
-        // Check for reply first
+        
         if (message.reference && message.reference.messageId) {
             try {
                 const repliedMessage = await message.channel.messages.fetch(message.reference.messageId);
@@ -79,37 +79,37 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
             } catch (e) { }
         }
 
-        // Determine User and Channel args
+        
         if (targetUser) {
-            // If user found via reply, all args are channel
+            
             channelArg = args.join(' ');
         } else {
-            // No reply, first arg must be user
+            
             if (args.length > 0) {
                 userArg = args[0];
 
-                // Check if first arg is definitely a user (Mention or ID)
+                
                 const isId = userArg.match(/^\d{17,19}$/);
                 const isMention = userArg.match(/^<@!?(\d{17,19})>$/);
 
                 if (isId || isMention) {
-                    // It's a user
+                    
                     try {
                         const id = isId ? userArg : isMention![1];
                         const fetchedMember = await message.guild!.members.fetch(id);
                         targetUser = fetchedMember.user;
-                        args.shift(); // Consume user arg
+                        args.shift(); 
                         channelArg = args.join(' ');
                     } catch (e) { }
                 } else {
-                    // It's text. Could be user (fuzzy) or channel (if we missed reply?)
-                    // But we already checked reply. So it must be user (fuzzy).
+                    
+                    
                     try {
-                        // Try to fetch as user first
+                        
                         const fetchedMember = await message.guild!.members.fetch({ query: userArg, limit: 1 });
                         if (fetchedMember.size > 0) {
                             targetUser = fetchedMember.first()!.user;
-                            args.shift(); // Consume user arg
+                            args.shift(); 
                             channelArg = args.join(' ');
                         }
                     } catch (e) { }
@@ -122,7 +122,7 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
             return;
         }
 
-        // Resolve Channel
+        
         if (channelArg) {
             const resolved = await resolveChannel(channelArg, message.guild!);
             if (resolved) targetChannelId = resolved.id;
@@ -130,7 +130,7 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
             if (member.voice.channel) {
                 targetChannelId = member.voice.channelId!;
             } else {
-                // Ask for channel
+                
                 await interaction.reply({ content: 'Which voice channel should I drag them to?' });
                 try {
                     const channel = message.channel as any;
@@ -164,12 +164,12 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
         }
     }
 
-    // Logic for both
+    
     const targetMember = await interaction.guild?.members.fetch(targetUser.id);
     if (!targetMember) return;
 
     if (targetMember.voice.channel) {
-        // Move immediately
+        
         try {
             await targetMember.voice.setChannel(targetChannelId);
             const channel = interaction.guild?.channels.cache.get(targetChannelId);
@@ -187,7 +187,7 @@ export async function execute(interaction: ChatInputCommandInteraction | any) {
             }
         }
     } else {
-        // Set rule
+        
         await db.createAutoDragRule(interaction.guildId!, targetUser.id, targetChannelId!, interaction.user.id);
         const channel = interaction.guild?.channels.cache.get(targetChannelId!);
         const msg = `${CustomEmojis.TICK} I will drag ${targetUser} to **${channel?.name || 'the channel'}** when they join a voice channel.`;

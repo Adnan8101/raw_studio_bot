@@ -1,6 +1,4 @@
-/**
- * InviteService - Handles invite tracking with database persistence
- */
+
 
 import { Collection, Guild, Invite } from 'discord.js';
 import { prisma } from '../database/connect';
@@ -8,17 +6,15 @@ import { prisma } from '../database/connect';
 export class InviteService {
   constructor() { }
 
-  /**
-   * Cache all invites for a guild in the database
-   */
+  
   async cacheGuildInvites(guild: Guild): Promise<void> {
     try {
       const invites = await guild.invites.fetch();
 
-      // Delete old cache for this guild
+      
       await prisma.inviteCache.deleteMany({ where: { guildId: guild.id } });
 
-      // Insert new cache
+      
       const inviteData = invites.map(invite => ({
         guildId: guild.id,
         code: invite.code,
@@ -41,16 +37,12 @@ export class InviteService {
     }
   }
 
-  /**
-   * Update invite cache for a guild
-   */
+  
   async updateInviteCache(guild: Guild): Promise<void> {
     await this.cacheGuildInvites(guild);
   }
 
-  /**
-   * Find which invite was used by comparing old and new invite data
-   */
+  
   async findUsedInvite(guildId: string, newInvites: Collection<string, Invite>): Promise<{
     inviterId: string | null;
     inviterTag: string | null;
@@ -58,20 +50,20 @@ export class InviteService {
     joinType: 'invite' | 'vanity' | 'unknown' | 'oauth';
   }> {
     try {
-      // Get cached invites from database
+      
       const cachedInvites = await prisma.inviteCache.findMany({ where: { guildId } });
 
-      // Convert to map for easy lookup
+      
       const oldInvitesMap = new Map(
         cachedInvites.map(inv => [inv.code, inv])
       );
 
-      // Find invite with increased use count
+      
       for (const [code, newInvite] of newInvites) {
         const oldInvite = oldInvitesMap.get(code);
 
         if (oldInvite && newInvite.uses! > oldInvite.uses) {
-          // This invite was used!
+          
           return {
             inviterId: newInvite.inviter?.id || null,
             inviterTag: newInvite.inviter?.tag || null,
@@ -79,7 +71,7 @@ export class InviteService {
             joinType: code === newInvite.guild?.vanityURLCode ? 'vanity' : 'invite'
           };
         } else if (!oldInvite && newInvite.uses! > 0) {
-          // New invite that was immediately used (edge case)
+          
           return {
             inviterId: newInvite.inviter?.id || null,
             inviterTag: newInvite.inviter?.tag || null,
@@ -89,7 +81,7 @@ export class InviteService {
         }
       }
 
-      // Check for vanity URL
+      
       const guild = newInvites.first()?.guild;
       if (guild && 'vanityURLCode' in guild && guild.vanityURLCode) {
         const vanityInvite = newInvites.find(inv => inv.code === guild.vanityURLCode);
@@ -105,7 +97,7 @@ export class InviteService {
         }
       }
 
-      // Could be OAuth2 (bot add), widget, discovery, etc.
+      
       return {
         inviterId: null,
         inviterTag: null,
@@ -123,9 +115,7 @@ export class InviteService {
     }
   }
 
-  /**
-   * Store member join data
-   */
+  
   async storeMemberJoin(
     guildId: string,
     userId: string,
@@ -153,27 +143,21 @@ export class InviteService {
     });
   }
 
-  /**
-   * Get member join data
-   */
+  
   async getMemberJoinData(guildId: string, userId: string) {
     return await prisma.memberJoinData.findUnique({ where: { guildId_userId: { guildId, userId } } });
   }
 
-  /**
-   * Delete member join data (cleanup after leave)
-   */
+  
   async deleteMemberJoinData(guildId: string, userId: string): Promise<void> {
     try {
       await prisma.memberJoinData.delete({ where: { guildId_userId: { guildId, userId } } });
     } catch (error) {
-      // Ignore if not found
+      
     }
   }
 
-  /**
-   * Get total invites for a user in a guild (net invites = total - left - fake + bonus)
-   */
+  
   async getUserInviteCount(guildId: string, userId: string): Promise<number> {
     const tracker = await prisma.inviteTracker.findUnique({ where: { guildId_userId: { guildId, userId } } });
 
@@ -182,22 +166,38 @@ export class InviteService {
     return tracker.totalInvites - tracker.leftInvites - tracker.fakeInvites + tracker.bonusInvites;
   }
 
-  /**
-   * Increment invite count for a user (someone joined using their invite)
-   */
-  async incrementInvites(guildId: string, userId: string): Promise<number> {
+  
+  async incrementInvites(guild: Guild, userId: string): Promise<number> {
     const tracker = await prisma.inviteTracker.upsert({
-      where: { guildId_userId: { guildId, userId } },
+      where: { guildId_userId: { guildId: guild.id, userId } },
       update: { totalInvites: { increment: 1 } },
-      create: { guildId, userId, totalInvites: 1 }
+      create: { guildId: guild.id, userId, totalInvites: 1 }
     });
 
-    return tracker.totalInvites - tracker.leftInvites - tracker.fakeInvites + tracker.bonusInvites;
+    const totalInvites = tracker.totalInvites - tracker.leftInvites - tracker.fakeInvites + tracker.bonusInvites;
+
+    
+    try {
+      const roleReward = await prisma.inviteRole.findUnique({
+        where: { guildId_invites: { guildId: guild.id, invites: totalInvites } }
+      });
+
+      if (roleReward) {
+        const member = await guild.members.fetch(userId).catch(() => null);
+        if (member) {
+          await member.roles.add(roleReward.roleId).catch(err =>
+            console.error(`Failed to add invite role ${roleReward.roleId} to ${userId}:`, err)
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error checking/awarding invite role:', error);
+    }
+
+    return totalInvites;
   }
 
-  /**
-   * Decrement invite count when someone leaves (increment leftInvites)
-   */
+  
   async decrementInvites(guildId: string, userId: string): Promise<number> {
     const tracker = await prisma.inviteTracker.upsert({
       where: { guildId_userId: { guildId, userId } },
@@ -208,9 +208,7 @@ export class InviteService {
     return tracker.totalInvites - tracker.leftInvites - tracker.fakeInvites + tracker.bonusInvites;
   }
 
-  /**
-   * Get all members invited by a specific user
-   */
+  
   async getMembersInvitedBy(guildId: string, inviterId: string) {
     return await prisma.memberJoinData.findMany({
       where: {
@@ -221,9 +219,7 @@ export class InviteService {
     });
   }
 
-  /**
-   * Get invite tracker stats for a user
-   */
+  
   async getInviteStats(guildId: string, userId: string) {
     return await prisma.inviteTracker.findUnique({ where: { guildId_userId: { guildId, userId } } });
   }

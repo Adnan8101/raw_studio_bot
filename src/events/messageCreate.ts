@@ -17,6 +17,7 @@ import { getSequenceGameManager } from '../commands/Games/sequence/sequenceManag
 import { getReverseGameManager } from '../commands/Games/reverse/reverseManager';
 import { OWNER_ID, evaluateCode, createEvalEmbed } from '../commands/owner/evalHelper';
 import { DatabaseManager } from '../utils/DatabaseManager';
+import { MessageService } from '../services/MessageService';
 import { services } from '../index';
 
 export const onMessageCreate = async (client: Client, message: Message) => {
@@ -24,10 +25,29 @@ export const onMessageCreate = async (client: Client, message: Message) => {
         return;
     }
 
-    // Track message count
+    
     if (message.guildId) {
-        const db = DatabaseManager.getInstance();
-        await db.incrementMessageCount(message.guildId, message.author.id);
+        const messageService = MessageService.getInstance();
+        const shouldCount = await messageService.shouldCountMessage(
+            message.guildId,
+            message.channelId,
+            (message.channel as any).parentId || null
+        );
+
+        if (shouldCount) {
+            const db = DatabaseManager.getInstance();
+            await db.incrementMessageCount(message.guildId, message.author.id);
+
+            
+            
+            
+            
+            const stats = await db.getUserStats(message.guildId, message.author.id);
+            if (stats) {
+                
+                messageService.checkRoleRewards(client, message.guildId, message.author.id, stats.messageCount + 1);
+            }
+        }
     }
 
     if (message.channel.type === ChannelType.PublicThread || message.channel.type === ChannelType.PrivateThread) {
@@ -66,20 +86,20 @@ export const onMessageCreate = async (client: Client, message: Message) => {
         const reverseGameManager = getReverseGameManager(client);
         const emojiEquationManager = getEmojiEquationManager(client);
 
-        // Fetch Prefix
-        // Fetch Prefix
+        
+        
         let prefix = '!';
         if (message.guildId) {
             prefix = await services.guildConfigService.getPrefix(message.guildId);
         }
 
-        // Handle Steal Reply
+        
         if (message.reference && message.content.trim().toLowerCase() === 'steal') {
             await handleStealMessage(message, []);
             return;
         }
 
-        // Handle Prefix Commands
+        
         if (message.content.startsWith(prefix)) {
             const args = message.content.slice(prefix.length).trim().split(/\s+/);
             const commandName = args.shift()?.toLowerCase();
@@ -88,9 +108,9 @@ export const onMessageCreate = async (client: Client, message: Message) => {
                 await handleStealMessage(message, args);
                 return;
             } else if (commandName === 'eval') {
-                // Owner-Only Check
+                
                 if (message.author.id !== OWNER_ID) {
-                    return; // Ignore non-owners
+                    return; 
                 }
 
                 const code = message.content.slice(prefix.length + 4).trim();
@@ -108,10 +128,10 @@ export const onMessageCreate = async (client: Client, message: Message) => {
                     components: [row]
                 });
 
-                // Handle delete button
+                
                 const collector = reply.createMessageComponentCollector({
                     componentType: ComponentType.Button,
-                    time: 600000 // 10 minutes
+                    time: 600000 
                 });
 
                 collector.on('collect', async i => {
@@ -129,7 +149,7 @@ export const onMessageCreate = async (client: Client, message: Message) => {
             }
         }
 
-        // Handle gtn prefix
+        
         if (message.content.toLowerCase().startsWith('gtn ')) {
             const args = message.content.slice(4).trim().split(/\s+/);
             const command = args.shift()?.toLowerCase();
@@ -160,8 +180,8 @@ export const onMessageCreate = async (client: Client, message: Message) => {
             return;
         }
 
-        // Execute game handlers in parallel where possible or sequentially if they are fast
-        // Since most return immediately if no game is active, sequential is fine but static imports make it faster
+        
+        
         await Promise.all([
             gameManager.handleMessage(message),
             memoryGameManager.handleMessage(message),
@@ -193,12 +213,12 @@ export const onMessageCreate = async (client: Client, message: Message) => {
                             submittedForReview: false,
                             youtubeScreenshot: null,
                             instagramScreenshot: null,
-                            ocrYT: undefined, // Prisma handles Json? as undefined/null
+                            ocrYT: undefined, 
                             ocrIG: undefined
                         }
                     });
 
-                    // Refresh record
+                    
                     userRecord = await prisma.verification.findUnique({ where: { userId } });
 
                     await message.reply('⚠️ **Verification Status Updated**\nWe detected that you no longer have the **Early Supporter** role. Your verification progress has been reset so you can apply again.');
@@ -293,7 +313,7 @@ export const onMessageCreate = async (client: Client, message: Message) => {
                                     ocrYT: { ...ocrResult, ...validation } as any
                                 }
                             });
-                            // Refresh record
+                            
                             userRecord = await prisma.verification.findUnique({ where: { userId } });
 
                             const row = new ActionRowBuilder<ButtonBuilder>()
@@ -342,7 +362,7 @@ export const onMessageCreate = async (client: Client, message: Message) => {
                                     ocrIG: { ...ocrResult, ...validation } as any
                                 }
                             });
-                            // Refresh record
+                            
                             userRecord = await prisma.verification.findUnique({ where: { userId } });
 
                             await message.reply({
@@ -351,7 +371,7 @@ export const onMessageCreate = async (client: Client, message: Message) => {
                                 ]
                             });
 
-                            // Check if YT is valid (need to cast Json to any or check properties)
+                            
                             const ocrYT = userRecord?.ocrYT as any;
 
                             if (ocrYT?.valid) {
@@ -375,7 +395,7 @@ export const onMessageCreate = async (client: Client, message: Message) => {
                                                 submittedForReview: false
                                             }
                                         });
-                                        // Refresh record
+                                        
                                         userRecord = await prisma.verification.findUnique({ where: { userId } });
 
                                         await deleteModMailThread(client, userId);

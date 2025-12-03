@@ -22,10 +22,10 @@ export function createClient(): BotClient {
     ],
   }) as BotClient;
 
-  // Initialize PostgreSQL cloud database
+  
   client.db = new PostgresDB();
   
-  // Initialize commands collection
+  
   client.commands = new Collection();
 
   return client;

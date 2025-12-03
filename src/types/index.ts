@@ -1,8 +1,6 @@
-/**
- * Core type definitions for the Anti-Nuke system
- */
 
-// Action types protected by anti-nuke
+
+
 export enum ProtectionAction {
   BAN_MEMBERS = 'BAN_MEMBERS',
   KICK_MEMBERS = 'KICK_MEMBERS',
@@ -16,7 +14,7 @@ export enum ProtectionAction {
   PRUNE_MEMBERS = 'PRUNE_MEMBERS',
 }
 
-// Whitelist category (includes ALL for full bypass)
+
 export enum WhitelistCategory {
   BAN_MEMBERS = 'BAN_MEMBERS',
   KICK_MEMBERS = 'KICK_MEMBERS',
@@ -31,14 +29,14 @@ export enum WhitelistCategory {
   ALL = 'ALL',
 }
 
-// Punishment types
+
 export enum PunishmentType {
   BAN = 'ban',
   KICK = 'kick',
   TIMEOUT = 'timeout',
 }
 
-// Job states
+
 export enum JobState {
   CREATED = 'created',
   ACTIVE = 'active',
@@ -47,7 +45,7 @@ export enum JobState {
   RETRY = 'retry',
 }
 
-// Job types
+
 export enum JobType {
   RECOVERY = 'recovery',
   CASE_WRITE = 'case_write',
@@ -55,7 +53,7 @@ export enum JobType {
   CLEANUP = 'cleanup',
 }
 
-// Security event interface
+
 export interface SecurityEvent {
   guildId: string;
   userId: string;
@@ -66,28 +64,28 @@ export interface SecurityEvent {
   metadata?: Record<string, any>;
 }
 
-// Anti-nuke configuration
+
 export interface AntiNukeConfiguration {
   guildId: string;
   enabled: boolean;
   protections: ProtectionAction[];
 }
 
-// Limit configuration
+
 export interface LimitConfiguration {
   action: ProtectionAction;
   limitCount: number;
   windowMs: number;
 }
 
-// Punishment configuration
+
 export interface PunishmentConfiguration {
   action: ProtectionAction;
   punishment: PunishmentType;
   durationSeconds?: number;
 }
 
-// Whitelist entry
+
 export interface WhitelistEntry {
   targetId: string;
   isRole: boolean;
@@ -96,7 +94,7 @@ export interface WhitelistEntry {
   createdAt: Date;
 }
 
-// Moderation case
+
 export interface ModCase {
   caseNumber: number;
   guildId: string;
@@ -109,13 +107,13 @@ export interface ModCase {
   createdAt: Date;
 }
 
-// Recovery mode
+
 export enum RecoveryMode {
   PARTIAL = 'partial',
   FULL = 'full',
 }
 
-// Embed colors
+
 export const EmbedColors = {
   SUCCESS: 0x00ff00,
   ERROR: 0xff0000,
@@ -125,7 +123,7 @@ export const EmbedColors = {
   MODERATION: 0xffa500,
 } as const;
 
-// Dangerous permissions that trigger alerts
+
 export const DANGEROUS_PERMISSIONS = [
   'ADMINISTRATOR',
   'MANAGE_GUILD',
@@ -137,7 +135,7 @@ export const DANGEROUS_PERMISSIONS = [
   'MENTION_EVERYONE',
 ] as const;
 
-// Default limits
+
 export const DEFAULT_LIMITS = {
   BAN_MEMBERS: { count: 3, windowMs: 10000 },
   KICK_MEMBERS: { count: 5, windowMs: 10000 },
@@ -151,7 +149,7 @@ export const DEFAULT_LIMITS = {
   PRUNE_MEMBERS: { count: 1, windowMs: 60000 },
 } as const;
 
-// Command interfaces for dual slash/prefix support
+
 export interface SlashCommand {
   data: any;
   execute: (interaction: any, ...args: any[]) => Promise<void>;

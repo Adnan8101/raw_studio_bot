@@ -1,6 +1,4 @@
-/**
- * Help Command - Universal help system with category dropdown
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -41,7 +39,7 @@ export const slashCommand: SlashCommand = {
   }
 };
 
-// Comprehensive Category Configuration
+
 const categoryConfig: Record<string, { name: string; emoji: string; description: string }> = {
   antinuke: {
     name: 'Anti-Nuke',
@@ -137,18 +135,23 @@ const categoryConfig: Record<string, { name: string; emoji: string; description:
     name: 'Voice',
     emoji: '<:xieron_mic:1445793726755508486>',
     description: 'Voice Management'
+  },
+  messages: {
+    name: 'Messages',
+    emoji: '<:messages:1445818790574166160>',
+    description: 'Message Tracking System'
   }
 };
 
 function canRunCommand(command: any, member: GuildMember): boolean {
   const commandData = command.slashCommand || command;
 
-  // 1. Owner Check
+  
   if ((commandData.category || '').toLowerCase() === 'owner') {
     return member.id === OWNER_ID;
   }
 
-  // 2. Permission Check
+  
   if (commandData.data?.default_member_permissions) {
     const requiredPerms = BigInt(commandData.data.default_member_permissions);
     if (!member.permissions.has(requiredPerms)) {
@@ -163,20 +166,20 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   services: { guildConfigService: GuildConfigService; commands: Collection<string, any> }
 ) {
-  // 0. Defer immediately to show responsiveness
+  
   await interaction.deferReply();
 
   const prefix = await services.guildConfigService.getPrefix(interaction.guild!.id);
   const commands = services.commands;
   const specificCommand = interaction.options.getString('command');
 
-  // 1. Handle Specific Command Help
+  
   if (specificCommand) {
     const cmd = commands.get(specificCommand.toLowerCase()) ||
       commands.find((c: any) => c.prefixCommand?.aliases?.includes(specificCommand.toLowerCase()));
 
     if (cmd) {
-      // Check if user can run this command
+      
       if (!canRunCommand(cmd, interaction.member as GuildMember)) {
         await interaction.editReply({
           embeds: [createInfoEmbed('Permission Denied', 'You do not have permission to view or use this command.')]
@@ -197,12 +200,12 @@ export async function execute(
       await interaction.editReply({ embeds: [embed] });
       return;
     } else {
-      // Command not found logic...
+      
       const suggestions: string[] = [];
       const input = specificCommand.toLowerCase();
 
       commands.forEach((cmd: any) => {
-        // Filter suggestions by permission
+        
         if (!canRunCommand(cmd, interaction.member as GuildMember)) return;
 
         const cmdName = (cmd.data?.name || cmd.name).toLowerCase();
@@ -315,7 +318,7 @@ export async function execute(
     .setFooter({ text: 'Select a category from the dropdown below' })
     .setTimestamp();
 
-  // 4. Build Dropdown
+  
   const selectMenu = new StringSelectMenuBuilder()
     .setCustomId(`help_category_${interaction.user.id}`)
     .setPlaceholder('🔍 Select a category to view commands')
@@ -348,22 +351,22 @@ export async function execute(
     components: [row],
   });
 
-  // 5. Interaction Collector
+  
   const collector = response.createMessageComponentCollector({
     filter: i => i.user.id === interaction.user.id && i.customId === `help_category_${interaction.user.id}`,
-    time: 300000, // 5 minutes
+    time: 300000, 
     componentType: ComponentType.StringSelect,
   });
 
   collector.on('collect', async (i: StringSelectMenuInteraction) => {
     try {
-      // Defer update immediately to prevent "Unknown interaction" if processing takes time
+      
       try {
         if (!i.deferred && !i.replied) {
           await i.deferUpdate();
         }
       } catch (error) {
-        // Ignore if already acknowledged or unknown interaction
+        
         return;
       }
 
@@ -389,13 +392,13 @@ export async function execute(
       const embeds: EmbedBuilder[] = [];
       const chunkSize = 25;
 
-      // Flatten all commands in this category
+      
       let allCommandStrings: string[] = [];
       for (const cmd of categoryCommands) {
         allCommandStrings.push(...getCommandDisplayNames(cmd));
       }
 
-      // Sort alphabetically
+      
       allCommandStrings.sort();
 
       for (let j = 0; j < allCommandStrings.length; j += chunkSize) {
@@ -429,7 +432,7 @@ export async function execute(
       await i.editReply({ embeds: embeds, components: [row] });
     } catch (error) {
       console.error('Error in help interaction collector:', error);
-      // If we deferred but failed to edit, or failed to defer
+      
       try {
         if (!i.replied && !i.deferred) {
           await i.reply({ content: 'An error occurred.', flags: MessageFlags.Ephemeral });
@@ -437,7 +440,7 @@ export async function execute(
           await i.editReply({ content: 'An error occurred while navigating.' });
         }
       } catch (e) {
-        // Interaction dead
+        
       }
     }
   });

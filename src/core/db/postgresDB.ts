@@ -16,7 +16,7 @@ export interface CustomQuestion {
 export interface PanelData {
   id: string;
   type: 'panel';
-  guildId?: string; // Track which server this panel belongs to
+  guildId?: string; 
   name?: string;
   channel?: string;
   openCategory?: string;
@@ -30,9 +30,9 @@ export interface PanelData {
   embedColor?: string;
   description: string;
   openMessage: string;
-  questions: string[]; // Legacy support
+  questions: string[]; 
   customQuestions?: CustomQuestion[];
-  pendingQuestion?: string; // Temporarily store question before type selection
+  pendingQuestion?: string; 
   claimable: boolean;
   allowOwnerClose?: boolean;
   enabled: boolean;
@@ -40,7 +40,7 @@ export interface PanelData {
   ticketsCreated?: number;
   userPermissions?: string[];
   staffPermissions?: string[];
-  editChanges?: string[]; // Track changes during editing
+  editChanges?: string[]; 
 }
 
 export interface TicketData {
@@ -64,10 +64,10 @@ export interface AutosaveData {
   panelId?: string;
   data: Partial<PanelData>;
   tempPanel?: PanelData;
-  pendingQuestion?: string; // Temporarily store question before type selection
+  pendingQuestion?: string; 
   startedAt: string;
   embedColor?: string;
-  editChanges?: string[]; // Track changes during editing
+  editChanges?: string[]; 
 }
 
 export interface GuildConfig {
@@ -79,7 +79,7 @@ export interface GuildConfig {
 }
 
 export interface RoleAlias {
-  id: string; // roleId
+  id: string; 
   type: 'role_alias';
   guildId: string;
   alias: string;
@@ -92,10 +92,10 @@ class PostgresDB {
   private pool: Pool;
   private isConnected: boolean = false;
 
-  // Caching layer to reduce database queries
+  
   private prefixCache: Map<string, { prefix: string; cachedAt: number }> = new Map();
   private panelCache: Map<string, { panel: PanelData; cachedAt: number }> = new Map();
-  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  private readonly CACHE_TTL = 5 * 60 * 1000; 
 
   constructor(connectionString?: string) {
     const dbUrl = connectionString || process.env.DATABASE_URL;
@@ -104,7 +104,7 @@ class PostgresDB {
       throw new Error('DATABASE_URL environment variable is required for PostgreSQL connection');
     }
 
-    // Remove sslmode from connection string and handle SSL explicitly
+    
     const cleanUrl = dbUrl.replace(/[?&]sslmode=[^&]*/g, '');
 
     const isLocal = cleanUrl.includes('localhost') || cleanUrl.includes('127.0.0.1');
@@ -114,34 +114,32 @@ class PostgresDB {
       ssl: isLocal ? false : {
         rejectUnauthorized: false
       },
-      max: 20, // Maximum pool size
+      max: 20, 
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 30000, // Increased to 30 seconds for cloud databases
-      // Add keepalive settings for better connection stability
+      connectionTimeoutMillis: 30000, 
+      
       keepAlive: true,
       keepAliveInitialDelayMillis: 10000,
     });
 
-    // Add error handler for pool
+    
     this.pool.on('error', (err) => {
-      // Silent error handling
+      
     });
 
-    // Test connection and initialize (non-blocking)
+    
     this.initializeDatabase().catch(err => {
       console.error('Database initialization error:', err.message);
     });
 
-    // Warm up connection pool in background
+    
     this.warmupPool();
   }
 
-  /**
-   * Warm up connection pool by creating initial connections
-   */
+  
   private async warmupPool(): Promise<void> {
     try {
-      // Create 3 connections to warm up the pool
+      
       const warmupPromises = [];
       for (let i = 0; i < 3; i++) {
         warmupPromises.push(
@@ -198,13 +196,13 @@ class PostgresDB {
         this.isConnected = true;
         console.log('✅ Database tables initialized');
 
-        return; // Success, exit retry loop
+        return; 
 
       } catch (error: any) {
         lastError = error;
 
         if (attempt < retries) {
-          const waitTime = attempt * 2000; // Exponential backoff
+          const waitTime = attempt * 2000; 
           await new Promise(resolve => setTimeout(resolve, waitTime));
         }
       } finally {
@@ -215,20 +213,16 @@ class PostgresDB {
       }
     }
 
-    // All retries failed
+    
     throw lastError;
   }
 
-  /**
-   * Check if the database is connected
-   */
+  
   isConnectionReady(): boolean {
     return this.isConnected;
   }
 
-  /**
-   * Wait for database to be ready (with timeout)
-   */
+  
   async waitForConnection(timeoutMs: number = 30000): Promise<boolean> {
     const startTime = Date.now();
     while (!this.isConnected && Date.now() - startTime < timeoutMs) {
@@ -237,9 +231,7 @@ class PostgresDB {
     return this.isConnected;
   }
 
-  /**
-   * Save any data object to the database
-   */
+  
   async save<T extends StoredData>(data: T): Promise<void> {
     if (!this.isConnected) {
       const connected = await this.waitForConnection(5000);
@@ -265,9 +257,7 @@ class PostgresDB {
     }
   }
 
-  /**
-   * Get a specific object by ID
-   */
+  
   async get<T extends StoredData>(id: string): Promise<T | null> {
     if (!this.isConnected) {
       const connected = await this.waitForConnection(5000);
@@ -286,7 +276,7 @@ class PostgresDB {
       if (result.rows.length === 0) return null;
 
       const row = result.rows[0];
-      // data is already parsed as JSONB from PostgreSQL
+      
       return typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
     } catch (error: any) {
       throw error;
@@ -295,9 +285,7 @@ class PostgresDB {
     }
   }
 
-  /**
-   * Get all objects of a specific type
-   */
+  
   async getByType<T extends StoredData>(type: DataRow['type']): Promise<T[]> {
     const client = await this.pool.connect();
     try {
@@ -307,7 +295,7 @@ class PostgresDB {
       );
 
       return result.rows.map(row => {
-        // data is already parsed as JSONB from PostgreSQL
+        
         return typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
       });
     } catch (error: any) {
@@ -317,9 +305,7 @@ class PostgresDB {
     }
   }
 
-  /**
-   * Delete an object by ID
-   */
+  
   async delete(id: string): Promise<void> {
     const client = await this.pool.connect();
     try {
@@ -331,9 +317,7 @@ class PostgresDB {
     }
   }
 
-  /**
-   * Get all panels
-   */
+  
   async getAllPanels(guildId?: string): Promise<PanelData[]> {
     if (!guildId) {
       return this.getByType<PanelData>('panel');
@@ -341,7 +325,7 @@ class PostgresDB {
 
     const client = await this.pool.connect();
     try {
-      // Query panels that have guildId set to this guild
+      
       const result = await client.query(
         `SELECT * FROM data WHERE type = 'panel' AND data->>'guildId' = $1 ORDER BY "updatedAt" DESC`,
         [guildId]
@@ -351,23 +335,19 @@ class PostgresDB {
         return typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
       });
     } catch (error: any) {
-      // If query fails, return empty array
+      
       return [];
     } finally {
       client.release();
     }
   }
 
-  /**
-   * Get all tickets
-   */
+  
   async getAllTickets(): Promise<TicketData[]> {
     return this.getByType<TicketData>('ticket');
   }
 
-  /**
-   * Get tickets for a specific panel
-   */
+  
   async getTicketsByPanel(panelId: string): Promise<TicketData[]> {
     const client = await this.pool.connect();
     try {
@@ -387,9 +367,7 @@ class PostgresDB {
     }
   }
 
-  /**
-   * Get open tickets for a specific user and panel (optimized query)
-   */
+  
   async getOpenTicketsForUser(userId: string, panelId: string): Promise<TicketData[]> {
     const client = await this.pool.connect();
     try {
@@ -414,23 +392,17 @@ class PostgresDB {
     }
   }
 
-  /**
-   * Get autosave for a specific user
-   */
+  
   async getAutosave(userId: string): Promise<AutosaveData | null> {
     return this.get<AutosaveData>(`autosave:${userId}`);
   }
 
-  /**
-   * Delete autosave for a user
-   */
+  
   async deleteAutosave(userId: string): Promise<void> {
     await this.delete(`autosave:${userId}`);
   }
 
-  /**
-   * Generate a unique panel ID
-   */
+  
   async generatePanelId(): Promise<string> {
     const panels = await this.getAllPanels();
     const ids = panels.map(p => parseInt(p.id.split(':')[1]));
@@ -438,9 +410,7 @@ class PostgresDB {
     return `panel:${maxId + 1}`;
   }
 
-  /**
-   * Generate a unique ticket ID
-   */
+  
   async generateTicketId(): Promise<string> {
     const tickets = await this.getAllTickets();
     const ids = tickets.map(t => parseInt(t.id.split(':')[1]));
@@ -448,37 +418,27 @@ class PostgresDB {
     return `ticket:${maxId + 1}`;
   }
 
-  /**
-   * Close database connection pool
-   */
+  
   async close(): Promise<void> {
     await this.pool.end();
   }
 
-  /**
-   * Get pool instance for advanced queries
-   */
+  
   getPool(): Pool {
     return this.pool;
   }
 
-  /**
-   * Check if database is connected
-   */
+  
   isConnectionActive(): boolean {
     return this.isConnected;
   }
 
-  /**
-   * Get guild configuration
-   */
+  
   async getGuildConfig(guildId: string): Promise<GuildConfig | null> {
     return this.get<GuildConfig>(`config:${guildId}`);
   }
 
-  /**
-   * Save guild configuration
-   */
+  
   async saveGuildConfig(guildId: string, prefix: string): Promise<void> {
     const config: GuildConfig = {
       id: `config:${guildId}`,
@@ -489,42 +449,36 @@ class PostgresDB {
     };
     await this.save(config);
 
-    // Invalidate cache
+    
     this.clearPrefixCache(guildId);
   }
 
-  /**
-   * Get guild prefix or default (with caching)
-   */
+  
   async getPrefix(guildId: string): Promise<string> {
-    // Check cache first
+    
     const cached = this.prefixCache.get(guildId);
     if (cached && Date.now() - cached.cachedAt < this.CACHE_TTL) {
       return cached.prefix;
     }
 
-    // Fetch from database
+    
     const config = await this.getGuildConfig(guildId);
     const prefix = config?.prefix || '$';
 
-    // Update cache
+    
     this.prefixCache.set(guildId, { prefix, cachedAt: Date.now() });
 
     return prefix;
   }
 
-  /**
-   * Clear prefix cache for a guild (call when prefix is updated)
-   */
+  
   clearPrefixCache(guildId: string): void {
     this.prefixCache.delete(guildId);
   }
 
-  /**
-   * Save panel template
-   */
+  
   async savePanelTemplate(templateId: string, template: any): Promise<void> {
-    // Create a copy without the 'id' field to avoid conflicts
+    
     const { id: _originalId, ...templateWithoutId } = template;
 
     const templateData = {
@@ -535,34 +489,27 @@ class PostgresDB {
     await this.save(templateData as any);
   }
 
-  /**
-   * Get panel template
-   */
+  
   async getPanelTemplate(templateId: string): Promise<any | null> {
     return await this.get(`template:${templateId}`);
   }
 
-  /**
-   * Get all templates
-   */
+  
   async getAllTemplates(): Promise<any[]> {
     return this.getByType('template');
   }
 
-  /**
-   * Migrate existing panels to add guildId based on channel lookup
-   * This should be called once to update old panels
-   */
+  
   async migratePanelsWithGuildId(client: any): Promise<number> {
     try {
       const allPanels = await this.getByType<PanelData>('panel');
       let migratedCount = 0;
 
       for (const panel of allPanels) {
-        // Skip if already has guildId
+        
         if (panel.guildId) continue;
 
-        // Try to find the guild by looking up the channel
+        
         if (panel.channel) {
           try {
             const channel = await client.channels.fetch(panel.channel);
@@ -586,9 +533,7 @@ class PostgresDB {
     }
   }
 
-  /**
-   * Add a role alias
-   */
+  
   async addRoleAlias(guildId: string, roleId: string, alias: string): Promise<void> {
     const client = await this.pool.connect();
     try {
@@ -606,9 +551,7 @@ class PostgresDB {
     }
   }
 
-  /**
-   * Remove a role alias
-   */
+  
   async removeRoleAlias(guildId: string, alias: string): Promise<boolean> {
     const client = await this.pool.connect();
     try {
@@ -624,9 +567,7 @@ class PostgresDB {
     }
   }
 
-  /**
-   * Get all aliases for a guild
-   */
+  
   async getRoleAliases(guildId: string): Promise<{ alias: string; roleId: string }[]> {
     const client = await this.pool.connect();
     try {
@@ -642,9 +583,7 @@ class PostgresDB {
     }
   }
 
-  /**
-   * Get role ID by alias
-   */
+  
   async getRoleByAlias(guildId: string, alias: string): Promise<string | null> {
     const client = await this.pool.connect();
     try {

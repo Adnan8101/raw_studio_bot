@@ -1,6 +1,4 @@
-/**
- * Quarantine Command - Quarantine/unquarantine members and setup
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -122,7 +120,7 @@ async function handleSetup(
   const channel = interaction.options.getChannel('channel', true);
   const guild = interaction.guild!;
 
-  // Validate role
+  
   if (role.id === guild.roles.everyone.id) {
     const errorEmbed = createErrorEmbed('Cannot use @everyone role for quarantine.');
     await interaction.editReply({ embeds: [errorEmbed] });
@@ -136,15 +134,15 @@ async function handleSetup(
     return;
   }
 
-  // Save configuration
+  
   await services.moderationService.setupQuarantine(guild.id, role.id, channel.id);
 
-  // Auto-configure role permissions
+  
   try {
-    // Get all channels
+    
     const channels = await guild.channels.fetch();
 
-    // Hide all channels from quarantine role
+    
     for (const [channelId, guildChannel] of channels) {
       if (!guildChannel) continue;
 
@@ -161,7 +159,7 @@ async function handleSetup(
       }
     }
 
-    // Allow access to the designated channel
+    
     const accessChannel = await guild.channels.fetch(channel.id);
     if (accessChannel && 'permissionOverwrites' in accessChannel) {
       await accessChannel.permissionOverwrites.create(role.id, {
@@ -210,7 +208,7 @@ async function handleAdd(
   const guild = interaction.guild!;
   const moderator = interaction.member as any;
 
-  // Get quarantine config
+  
   const config = await services.moderationService.getQuarantineConfig(guild.id);
   if (!config) {
     const errorEmbed = createErrorEmbed('Quarantine system is not configured. Use `/quarantine setup` first.');
@@ -218,7 +216,7 @@ async function handleAdd(
     return;
   }
 
-  // Get member
+  
   let target;
   try {
     target = await guild.members.fetch(user.id);
@@ -229,7 +227,7 @@ async function handleAdd(
     return;
   }
 
-  // Check permissions
+  
   const moderatorCheck = canModerate(moderator, target, PermissionFlagsBits.ManageRoles);
   if (!moderatorCheck.allowed) {
     const errorEmbed = createErrorEmbed(moderatorCheck.reason || 'You cannot moderate this user.');
@@ -244,14 +242,14 @@ async function handleAdd(
     return;
   }
 
-  // Check if already quarantined
+  
   if (target.roles.cache.has(config.roleId)) {
     const errorEmbed = createErrorEmbed('This member is already quarantined.');
     await interaction.editReply({ embeds: [errorEmbed] });
     return;
   }
 
-  // Add quarantine role
+  
   try {
     await target.roles.add(config.roleId, reason);
 
@@ -264,7 +262,7 @@ async function handleAdd(
 
     await interaction.editReply({ embeds: [embed] });
 
-    // Log case
+    
     const modCase = await services.caseService.createCase({
       guildId: guild.id,
       targetId: target.id,
@@ -273,7 +271,7 @@ async function handleAdd(
       reason,
     });
 
-    // Send to logging channel
+    
     await services.loggingService.logModeration(guild.id, {
       action: 'Quarantine',
       target: target.user,
@@ -301,7 +299,7 @@ async function handleRemove(
   const reason = interaction.options.getString('reason') || 'No reason provided';
   const guild = interaction.guild!;
 
-  // Get quarantine config
+  
   const config = await services.moderationService.getQuarantineConfig(guild.id);
   if (!config) {
     const errorEmbed = createErrorEmbed('Quarantine system is not configured.');
@@ -309,7 +307,7 @@ async function handleRemove(
     return;
   }
 
-  // Get member
+  
   let target;
   try {
     target = await guild.members.fetch(user.id);
@@ -320,14 +318,14 @@ async function handleRemove(
     return;
   }
 
-  // Check if quarantined
+  
   if (!target.roles.cache.has(config.roleId)) {
     const errorEmbed = createErrorEmbed('This member is not quarantined.');
     await interaction.editReply({ embeds: [errorEmbed] });
     return;
   }
 
-  // Remove quarantine role
+  
   try {
     await target.roles.remove(config.roleId, reason);
 
@@ -340,7 +338,7 @@ async function handleRemove(
 
     await interaction.editReply({ embeds: [embed] });
 
-    // Log case
+    
     const modCase = await services.caseService.createCase({
       guildId: guild.id,
       targetId: target.id,
@@ -349,7 +347,7 @@ async function handleRemove(
       reason,
     });
 
-    // Send to logging channel
+    
     await services.loggingService.logModeration(guild.id, {
       action: 'Unquarantine',
       target: target.user,

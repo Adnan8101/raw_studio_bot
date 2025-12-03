@@ -1,6 +1,4 @@
-/**
- * Check Warn Command - View warnings for a member
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -38,7 +36,7 @@ export async function execute(
   const user = interaction.options.getUser('user', true);
   const guild = interaction.guild!;
 
-  // Get warnings
+  
   const warns = await services.moderationService.getWarns(guild.id, user.id);
 
   if (warns.length === 0) {
@@ -49,7 +47,7 @@ export async function execute(
     return;
   }
 
-  // Create embed
+  
   const embed = new EmbedBuilder()
     .setTitle(`${CustomEmojis.CAUTION} Warnings for ${user.tag}`)
     .setDescription(`Total Warnings: **${warns.length}**`)
@@ -57,7 +55,7 @@ export async function execute(
     .setThumbnail(user.displayAvatarURL())
     .setTimestamp();
 
-  // Add warnings (limit to last 10)
+  
   const displayWarns = warns.slice(0, 10);
   for (const warn of displayWarns) {
     const moderator = await interaction.client.users.fetch(warn.moderatorId).catch(() => null);

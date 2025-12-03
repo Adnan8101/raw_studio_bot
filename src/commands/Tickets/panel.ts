@@ -78,11 +78,11 @@ export async function execute(
   const db = services.ticketDB;
   const subcommand = interaction.options.getSubcommand();
 
-  // Owner-only check
+  
   if (interaction.user.id !== interaction.guild?.ownerId) {
     await interaction.reply({
       content: '<:tcet_cross:1437995480754946178> This command can only be used by the **server owner**.',
-      flags: 1 << 6 // MessageFlags.Ephemeral
+      flags: 1 << 6 
     });
     return;
   }
@@ -107,7 +107,7 @@ async function handleSave(
 
   const panelName = interaction.options.getString('panel-name', true);
 
-  // Find panel by name in current guild
+  
   const panels = await db.getAllPanels(interaction.guildId || undefined);
   const panel = panels.find((p: PanelData) => p.name?.toLowerCase() === panelName.toLowerCase());
 
@@ -118,10 +118,10 @@ async function handleSave(
     return;
   }
 
-  // Generate unique template ID
+  
   const templateId = `TPL-${randomBytes(4).toString('hex').toUpperCase()}`;
 
-  // Create template (exclude server-specific data)
+  
   const template: PanelTemplate = {
     id: templateId,
     name: panel.name || 'Unnamed Panel',
@@ -140,10 +140,10 @@ async function handleSave(
     originalGuild: interaction.guildId || 'unknown',
   };
 
-  // Save template to database
+  
   await db.savePanelTemplate(templateId, template);
 
-  // Create embed for DM
+  
   const embed = new EmbedBuilder()
     .setTitle('<:module:1437997093753983038> Panel Template Saved')
     .setDescription(`Your panel **${panel.name}** has been saved as a template!`)
@@ -165,14 +165,14 @@ async function handleSave(
     .setFooter({ text: `Save this Template ID - Powered by ${client.user?.username || 'Ticket Bot'}` })
     .setTimestamp();
 
-  // Try to send DM
+  
   try {
     await interaction.user.send({ embeds: [embed] });
     await interaction.editReply({
       content: '<:tcet_tick:1437995479567962184> Panel template saved! Check your DMs for the Template ID.',
     });
   } catch (error) {
-    // If DM fails, send in channel
+    
     await interaction.editReply({
       embeds: [embed],
       content: '<:tcet_tick:1437995479567962184> Panel template saved! (Unable to DM, showing here instead)',
@@ -189,7 +189,7 @@ async function handleImport(
 
   const templateId = interaction.options.getString('template-id', true).trim().toUpperCase();
 
-  // Validate template ID format
+  
   if (!templateId.startsWith('TPL-') || templateId.length !== 12) {
     await interaction.editReply({
       content: '<:tcet_cross:1437995480754946178> Invalid template ID format. It should look like: `TPL-XXXXX`',
@@ -197,7 +197,7 @@ async function handleImport(
     return;
   }
 
-  // Get template from database
+  
   const template = await db.getPanelTemplate(templateId);
 
   if (!template) {
@@ -207,23 +207,23 @@ async function handleImport(
     return;
   }
 
-  // Generate new panel ID for this server
+  
   const newPanelId = await db.generatePanelId();
 
-  // Create new panel from template (without channels/roles)
+  
   const newPanel: PanelData = {
     id: newPanelId,
     type: 'panel',
-    guildId: interaction.guildId || undefined, // Set guild ID for new panel
+    guildId: interaction.guildId || undefined, 
     name: template.name,
-    // Channels and roles not set - user must configure
+    
     channel: undefined,
     openCategory: undefined,
     closeCategory: undefined,
     staffRole: undefined,
     logsChannel: undefined,
     transcriptChannel: undefined,
-    // Copy template data
+    
     label: template.label,
     emoji: template.emoji,
     color: template.color,
@@ -235,11 +235,11 @@ async function handleImport(
     allowOwnerClose: template.allowOwnerClose,
     userPermissions: template.userPermissions,
     staffPermissions: template.staffPermissions,
-    enabled: false, // Disabled by default until configured
+    enabled: false, 
     ticketsCreated: 0,
   };
 
-  // Save to database
+  
   await db.save(newPanel);
 
   const embed = new EmbedBuilder()
@@ -282,7 +282,7 @@ async function handleTemplates(
 ): Promise<void> {
   await interaction.deferReply();
 
-  // Get all templates created by this user's guild
+  
   const allTemplates = await db.getAllTemplates();
   const userTemplates = allTemplates.filter((t: any) => t.originalGuild === interaction.guildId);
 
@@ -293,7 +293,7 @@ async function handleTemplates(
     return;
   }
 
-  // Create embeds for each template (max 10 embeds per message)
+  
   const embeds = userTemplates.slice(0, 10).map((template: any) => {
     const templateId = template.id.replace('template:', '');
     return new EmbedBuilder()
@@ -320,7 +320,7 @@ async function handleTemplates(
       .setTimestamp();
   });
 
-  // Create summary embed
+  
   const summaryEmbed = new EmbedBuilder()
     .setTitle('<:module:1437997093753983038> Your Panel Templates')
     .setDescription(
@@ -332,14 +332,14 @@ async function handleTemplates(
     .setFooter({ text: `Powered by ${client.user?.username || 'Ticket Bot'}` })
     .setTimestamp();
 
-  // Try to send DM
+  
   try {
     await interaction.user.send({ embeds: [summaryEmbed, ...embeds] });
     await interaction.editReply({
       content: '<:tcet_tick:1437995479567962184> Check your DMs! I\'ve sent you a list of all your templates.',
     });
   } catch (error) {
-    // If DM fails, send in channel
+    
     await interaction.editReply({
       embeds: [summaryEmbed, ...embeds],
       content: '<:tcet_cross:1437995480754946178> I couldn\'t DM you, so here are your templates:',
@@ -354,7 +354,7 @@ async function handleDeleteTemplate(
 ): Promise<void> {
   await interaction.deferReply();
 
-  // Get all templates created by this user's guild
+  
   const allTemplates = await client.db.getAllTemplates();
   const userTemplates = allTemplates.filter((t: any) => t.originalGuild === interaction.guildId);
 
@@ -365,7 +365,7 @@ async function handleDeleteTemplate(
     return;
   }
 
-  // Create options for the dropdown
+  
   const options = userTemplates.map((template: any) => {
     const templateId = template.id.replace('template:', '');
     return {
@@ -381,7 +381,7 @@ async function handleDeleteTemplate(
     .setPlaceholder('Select templates to delete')
     .setMinValues(1)
     .setMaxValues(Math.min(options.length, 25))
-    .addOptions(options.slice(0, 25)); // Discord limit
+    .addOptions(options.slice(0, 25)); 
 
   const row1 = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
 

@@ -160,7 +160,7 @@ async function handleSetup(
   client: BotClient,
   db: any
 ): Promise<void> {
-  await interaction.deferReply({ flags: 1 << 6 }); // MessageFlags.Ephemeral
+  await interaction.deferReply({ flags: 1 << 6 }); 
 
   const wizardHandler = new SetupWizardHandler();
   await wizardHandler.showMainMenu(interaction, client, interaction.user.id);
@@ -171,7 +171,7 @@ async function handleEdit(
   client: BotClient,
   db: any
 ): Promise<void> {
-  await interaction.deferReply({ flags: 1 << 6 }); // MessageFlags.Ephemeral
+  await interaction.deferReply({ flags: 1 << 6 }); 
 
   const panels = await db.getAllPanels(interaction.guildId || undefined);
 
@@ -207,7 +207,7 @@ async function handleDelete(
   client: BotClient,
   db: any
 ): Promise<void> {
-  await interaction.deferReply({ flags: 1 << 6 }); // MessageFlags.Ephemeral
+  await interaction.deferReply({ flags: 1 << 6 }); 
 
   const panels = await db.getAllPanels(interaction.guildId || undefined);
 
@@ -243,7 +243,7 @@ async function handleList(
   client: BotClient,
   db: any
 ): Promise<void> {
-  await interaction.deferReply({ flags: 1 << 6 }); // MessageFlags.Ephemeral
+  await interaction.deferReply({ flags: 1 << 6 }); 
 
   const panels = await db.getAllPanels(interaction.guildId || undefined);
   const embed = EmbedController.createPanelListEmbed(panels);
@@ -256,15 +256,15 @@ async function handleClearTicket(
   client: BotClient,
   db: any
 ): Promise<void> {
-  await interaction.deferReply({ flags: 1 << 6 }); // MessageFlags.Ephemeral
+  await interaction.deferReply({ flags: 1 << 6 }); 
 
   const user = interaction.options.getUser('user', true);
 
-  // Get all panels to check guild association
+  
   const allPanels = await db.getAllPanels() as PanelData[];
   const panelMap = new Map(allPanels.map(p => [p.id, p]));
 
-  // Get all tickets for this user in this guild
+  
   const allTickets = await db.getAllTickets();
   const userTickets = allTickets.filter((t: any) => {
     if (t.owner !== user.id) return false;
@@ -279,13 +279,13 @@ async function handleClearTicket(
     return;
   }
 
-  // Create options for each ticket with panel info
+  
   const options = await Promise.all(userTickets.map(async (ticket: any) => {
     const panel = panelMap.get(ticket.panelId);
     const panelName = panel?.name || 'Unknown Panel';
     const state = ticket.state === 'open' ? '🟢 Open' : '🔴 Closed';
 
-    // Try to get channel name
+    
     let channelName = 'Unknown';
     try {
       const channel = await client.channels.fetch(ticket.channelId);
@@ -304,7 +304,7 @@ async function handleClearTicket(
     };
   }));
 
-  // Create embed showing user's tickets
+  
   const embed = new EmbedBuilder()
     .setTitle(`🗑️ Clear Tickets for ${user.tag}`)
     .setDescription(
@@ -323,7 +323,7 @@ async function handleClearTicket(
     .setPlaceholder('Select tickets to delete')
     .setMinValues(1)
     .setMaxValues(Math.min(options.length, 25))
-    .addOptions(options.slice(0, 25)); // Discord limit
+    .addOptions(options.slice(0, 25)); 
 
   const row1 = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
 
@@ -351,7 +351,7 @@ async function handleDeleteTicket(
   client: BotClient,
   db: any
 ): Promise<void> {
-  await interaction.deferReply({ flags: 1 << 6 }); // MessageFlags.Ephemeral
+  await interaction.deferReply({ flags: 1 << 6 }); 
 
   const channel = interaction.channel;
   if (!channel || !channel.isTextBased()) {
@@ -361,7 +361,7 @@ async function handleDeleteTicket(
     return;
   }
 
-  // Find ticket by channel ID
+  
   const tickets = await db.getAllTickets();
   const ticket = tickets.find((t: any) => t.channelId === channel.id);
 
@@ -372,7 +372,7 @@ async function handleDeleteTicket(
     return;
   }
 
-  // Check if user is staff or has manage channels permission
+  
   const panel = await db.get(ticket.panelId) as PanelData;
   const member = interaction.member as any;
   const isStaff = member?.roles?.cache?.has(panel?.staffRole || '') || interaction.memberPermissions?.has('ManageChannels');
@@ -385,10 +385,10 @@ async function handleDeleteTicket(
   }
 
   try {
-    // Import TextChannel type
+    
     const { TextChannel } = await import('discord.js');
 
-    // Generate transcript before deleting if ticket is closed
+    
     if (ticket.state === 'closed' && channel instanceof TextChannel) {
       const { generateProfessionalTranscript, createTranscriptEmbed } = await import('../../modules/ticket/transcriptGenerator');
       const ticketNumber = parseInt(ticket.id.split(':')[1]);
@@ -420,7 +420,7 @@ async function handleDeleteTicket(
       const attachment = await generateProfessionalTranscript(channel, transcriptOptions);
       const transcriptEmbed = createTranscriptEmbed(transcriptOptions);
 
-      // Send transcript to transcript channel if configured
+      
       if (panel?.transcriptChannel) {
         try {
           const transcriptChannel = await client.channels.fetch(panel.transcriptChannel);
@@ -435,7 +435,7 @@ async function handleDeleteTicket(
         }
       }
 
-      // Try to DM transcript to owner
+      
       try {
         await owner.send({
           content: `🗑️ **Your ticket has been deleted.** Here is the transcript:`,
@@ -446,7 +446,7 @@ async function handleDeleteTicket(
       }
     }
 
-    // Log to logs channel before deleting
+    
     if (panel?.logsChannel && 'name' in channel) {
       try {
         const logChannel = await client.channels.fetch(panel.logsChannel);
@@ -469,18 +469,18 @@ async function handleDeleteTicket(
       }
     }
 
-    // Send confirmation before deletion
+    
     await interaction.editReply({
       content: '<:tcet_tick:1437995479567962184> **Ticket will be deleted in 3 seconds...**\n\n*Transcript has been saved and sent.*',
     });
 
-    // Wait 3 seconds
+    
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    // Delete ticket data
+    
     db.delete(ticket.id);
 
-    // Delete channel
+    
     await channel.delete();
   } catch (error) {
     await interaction.editReply({
@@ -494,7 +494,7 @@ async function handleClose(
   client: BotClient,
   db: any
 ): Promise<void> {
-  await interaction.deferReply({ flags: 1 << 6 }); // MessageFlags.Ephemeral
+  await interaction.deferReply({ flags: 1 << 6 }); 
 
   const channel = interaction.channel;
   if (!channel || !channel.isTextBased()) {
@@ -504,7 +504,7 @@ async function handleClose(
     return;
   }
 
-  // Find ticket by channel ID
+  
   const tickets = await db.getAllTickets();
   const ticket = tickets.find((t: any) => t.channelId === channel.id);
 
@@ -522,14 +522,14 @@ async function handleClose(
     return;
   }
 
-  // Get panel to check allowOwnerClose
+  
   const panel = await db.get(ticket.panelId) as PanelData | null;
 
-  // Check if user is the owner
+  
   const isOwner = ticket.owner === interaction.user.id;
   const isStaff = interaction.memberPermissions?.has('ManageChannels');
 
-  // Check permission based on allowOwnerClose setting
+  
   if (isOwner && panel?.allowOwnerClose === false && !isStaff) {
     await interaction.editReply({
       content: '<:tcet_cross:1437995480754946178> **Only staff members can close this ticket.**\n\nIf you need assistance, please wait for a staff member.',
@@ -537,7 +537,7 @@ async function handleClose(
     return;
   }
 
-  // Import TicketHandler dynamically
+  
   const { TicketHandler } = await import('../../modules/ticket/ticketHandler');
   const handler = new TicketHandler();
   await handler.closeTicket(interaction, client, ticket.id);
@@ -548,7 +548,7 @@ async function handleReopen(
   client: BotClient,
   db: any
 ): Promise<void> {
-  await interaction.deferReply({ flags: 1 << 6 }); // MessageFlags.Ephemeral
+  await interaction.deferReply({ flags: 1 << 6 }); 
 
   const channel = interaction.channel;
   if (!channel || !channel.isTextBased()) {
@@ -558,7 +558,7 @@ async function handleReopen(
     return;
   }
 
-  // Find ticket by channel ID
+  
   const tickets = await db.getAllTickets();
   const ticket = tickets.find((t: any) => t.channelId === channel.id);
 
@@ -576,7 +576,7 @@ async function handleReopen(
     return;
   }
 
-  // Import TicketHandler dynamically
+  
   const { TicketHandler } = await import('../../modules/ticket/ticketHandler');
   const handler = new TicketHandler();
   await handler.reopenTicket(interaction, client, ticket.id);
@@ -587,7 +587,7 @@ async function handleRename(
   client: BotClient,
   db: any
 ): Promise<void> {
-  await interaction.deferReply({ flags: 1 << 6 }); // MessageFlags.Ephemeral
+  await interaction.deferReply({ flags: 1 << 6 }); 
 
   const channel = interaction.channel;
   if (!channel || !channel.isTextBased()) {
@@ -597,7 +597,7 @@ async function handleRename(
     return;
   }
 
-  // Find ticket by channel ID
+  
   const tickets = await db.getAllTickets();
   const ticket = tickets.find((t: any) => t.channelId === channel.id);
 
@@ -615,10 +615,10 @@ async function handleRename(
     if ('setName' in channel) {
       await channel.setName(sanitizedName);
 
-      // Get panel for logging
+      
       const panel = await db.get(ticket.panelId) as PanelData;
 
-      // Log to logs channel
+      
       if (panel?.logsChannel) {
         try {
           const logChannel = await client.channels.fetch(panel.logsChannel);
@@ -661,7 +661,7 @@ async function handleAddUser(
   client: BotClient,
   db: any
 ): Promise<void> {
-  await interaction.deferReply({ flags: 1 << 6 }); // MessageFlags.Ephemeral
+  await interaction.deferReply({ flags: 1 << 6 }); 
 
   const channel = interaction.channel;
   if (!channel || !channel.isTextBased()) {
@@ -671,7 +671,7 @@ async function handleAddUser(
     return;
   }
 
-  // Find ticket by channel ID
+  
   const tickets = await db.getAllTickets();
   const ticket = tickets.find((t: any) => t.channelId === channel.id);
 
@@ -682,12 +682,12 @@ async function handleAddUser(
     return;
   }
 
-  // Get panel to check staff role
+  
   const panel = await db.get(ticket.panelId) as PanelData;
   const member = interaction.member as any;
   const isStaff = member?.roles?.cache?.has(panel?.staffRole || '') || interaction.memberPermissions?.has('ManageChannels');
 
-  // Only staff can add users
+  
   if (!isStaff) {
     await interaction.editReply({
       content: '<:tcet_cross:1437995480754946178> **Only staff members can add users to tickets.**\n\nYou must have the staff role or Manage Channels permission.',
@@ -697,21 +697,21 @@ async function handleAddUser(
 
   const user = interaction.options.getUser('user', true);
 
-  // Get panel to use configured permissions
+  
   const userPermissions = panel?.userPermissions || [];
 
   try {
     if ('permissionOverwrites' in channel) {
-      // Build permission object based on panel configuration
+      
       const permissions: any = {};
 
       if (userPermissions.length > 0) {
-        // Use configured permissions
+        
         for (const perm of userPermissions) {
           permissions[perm] = true;
         }
       } else {
-        // Default permissions if none configured
+        
         permissions.ViewChannel = true;
         permissions.SendMessages = true;
         permissions.ReadMessageHistory = true;
@@ -743,7 +743,7 @@ async function handleClaim(
   client: BotClient,
   db: any
 ): Promise<void> {
-  await interaction.deferReply({ flags: 1 << 6 }); // MessageFlags.Ephemeral
+  await interaction.deferReply({ flags: 1 << 6 }); 
 
   const channel = interaction.channel;
   if (!channel || !channel.isTextBased()) {
@@ -753,7 +753,7 @@ async function handleClaim(
     return;
   }
 
-  // Find ticket by channel ID
+  
   const tickets = await db.getAllTickets();
   const ticket = tickets.find((t: any) => t.channelId === channel.id);
 
@@ -764,7 +764,7 @@ async function handleClaim(
     return;
   }
 
-  // Get panel to check staff role
+  
   const panel = await db.get(ticket.panelId) as PanelData | null;
   const member = interaction.member as any;
   const isStaff = member?.roles?.cache?.has(panel?.staffRole || '') || interaction.memberPermissions?.has('ManageChannels');
@@ -783,11 +783,11 @@ async function handleClaim(
     return;
   }
 
-  // Update ticket
+  
   ticket.claimedBy = interaction.user.id;
   db.save(ticket);
 
-  // Rename channel
+  
   try {
     if ('setName' in channel) {
       const newName = `claimed-${interaction.user.username}`.toLowerCase().replace(/[^a-z0-9-]/g, '-');
@@ -796,12 +796,12 @@ async function handleClaim(
   } catch (error) {
   }
 
-  // Send success embed (ephemeral to claimer)
+  
   await interaction.editReply({
     content: '<:tcet_tick:1437995479567962184> **You have claimed this ticket.**\n\nYou are now responsible for helping the user.',
   });
 
-  // Send public message
+  
   const { EmbedBuilder } = await import('discord.js');
   const embed = new EmbedBuilder()
     .setTitle('<:tcet_tick:1437995479567962184> Ticket Claimed')
@@ -819,7 +819,7 @@ async function handleUnclaim(
   client: BotClient,
   db: any
 ): Promise<void> {
-  await interaction.deferReply({ flags: 1 << 6 }); // MessageFlags.Ephemeral
+  await interaction.deferReply({ flags: 1 << 6 }); 
 
   const channel = interaction.channel;
   if (!channel || !channel.isTextBased()) {
@@ -829,7 +829,7 @@ async function handleUnclaim(
     return;
   }
 
-  // Find ticket by channel ID
+  
   const tickets = await db.getAllTickets();
   const ticket = tickets.find((t: any) => t.channelId === channel.id);
 
@@ -854,27 +854,27 @@ async function handleUnclaim(
     return;
   }
 
-  // Get original owner username for channel name
+  
   try {
     const owner = await client.users.fetch(ticket.owner);
     const claimedBy = ticket.claimedBy;
 
-    // Update ticket
+    
     ticket.claimedBy = undefined;
     db.save(ticket);
 
-    // Rename channel back to original
+    
     if ('setName' in channel) {
       const newName = `ticket-${owner.username}`.toLowerCase().replace(/[^a-z0-9-]/g, '-');
       await channel.setName(newName);
     }
 
-    // Send success embed (ephemeral to unclaimer)
+    
     await interaction.editReply({
       content: '<:tcet_tick:1437995479567962184> **You have unclaimed this ticket.**\n\nOther staff members can now claim it.',
     });
 
-    // Send public message
+    
     const { EmbedBuilder } = await import('discord.js');
     const embed = new EmbedBuilder()
       .setTitle('<:tcet_tick:1437995479567962184> Ticket Unclaimed')

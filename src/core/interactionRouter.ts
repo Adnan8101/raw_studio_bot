@@ -8,19 +8,15 @@ export interface InteractionHandler {
 export class InteractionRouter {
   private handlers: Map<string, InteractionHandler> = new Map();
 
-  /**
-   * Register a handler for a specific interaction pattern
-   */
+  
   register(pattern: string, handler: InteractionHandler): void {
     this.handlers.set(pattern, handler);
   }
 
-  /**
-   * Route an interaction to the appropriate handler
-   */
+  
   async route(interaction: Interaction, client: BotClient): Promise<void> {
     try {
-      // Parse custom ID (format: system:action:id:extra)
+      
       let customId: string;
       if (interaction.isButton()) {
         customId = interaction.customId;
@@ -29,23 +25,23 @@ export class InteractionRouter {
       } else if (interaction.isModalSubmit()) {
         customId = interaction.customId;
       } else {
-        return; // Not a component interaction
+        return; 
       }
 
       const parts = customId.split(':');
       const system = parts[0];
       const action = parts[1];
 
-      // Check if this action opens a modal - if so, don't defer
+      
       const modalActions = ['set-name', 'set-description', 'set-openmessage', 'add-question', 'set-label', 'set-color', 'set-embed-color'];
       const shouldShowModal = modalActions.includes(action);
 
-      // Actions that should use ephemeral reply instead of update
+      
       const ephemeralActions = ['open'];
       const shouldUseEphemeral = ephemeralActions.includes(action);
 
-      // Defer for buttons/menus ONLY if not opening modal and not using ephemeral
-      // This prevents "interaction failed" errors
+      
+      
       if (!shouldShowModal && !shouldUseEphemeral && !interaction.isModalSubmit()) {
         if ((interaction.isButton() || interaction.isStringSelectMenu()) && !interaction.replied && !interaction.deferred) {
           await interaction.deferUpdate().catch((err) => {
@@ -54,7 +50,7 @@ export class InteractionRouter {
         }
       }
 
-      // Find matching handler
+      
       const handler = this.handlers.get(system);
       if (handler) {
         await handler.execute(interaction, client, parts);
@@ -64,7 +60,7 @@ export class InteractionRouter {
     } catch (error: any) {
       console.error('[Router] Error:', error.message, error.stack);
 
-      // Try to send error message
+      
       try {
         const errorMessage = 'Something went wrong. Please try again or contact support.';
 
@@ -85,9 +81,7 @@ export class InteractionRouter {
     }
   }
 
-  /**
-   * Get all registered handlers
-   */
+  
   getHandlers(): Map<string, InteractionHandler> {
     return this.handlers;
   }

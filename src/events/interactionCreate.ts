@@ -1,4 +1,4 @@
-import { Client, Interaction, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, TextChannel, ModalBuilder, TextInputBuilder, TextInputStyle, ChannelType } from 'discord.js';
+import { Client, Interaction, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, TextChannel, ModalBuilder, TextInputBuilder, TextInputStyle, ChannelType, MessageFlags } from 'discord.js';
 import { prisma } from '../database/connect';
 import { CONFIG } from '../config';
 import { sendToManualReview } from './messageCreate';
@@ -6,14 +6,14 @@ import { getTargetRoleName, deleteModMailThread, getRoleMemberCount, sendVerific
 
 export const onInteractionCreate = async (client: Client, interaction: Interaction) => {
     try {
-        // Chat Input Commands are now handled in index.ts via CommandLoader
+        
         if (interaction.isChatInputCommand()) {
             return;
         }
 
         if (interaction.isModalSubmit()) {
             if (interaction.customId.startsWith('reject_reason_')) {
-                await interaction.deferReply({ ephemeral: false });
+                await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                 const targetUserId = interaction.customId.split('_')[2];
                 const reason = interaction.fields.getTextInputValue('reason');
                 const adminUser = interaction.user;
@@ -58,7 +58,7 @@ export const onInteractionCreate = async (client: Client, interaction: Interacti
                     }
                 }
             } else if (interaction.customId.startsWith('revoke_reason_')) {
-                await interaction.deferReply({ ephemeral: false });
+                await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                 const targetUserId = interaction.customId.split('_')[2];
                 const reason = interaction.fields.getTextInputValue('reason');
                 const adminUser = interaction.user;
@@ -106,7 +106,7 @@ export const onInteractionCreate = async (client: Client, interaction: Interacti
             const { customId, user } = interaction;
             const userId = user.id;
             if (customId === 'start_verification_flow') {
-                await interaction.deferReply({ ephemeral: true });
+                await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                 let userRecord = await prisma.verification.findUnique({ where: { userId } });
 
                 if (!userRecord) {
@@ -192,7 +192,7 @@ export const onInteractionCreate = async (client: Client, interaction: Interacti
                     await interaction.editReply({ embeds: [embed], components: [row, row2] });
                 }
             } else if (customId === 'open_ticket') {
-                await interaction.deferReply({ ephemeral: true });
+                await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                 await prisma.verification.upsert({
                     where: { userId },
                     update: { status: 'TICKET' },
@@ -223,7 +223,7 @@ export const onInteractionCreate = async (client: Client, interaction: Interacti
                     await interaction.editReply({ content: '❌ Error creating ticket. Please contact staff directly.' });
                 }
             } else if (customId === 'start_verification') {
-                await interaction.deferReply({ ephemeral: true });
+                await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                 let userRecord = await prisma.verification.findUnique({ where: { userId } });
                 if (!userRecord) {
                     userRecord = await prisma.verification.create({ data: { userId, status: 'VERIFYING' } });
@@ -253,7 +253,7 @@ export const onInteractionCreate = async (client: Client, interaction: Interacti
                     });
                 }
             } else if (customId === 'restart_verification') {
-                await interaction.deferReply({ ephemeral: true });
+                await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                 await prisma.verification.update({
                     where: { userId },
                     data: {
@@ -278,7 +278,7 @@ export const onInteractionCreate = async (client: Client, interaction: Interacti
                     });
                 }
             } else if (customId === 'reset_verification') {
-                await interaction.deferReply({ ephemeral: true });
+                await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                 await prisma.verification.delete({ where: { userId } });
                 const roleName = await getTargetRoleName(client);
                 const embed = new EmbedBuilder()
@@ -341,7 +341,7 @@ export const onInteractionCreate = async (client: Client, interaction: Interacti
                     data: updateData
                 });
 
-                // Refresh record for manual review function
+                
                 const updatedRecord = await prisma.verification.findUnique({ where: { userId } });
 
                 let responseContent = '📝 **Manual Review Requested.**\nOur staff will review your screenshot shortly.';
@@ -353,7 +353,7 @@ export const onInteractionCreate = async (client: Client, interaction: Interacti
                     await interaction.editReply({ content: responseContent, embeds: [], components: [] });
                 }
             } else if (customId.startsWith('admin_approve_')) {
-                await interaction.deferReply({ ephemeral: false });
+                await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                 const targetUserId = customId.split('_')[2];
                 const userRecord = await prisma.verification.findUnique({ where: { userId: targetUserId } });
                 if (!userRecord) {
@@ -438,7 +438,7 @@ export const onInteractionCreate = async (client: Client, interaction: Interacti
                 modal.addComponents(row);
                 await interaction.showModal(modal);
             } else if (customId.startsWith('admin_start_chat_')) {
-                await interaction.deferReply({ ephemeral: true });
+                await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                 const targetUserId = customId.split('_')[3];
                 try {
                     const logsChannel = await client.channels.fetch(CONFIG.CHANNELS.LOGS) as TextChannel;
@@ -472,9 +472,9 @@ export const onInteractionCreate = async (client: Client, interaction: Interacti
             if ('reply' in interaction) {
                 const repliable = interaction as any;
                 if (!repliable.replied && !repliable.deferred) {
-                    await repliable.reply({ content: '❌ An error occurred.', ephemeral: true }).catch(() => { });
+                    await repliable.reply({ content: '❌ An error occurred.', flags: MessageFlags.Ephemeral }).catch(() => { });
                 } else {
-                    await repliable.followUp({ content: '❌ An error occurred.', ephemeral: true }).catch(() => { });
+                    await repliable.followUp({ content: '❌ An error occurred.', flags: MessageFlags.Ephemeral }).catch(() => { });
                 }
             }
         } catch (e) {

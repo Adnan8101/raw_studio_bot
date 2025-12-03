@@ -4,7 +4,7 @@ import { logToChannel } from '../utils/logger';
 import { prisma } from '../database/connect';
 
 export const onGuildMemberUpdate = async (client: Client, oldMember: GuildMember | PartialGuildMember, newMember: GuildMember | PartialGuildMember) => {
-    // 1. Handle Partial Members
+    
     if (oldMember.partial) {
         try { oldMember = await oldMember.fetch(); } catch (e) { console.error('Could not fetch oldMember', e); return; }
     }
@@ -12,7 +12,7 @@ export const onGuildMemberUpdate = async (client: Client, oldMember: GuildMember
         try { newMember = await newMember.fetch(); } catch (e) { console.error('Could not fetch newMember', e); return; }
     }
 
-    // 2. Name Prevention Logic
+    
     if (oldMember.nickname !== newMember.nickname) {
         const newName = newMember.nickname;
         if (newName) {
@@ -23,7 +23,7 @@ export const onGuildMemberUpdate = async (client: Client, oldMember: GuildMember
                     const isBlocked = settings.blockedNames.some(blocked => lowerName.includes(blocked.toLowerCase()));
 
                     if (isBlocked) {
-                        // Check Audit Logs to see who changed it
+                        
                         const fetchedLogs = await newMember.guild.fetchAuditLogs({
                             limit: 1,
                             type: AuditLogEvent.MemberUpdate,
@@ -32,29 +32,29 @@ export const onGuildMemberUpdate = async (client: Client, oldMember: GuildMember
 
                         let executor = log?.executor;
 
-                        // If no log found (rare) or log is old, assume user changed it themselves if they don't have manage nicknames
-                        // But to be safe, we only revert if we are sure it wasn't an admin.
-                        // Actually, if the user changes their own nickname, the executor is the user.
-                        // If the executor is NOT the user AND has ManageNicknames, allow it.
-                        // If executor IS the user, revert it.
+                        
+                        
+                        
+                        
+                        
                         
                         if (log && log.target?.id === newMember.id) {
-                            // Check if the change in log matches the nickname change
+                            
                             const nickChange = log.changes.find(c => c.key === 'nick');
                             if (nickChange) {
-                                // It matches
+                                
                             } else {
-                                // Might be an old log, be careful.
-                                // If we can't verify executor, we might skip or default to revert if user has no perms.
+                                
+                                
                             }
                         }
 
-                        // Simplified Logic:
-                        // If the user who changed it (executor) has ManageNicknames permission, allow it.
-                        // Otherwise (user changing own name), revert it.
+                        
+                        
+                        
 
-                        // We need to know WHO changed it.
-                        // If we can't find the log, we assume it's the user (safest bet for prevention).
+                        
+                        
 
                         let isAuthorized = false;
 
@@ -68,7 +68,7 @@ export const onGuildMemberUpdate = async (client: Client, oldMember: GuildMember
                         }
 
                         if (!isAuthorized) {
-                            // Revert
+                            
                             await newMember.setNickname(oldMember.nickname || null, 'Name prevention: Blocked name used');
 
                             try {
@@ -88,7 +88,7 @@ export const onGuildMemberUpdate = async (client: Client, oldMember: GuildMember
         }
     }
 
-    // 3. Role Verification Logic (Existing)
+    
     const roleId = CONFIG.ROLES.EARLY_SUPPORTER;
     const oldHasRole = oldMember.roles.cache.has(roleId);
     const newHasRole = newMember.roles.cache.has(roleId);

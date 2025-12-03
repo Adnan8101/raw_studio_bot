@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, MessageFlags, TextChannel } from 'discord.js';
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import { createSuccessEmbed, createErrorEmbed } from '../../utils/embedHelpers';
+import { PrefixCommand } from '../../types';
 
 export const category = 'giveaways';
 
@@ -15,22 +16,24 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: ChatInputCommandInteraction) {
     const messageId = interaction.options.getString('message_id', true);
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
     const db = DatabaseManager.getInstance();
     const giveaway = await db.getGiveaway(messageId);
 
     if (!giveaway) {
-        await interaction.reply({ embeds: [createErrorEmbed('Giveaway not found.')], flags: MessageFlags.Ephemeral });
+        await interaction.editReply({ embeds: [createErrorEmbed('Giveaway not found.')] });
         return;
     }
 
     if (giveaway.ended) {
-        await interaction.reply({ embeds: [createErrorEmbed('Giveaway already ended.')], flags: MessageFlags.Ephemeral });
+        await interaction.editReply({ embeds: [createErrorEmbed('Giveaway already ended.')] });
         return;
     }
 
     await db.endGiveaway(messageId);
 
-    // Try to delete message
+    
     try {
         const channel = await interaction.guild?.channels.fetch(giveaway.channelId) as TextChannel;
         if (channel) {
@@ -38,8 +41,54 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             if (msg) await msg.delete();
         }
     } catch (e) {
-        // Ignore if message already deleted
+        
     }
 
-    await interaction.reply({ embeds: [createSuccessEmbed('Giveaway cancelled.')], flags: MessageFlags.Ephemeral });
+    await interaction.editReply({ embeds: [createSuccessEmbed('Giveaway cancelled.')] });
 }
+
+export const prefixExecute = async (interaction: any) => {
+    const args = interaction.args;
+    if (args.length < 1) {
+        await interaction.reply({ embeds: [createErrorEmbed('Usage: `!gcancel <message_id>`')] });
+        return;
+    }
+
+    const messageId = args[0];
+    const db = DatabaseManager.getInstance();
+    const giveaway = await db.getGiveaway(messageId);
+
+    if (!giveaway) {
+        await interaction.reply({ embeds: [createErrorEmbed('Giveaway not found.')] });
+        return;
+    }
+
+    if (giveaway.ended) {
+        await interaction.reply({ embeds: [createErrorEmbed('Giveaway already ended.')] });
+        return;
+    }
+
+    await db.endGiveaway(messageId);
+
+    
+    try {
+        const channel = await interaction.message.guild?.channels.fetch(giveaway.channelId) as TextChannel;
+        if (channel) {
+            const msg = await channel.messages.fetch(messageId);
+            if (msg) await msg.delete();
+        }
+    } catch (e) {
+        
+    }
+
+    await interaction.reply({ embeds: [createSuccessEmbed('Giveaway cancelled.')] });
+};
+
+export const prefixCommand: PrefixCommand = {
+    name: 'gcancel',
+    description: 'Cancel a giveaway',
+    usage: 'gcancel <message_id>',
+    aliases: ['gstop'],
+    permissions: [PermissionFlagsBits.ManageGuild],
+    execute: prefixExecute
+};

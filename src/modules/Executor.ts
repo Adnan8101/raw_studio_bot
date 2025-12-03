@@ -1,6 +1,4 @@
-/**
- * Executor - Enforces punishments and cleanup actions
- */
+
 
 import { PrismaClient } from '@prisma/client';
 import { Client, Guild, GuildMember, PermissionsBitField } from 'discord.js';
@@ -12,7 +10,7 @@ import { LoggingService } from '../services/LoggingService';
 import { ActionLimiter } from './ActionLimiter';
 
 export class Executor {
-  // Track locks per guild+executor to prevent duplicate punishments
+  
   private activeLocks: Set<string> = new Set();
 
   constructor(
@@ -24,44 +22,42 @@ export class Executor {
     private actionLimiter: ActionLimiter
   ) { }
 
-  /**
-   * Execute punishment for a security event
-   */
+  
   async executePunishment(event: SecurityEvent, count: number, limit: number, resetTime?: number): Promise<void> {
     const lockKey = `${event.guildId}:${event.userId}`;
 
-    // Check if already processing this executor
+    
     if (this.activeLocks.has(lockKey)) {
       console.log(`Skipping duplicate punishment for ${lockKey}`);
       return;
     }
 
-    // FAILSAFE: Bot should never punish itself
+    
     if (event.userId === this.client.user?.id) {
       console.log('🛡️ Prevented bot self-punishment');
       return;
     }
 
     try {
-      // Acquire lock
+      
       this.activeLocks.add(lockKey);
 
-      // Skip advisory locks for SQLite (PostgreSQL feature)
-      // In production with PostgreSQL, enable pg_try_advisory_lock
+      
+      
 
-      // Get punishment configuration (default to BAN if not configured)
+      
       let punishmentConfig = await this.configService.getPunishment(event.guildId, event.action);
 
       if (!punishmentConfig) {
         console.log(`No punishment configured for ${event.action} in guild ${event.guildId}, defaulting to BAN`);
-        // Default punishment: BAN
+        
         punishmentConfig = {
           action: event.action,
           punishment: PunishmentType.BAN,
         };
       }
 
-      // Fetch guild and member
+      
       const guild = await this.client.guilds.fetch(event.guildId);
       const member = await guild.members.fetch(event.userId).catch(() => null);
 
@@ -70,19 +66,19 @@ export class Executor {
         return;
       }
 
-      // Safety check: don't punish guild owner
+      
       if (member.id === guild.ownerId) {
         console.log(`Skipping punishment for guild owner ${member.id}`);
         return;
       }
 
-      // Safety check: don't punish if bot can't (role hierarchy)
+      
       if (!this.canPunishMember(guild, member)) {
         console.log(`Cannot punish ${member.id} due to role hierarchy`);
         return;
       }
 
-      // Execute punishment
+      
       let success = false;
       let reason = `Anti-Nuke: ${event.action} limit exceeded (${count}/${limit})`;
 
@@ -99,7 +95,7 @@ export class Executor {
       }
 
       if (success) {
-        // Create case
+        
         const modCase = await this.caseService.createCase({
           guildId: event.guildId,
           targetId: event.userId,
@@ -115,7 +111,7 @@ export class Executor {
           },
         });
 
-        // Log to security channel
+        
         const embed = this.loggingService.createSecurityActionEmbed({
           title: '🚨 Anti-Nuke Action — User Punished',
           executorId: event.userId,
@@ -130,20 +126,18 @@ export class Executor {
 
         await this.loggingService.logSecurity(event.guildId, embed);
 
-        // REVERSION LOGIC: Undo the actions that triggered this
-        await this.revertRecentActions(event.guildId, event.userId, event.action, 60000); // Look back 60s
+        
+        await this.revertRecentActions(event.guildId, event.userId, event.action, 60000); 
       }
 
-      // Lock released by in-memory lock timeout
+      
     } finally {
-      // Remove in-memory lock
+      
       this.activeLocks.delete(lockKey);
     }
   }
 
-  /**
-   * Revert recent actions by a user
-   */
+  
   async revertRecentActions(
     guildId: string,
     userId: string,
@@ -164,7 +158,7 @@ export class Executor {
       }
 
       if (revertedCount > 0) {
-        // Log reversion
+        
         const embed = this.loggingService.createSecurityActionEmbed({
           title: '♻️ Anti-Nuke Reversion',
           executorId: userId,
@@ -172,11 +166,11 @@ export class Executor {
           action: action,
           limit: 0,
           count: revertedCount,
-          punishment: PunishmentType.BAN, // Just reusing the type for the embed
+          punishment: PunishmentType.BAN, 
           caseId: 0,
         });
 
-        // Override description to be more specific
+        
         embed.setDescription(`**Reverted ${revertedCount} actions** of type \`${action}\` performed by <@${userId}>.`);
 
         await this.loggingService.logSecurity(guildId, embed);
@@ -187,9 +181,7 @@ export class Executor {
     }
   }
 
-  /**
-   * Revert a single action
-   */
+  
   async revertAction(event: SecurityEvent): Promise<boolean> {
     if (!event.targetId) return false;
 
@@ -224,21 +216,21 @@ export class Executor {
         case ProtectionAction.GIVE_ADMIN_ROLE:
           const member = await guild.members.fetch(event.targetId).catch(() => null);
           if (member && event.metadata?.adminRoles) {
-            // Try to find the roles mentioned in metadata
-            // This is tricky because we only stored names in metadata in AuditLogMonitor
-            // But we can try to find roles by name or just check all admin roles on the user
-            // Better approach: AuditLogMonitor should store role IDs in metadata if possible
-            // For now, let's remove all dangerous roles from the target
+            
+            
+            
+            
+            
             await this.removeDangerousRoles(event.guildId, event.targetId);
             return true;
           }
           break;
 
         case ProtectionAction.DANGEROUS_PERMS:
-          // If a role was given dangerous perms, we should revert that change
-          // For now, we can just delete the role if it was just created, or remove the perms
-          // But since we don't know if it was just created or updated easily here without more context
-          // We will try to remove the dangerous permissions from the role
+          
+          
+          
+          
           const dangerousRole = await guild.roles.fetch(event.targetId).catch(() => null);
           if (dangerousRole) {
             const permissions = dangerousRole.permissions;
@@ -262,9 +254,7 @@ export class Executor {
     return false;
   }
 
-  /**
-   * Ban a member
-   */
+  
   private async banMember(guild: Guild, member: GuildMember, reason: string): Promise<boolean> {
     try {
       await guild.members.ban(member, { reason });
@@ -275,9 +265,7 @@ export class Executor {
     }
   }
 
-  /**
-   * Kick a member
-   */
+  
   private async kickMember(guild: Guild, member: GuildMember, reason: string): Promise<boolean> {
     try {
       await member.kick(reason);
@@ -288,9 +276,7 @@ export class Executor {
     }
   }
 
-  /**
-   * Timeout a member
-   */
+  
   private async timeoutMember(
     guild: Guild,
     member: GuildMember,
@@ -307,19 +293,17 @@ export class Executor {
     }
   }
 
-  /**
-   * Check if bot can punish a member (role hierarchy check)
-   */
+  
   private canPunishMember(guild: Guild, member: GuildMember): boolean {
     const botMember = guild.members.me;
     if (!botMember) return false;
 
-    // Check if bot has required permissions
+    
     if (!botMember.permissions.has(PermissionsBitField.Flags.BanMembers)) {
       return false;
     }
 
-    // Check role hierarchy
+    
     if (member.roles.highest.position >= botMember.roles.highest.position) {
       return false;
     }
@@ -327,9 +311,7 @@ export class Executor {
     return true;
   }
 
-  /**
-   * Kick all bots (used for ADD_BOTS protection)
-   */
+  
   async kickRecentBots(guildId: string, exceptBotId?: string): Promise<number> {
     try {
       const guild = await this.client.guilds.fetch(guildId);
@@ -363,9 +345,7 @@ export class Executor {
     }
   }
 
-  /**
-   * Remove dangerous roles from a user
-   */
+  
   async removeDangerousRoles(guildId: string, userId: string): Promise<number> {
     try {
       const guild = await this.client.guilds.fetch(guildId);

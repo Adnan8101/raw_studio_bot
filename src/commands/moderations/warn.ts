@@ -1,6 +1,4 @@
-/**
- * Warn Command - Issue a warning to a member
- */
+
 
 import {
   ChatInputCommandInteraction,
@@ -48,7 +46,7 @@ export async function execute(
   const guild = interaction.guild!;
   const moderator = interaction.member as any;
 
-  // Get member
+  
   let target;
   try {
     target = await guild.members.fetch(user.id);
@@ -58,7 +56,7 @@ export async function execute(
     return;
   }
 
-  // Check permissions
+  
   const moderatorCheck = canModerate(moderator, target, PermissionFlagsBits.ModerateMembers);
   if (!moderatorCheck.allowed) {
     const errorEmbed = createErrorEmbed(moderatorCheck.reason || 'You cannot moderate this user.');
@@ -66,7 +64,7 @@ export async function execute(
     return;
   }
 
-  // Add warning
+  
   try {
     await services.moderationService.addWarn(guild.id, target.id, interaction.user.id, reason);
     const warnCount = await services.moderationService.getWarnCount(guild.id, target.id);
@@ -81,7 +79,7 @@ export async function execute(
 
     await interaction.editReply({ embeds: [embed] });
 
-    // Send to logging channel
+    
     await services.loggingService.logModeration(guild.id, {
       action: 'Warn',
       target: target.user,
@@ -89,7 +87,7 @@ export async function execute(
       reason,
     });
 
-    // Try to DM the user
+    
     try {
       const dmEmbed = new EmbedBuilder()
         .setTitle(`${CustomEmojis.CAUTION} Warning in ${guild.name}`)
@@ -102,7 +100,7 @@ export async function execute(
 
       await target.send({ embeds: [dmEmbed] });
     } catch {
-      // DM failed, ignore
+      
     }
   } catch (error: any) {
     const errorEmbed = createErrorEmbed(`Failed to warn member: ${error.message}`);

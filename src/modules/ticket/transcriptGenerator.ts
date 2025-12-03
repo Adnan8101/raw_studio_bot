@@ -13,11 +13,7 @@ export interface TranscriptOptions {
   closedAt?: Date;
 }
 
-/**
- * Generates a world-class professional HTML transcript for a ticket
- * This uses discord-html-transcripts for a 100% accurate Discord clone
- * Captures ALL messages, images, attachments, embeds, and formatting
- */
+
 export async function generateProfessionalTranscript(
   channel: TextChannel,
   options: TranscriptOptions
@@ -28,19 +24,19 @@ export async function generateProfessionalTranscript(
   } = options;
 
 
-  // Generate the transcript with ALL messages - 100% Discord clone
-  // This captures:
-  // - All messages from first to last
-  // - All images and attachments
-  // - All embeds with full formatting
-  // - User avatars and roles
-  // - Timestamps and message metadata
-  // - Reactions and replies
+  
+  
+  
+  
+  
+  
+  
+  
   const attachment = await discordTranscripts.createTranscript(channel, {
-    limit: -1, // -1 means fetch ALL messages (no limit)
+    limit: -1, 
     filename: `ticket-${ticketNumber}-transcript.html`,
-    saveImages: true, // Save all images in the transcript
-    poweredBy: false, // Remove "powered by" footer
+    saveImages: true, 
+    poweredBy: false, 
     footerText: `Ticket #${ticketNumber} | ${panelName}`,
   }) as AttachmentBuilder;
 
@@ -48,9 +44,7 @@ export async function generateProfessionalTranscript(
   return attachment;
 }
 
-/**
- * Creates a professional embed for the transcript
- */
+
 export function createTranscriptEmbed(options: TranscriptOptions): EmbedBuilder {
   const {
     ticketId,
@@ -123,9 +117,7 @@ export function createTranscriptEmbed(options: TranscriptOptions): EmbedBuilder 
   return embed;
 }
 
-/**
- * Generates a 4-digit random ticket number
- */
+
 export function generateTicketNumber(): number {
   return Math.floor(1000 + Math.random() * 9000);
 }

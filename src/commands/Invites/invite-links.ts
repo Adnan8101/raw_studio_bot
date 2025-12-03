@@ -7,6 +7,7 @@ import {
 } from 'discord.js';
 import { SlashCommand, PrefixCommand } from '../../types';
 import { DatabaseManager } from '../../utils/DatabaseManager';
+import { createErrorEmbed, COLORS, ICONS } from '../../utils/embeds';
 
 const slashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
@@ -16,7 +17,7 @@ const slashCommand: SlashCommand = {
       option.setName('user')
         .setDescription('The user to check invite links for (optional)')
         .setRequired(false)),
-  category: 'invites_welcome',
+  category: 'Invites',
   syntax: '/invite-links [user]',
   permission: 'None',
   example: '/invite-links @Tai',
@@ -26,7 +27,7 @@ const slashCommand: SlashCommand = {
     const guild = interaction.guild;
 
     if (!guild) {
-      await interaction.reply({ content: 'This command can only be used in a server!', ephemeral: true });
+      await interaction.reply({ embeds: [createErrorEmbed('This command can only be used in a server!')], ephemeral: true });
       return;
     }
 
@@ -36,7 +37,7 @@ const slashCommand: SlashCommand = {
 
       if (inviteTrackers.length === 0) {
         const embed = new EmbedBuilder()
-          .setColor(0xFF6B6B)
+          .setColor(COLORS.ERROR)
           .setAuthor({
             name: targetUser.username,
             iconURL: targetUser.displayAvatarURL()
@@ -66,7 +67,7 @@ const slashCommand: SlashCommand = {
         };
       });
 
-      // Split into multiple embeds if too many fields
+      
       const embedsToSend: EmbedBuilder[] = [];
       const fieldsPerEmbed = 6;
 
@@ -74,7 +75,7 @@ const slashCommand: SlashCommand = {
         const currentFields = fields.slice(i, i + fieldsPerEmbed);
 
         const embed = new EmbedBuilder()
-          .setColor(0x00AE86)
+          .setColor(COLORS.SUCCESS)
           .setAuthor({
             name: `${targetUser.username}'s Invite Links`,
             iconURL: targetUser.displayAvatarURL()
@@ -94,7 +95,7 @@ const slashCommand: SlashCommand = {
     } catch (error) {
       console.error('Error fetching invite links:', error);
       await interaction.reply({
-        content: 'An error occurred while fetching invite links.',
+        embeds: [createErrorEmbed('An error occurred while fetching invite links.')],
         ephemeral: true
       });
     }
@@ -103,7 +104,7 @@ const slashCommand: SlashCommand = {
 
 const prefixCommand: PrefixCommand = {
   name: 'invite-links',
-  aliases: ['invitelinks', 'invlinks', 'myinvites'],
+  aliases: ['invitelinks', 'invlinks', 'myinvites', 'inviteinfo'],
   description: 'View all your invite links',
   usage: 'invite-links [user]',
   example: 'invite-links @Tai',
@@ -111,7 +112,7 @@ const prefixCommand: PrefixCommand = {
   async execute(message: Message, args: string[]): Promise<void> {
     const guild = message.guild;
     if (!guild) {
-      await message.reply('This command can only be used in a server!');
+      await message.reply({ embeds: [createErrorEmbed('This command can only be used in a server!')] });
       return;
     }
 
@@ -126,11 +127,11 @@ const prefixCommand: PrefixCommand = {
         if (member) {
           targetUser = member.user;
         } else {
-          await message.reply('User not found in this server!');
+          await message.reply({ embeds: [createErrorEmbed('User not found in this server!')] });
           return;
         }
       } catch (error) {
-        await message.reply('Invalid user mentioned!');
+        await message.reply({ embeds: [createErrorEmbed('Invalid user mentioned!')] });
         return;
       }
     }
@@ -141,7 +142,7 @@ const prefixCommand: PrefixCommand = {
 
       if (inviteTrackers.length === 0) {
         const embed = new EmbedBuilder()
-          .setColor(0xFF6B6B)
+          .setColor(COLORS.ERROR)
           .setAuthor({
             name: targetUser.username,
             iconURL: targetUser.displayAvatarURL()
@@ -171,7 +172,7 @@ const prefixCommand: PrefixCommand = {
         };
       });
 
-      // Split into multiple embeds if too many fields
+      
       const embedsToSend: EmbedBuilder[] = [];
       const fieldsPerEmbed = 6;
 
@@ -179,7 +180,7 @@ const prefixCommand: PrefixCommand = {
         const currentFields = fields.slice(i, i + fieldsPerEmbed);
 
         const embed = new EmbedBuilder()
-          .setColor(0x00AE86)
+          .setColor(COLORS.SUCCESS)
           .setAuthor({
             name: `${targetUser.username}'s Invite Links`,
             iconURL: targetUser.displayAvatarURL()
@@ -198,7 +199,7 @@ const prefixCommand: PrefixCommand = {
       await message.reply({ embeds: embedsToSend });
     } catch (error) {
       console.error('Error fetching invite links:', error);
-      await message.reply('An error occurred while fetching invite links.');
+      await message.reply({ embeds: [createErrorEmbed('An error occurred while fetching invite links.')] });
     }
   },
 };

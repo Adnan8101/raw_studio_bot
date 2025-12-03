@@ -50,11 +50,11 @@ export class VowelsGameManager {
         let useMixed = false;
 
         if (difficulty === 'Easy') {
-            length = Math.floor(Math.random() * 7) + 9; // 9-15
+            length = Math.floor(Math.random() * 7) + 9; 
         } else if (difficulty === 'Medium') {
-            length = Math.floor(Math.random() * 6) + 15; // 15-20
-        } else { // Hard
-            length = Math.floor(Math.random() * 6) + 20; // 20-25
+            length = Math.floor(Math.random() * 6) + 15; 
+        } else { 
+            length = Math.floor(Math.random() * 6) + 20; 
         }
 
         if (category === 'words') useWords = true;
@@ -68,28 +68,28 @@ export class VowelsGameManager {
                 if (result.length + word.length <= length) {
                     result += word;
                 } else {
-                    // Fill remaining with random chars if no word fits (unlikely with short words, but safety)
+                    
                     break;
                 }
             }
-            // If we broke early or need filler
+            
             while (result.length < length) {
                 result += allChars[Math.floor(Math.random() * allChars.length)];
             }
         } else {
-            // Letters or Mixed
+            
             for (let i = 0; i < length; i++) {
                 if (useMixed && Math.random() < 0.1) {
-                    // Occasional punctuation
+                    
                     const punct = '.,!?;:';
                     result += punct[Math.floor(Math.random() * punct.length)];
                 } else {
                     if (difficulty === 'Easy') {
-                        // Easy: letters only, limited vowels? User said "Vowel set limited to a, e, i, o, u" which is standard.
-                        // "Lowercase & uppercase mix"
+                        
+                        
                         result += allChars[Math.floor(Math.random() * allChars.length)];
                     } else if (difficulty === 'Hard') {
-                        // Hard: visually similar letters like l/1
+                        
                         if (Math.random() < 0.2) {
                             const tricky = ['l', '1', 'I', '0', 'O'];
                             result += tricky[Math.floor(Math.random() * tricky.length)];
@@ -103,7 +103,7 @@ export class VowelsGameManager {
             }
         }
 
-        // Truncate to exact length if needed
+        
         return result.substring(0, length);
     }
 
@@ -116,7 +116,7 @@ export class VowelsGameManager {
         const text = this.generateText(difficulty, category);
         const { count: vowelCount, breakdown } = this.countVowels(text);
 
-        // Generate Image
+        
         const attachment = await VowelsCanvas.generateImage(text);
 
         const embed = new EmbedBuilder()
@@ -130,7 +130,7 @@ export class VowelsGameManager {
             files: [attachment]
         });
 
-        // DM the starter
+        
         try {
             await interaction.user.send(`Your answer: || ${vowelCount} ||`);
         } catch (e) {
@@ -155,13 +155,13 @@ export class VowelsGameManager {
         if (time > 0) {
             setTimeout(async () => {
                 try {
-                    // Check if game is still active
+                    
                     if (!this.activeGames.has(channelId)) return;
 
                     await interaction.deleteReply();
                 } catch (error) {
                     console.error('Error in Vowels Game timeout:', error);
-                    // Don't delete game here, just failed to delete message
+                    
                 }
             }, time * 1000);
         }
@@ -177,7 +177,7 @@ export class VowelsGameManager {
             return false;
         }
 
-        // Check permissions: Admin or Starter
+        
         if (!interaction.memberPermissions?.has('ManageGuild') && interaction.user.id !== game.starterId) {
             return false;
         }
@@ -192,7 +192,7 @@ export class VowelsGameManager {
 
         const channel = interaction.channel;
         if (channel) {
-            // Send to channel
+            
             if (channel.isTextBased() && !(channel as any).isDMBased()) {
                 await (channel as TextChannel).send({ embeds: [embed] });
             }
@@ -207,10 +207,10 @@ export class VowelsGameManager {
 
         const content = message.content.trim();
 
-        // "Allowed answer: only digits (e.g., 7) — no trailing spaces or text."
-        // "007 is considered wrong unless you want to accept leading zeros (recommend: reject)."
+        
+        
         if (!/^[1-9]\d*|0$/.test(content)) {
-            // If it's not a strict number (no leading zeros unless it's just 0), ignore
+            
             return;
         }
 

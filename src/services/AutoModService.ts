@@ -1,6 +1,4 @@
-/**
- * AutoMod Service - Manages automod configuration
- */
+
 
 import { PrismaClient } from '@prisma/client';
 
@@ -50,7 +48,7 @@ export class AutoModService {
   }
 
   async getAllWhitelists(guildId: string, type: string) {
-    // Get both feature-specific and global whitelists
+    
     return this.prisma.autoModWhitelist.findMany({
       where: {
         guildId,

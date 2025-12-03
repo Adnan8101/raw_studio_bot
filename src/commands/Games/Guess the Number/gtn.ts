@@ -150,7 +150,7 @@ export const handleGuessTheNumberCommand = async (interaction: ChatInputCommandI
 
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         } else if (subcommand === 'winner') {
-            // Placeholder for winner role setting
+            
             await interaction.reply({ content: 'Winner role configuration is coming soon!', flags: MessageFlags.Ephemeral });
         } else if (subcommand === 'lock') {
             if (channel.isThread()) {

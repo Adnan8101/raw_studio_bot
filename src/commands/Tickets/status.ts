@@ -10,7 +10,7 @@ export const data = new SlashCommandBuilder()
   .setName('status')
   .setDescription('Display comprehensive bot status and system information');
 
-// Custom Discord tick emoji
+
 const TICK = '<:tcet_tick:1437995479567962184>';
 
 async function getDatabaseStats(client: BotClient): Promise<{
@@ -59,7 +59,7 @@ async function getDatabaseStats(client: BotClient): Promise<{
 
     const pool = client.db.getPool();
 
-    // OPTIMIZED: Single query to get all counts at once
+    
     const statsResult = await pool.query(`
       SELECT 
         COUNT(*) FILTER (WHERE type IS NOT NULL) as total_records,
@@ -76,16 +76,16 @@ async function getDatabaseStats(client: BotClient): Promise<{
     const openTickets = parseInt(statsResult.rows[0].open_tickets);
     const closedTickets = parseInt(statsResult.rows[0].closed_tickets);
 
-    // Get database size
+    
     const sizeResult = await pool.query(`
       SELECT pg_size_pretty(pg_database_size(current_database())) as size
     `);
     const storage = sizeResult.rows[0].size;
 
-    // Get total available storage (disk allocation)
+    
     let totalStorage = 'N/A';
     try {
-      // Try to get actual disk space information
+      
       const diskResult = await pool.query(`
         SELECT 
           pg_size_pretty(
@@ -97,19 +97,19 @@ async function getDatabaseStats(client: BotClient): Promise<{
           ) as wal_size
       `);
 
-      // Try alternative method: get from pg_stat_file (requires superuser on some systems)
+      
       try {
         const fsResult = await pool.query(`
           SELECT 
             (pg_stat_file('base')).size as base_size,
             (pg_stat_file('global')).size as global_size
         `);
-        // This won't work on Cloud SQL due to permissions
+        
       } catch (e) {
-        // Expected to fail on Cloud SQL
+        
       }
 
-      // For Cloud SQL, query the actual allocated space via pg_ls_waldir and calculate
+      
       const walResult = await pool.query(`
         SELECT 
           COALESCE(sum(size), 0) as wal_size 
@@ -122,7 +122,7 @@ async function getDatabaseStats(client: BotClient): Promise<{
         WHERE datistemplate = false
       `);
 
-      // Get total space used by all objects
+      
       const totalUsed = await pool.query(`
         SELECT pg_size_pretty(
           (SELECT sum(pg_database_size(datname))::bigint FROM pg_database WHERE datistemplate = false) +
@@ -133,7 +133,7 @@ async function getDatabaseStats(client: BotClient): Promise<{
       totalStorage = totalUsed.rows[0].total_disk_usage || allDbSize.rows[0].all_db_size;
 
     } catch (e) {
-      // Final fallback: sum all database sizes
+      
       try {
         const allDbResult = await pool.query(`
           SELECT pg_size_pretty(sum(pg_database_size(datname))::bigint) as total_size
@@ -145,7 +145,7 @@ async function getDatabaseStats(client: BotClient): Promise<{
       }
     }
 
-    // Get database version and info
+    
 
     const versionResult = await pool.query('SELECT version() as version, current_database() as dbname');
     const fullVersion = versionResult.rows[0].version;
@@ -153,7 +153,7 @@ async function getDatabaseStats(client: BotClient): Promise<{
     const dbName = versionResult.rows[0].dbname;
 
 
-    // Get connection info
+    
 
     const hostResult = await pool.query(`
       SELECT 
@@ -227,7 +227,7 @@ export async function execute(
   await interaction.deferReply();
 
 
-  // Bot uptime
+  
   const uptime = process.uptime();
   const days = Math.floor(uptime / 86400);
   const hours = Math.floor((uptime % 86400) / 3600);
@@ -248,7 +248,7 @@ export async function execute(
   const heapTotalMB = (processMemory.heapTotal / 1024 / 1024).toFixed(2);
 
 
-  // CPU information
+  
 
   const cpus = os.cpus();
   const cpuModel = cpus[0].model;
@@ -278,7 +278,7 @@ export async function execute(
 
   }
 
-  // Discord statistics
+  
 
   const guildCount = client.guilds.cache.size;
   const channelCount = client.channels.cache.size;
@@ -286,14 +286,14 @@ export async function execute(
   const wsLatency = client.ws.ping;
 
 
-  // Environment info
+  
   const nodeVersion = process.version;
   const pid = process.pid;
   const execPath = process.execPath;
   const cwd = process.cwd();
 
 
-  // Database statistics
+  
   const dbStats = await getDatabaseStats(client);
 
 
@@ -312,7 +312,7 @@ export async function execute(
     }
   }
 
-  // Build main status embed with vertical layout
+  
   ;
   const statusEmbed = new EmbedBuilder()
     .setColor('#5865F2')
@@ -363,7 +363,7 @@ export async function execute(
     .setTimestamp()
     .setFooter({ text: `Requested by ${interaction.user.tag}` });
 
-  // Database embed with vertical layout
+  
   const dbEmbed = new EmbedBuilder()
     .setColor(dbStats.connected ? '#00ff00' : '#ff0000')
     .setTitle('Database Status')

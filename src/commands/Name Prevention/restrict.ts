@@ -44,7 +44,7 @@ export const handleRestrictCommand = async (interaction: ChatInputCommandInterac
             const nameToAdd = interaction.options.getString('name', true).toLowerCase();
 
             try {
-                // Fetch current settings to ensure uniqueness (simulate $addToSet)
+                
                 const currentSettings = await prisma.guildConfig.findUnique({ where: { guildId } });
                 let currentBlocked = currentSettings?.blockedNames || [];
 

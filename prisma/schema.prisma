@@ -413,8 +413,19 @@ model InviteTracker {
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@unique([guildId, userId])
-  @@index([guildId])
   @@index([userId])
+}
+
+model InviteRole {
+  id        String   @id @default(cuid())
+  guildId   String   @map("guild_id")
+  roleId    String   @map("role_id")
+  invites   Int      // Number of invites required
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([guildId, invites])
+  @@map("invite_roles")
+  @@index([guildId])
 }
 
 // ===========================
@@ -544,7 +555,13 @@ model UserStats {
   guildId       String    @map("guild_id")
   userId        String    @map("user_id")
   messageCount  Int       @default(0) @map("message_count")
-  voiceMinutes  Int       @default(0) @map("voice_minutes")
+  dailyMessages Int       @default(0) @map("daily_messages")
+  weeklyMessages Int      @default(0) @map("weekly_messages")
+  lastMessageDate DateTime? @map("last_message_date")
+  voiceMinutes  Int       @default(0) @map("voice_minutes") // Deprecated in favor of voiceTime
+  voiceTime       BigInt    @default(0) @map("voice_time")
+  dailyVoiceTime  BigInt    @default(0) @map("daily_voice_time")
+  weeklyVoiceTime BigInt    @default(0) @map("weekly_voice_time")
   lastVoiceJoin DateTime? @map("last_voice_join")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
@@ -553,4 +570,58 @@ model UserStats {
   @@map("user_stats")
   @@index([guildId])
   @@index([userId])
+}
+
+// ===========================
+// Message Tracking System
+// ===========================
+
+model MessageConfig {
+  id              String   @id @default(cuid())
+  guildId         String   @unique @map("guild_id")
+  dailyResetTime  String   @default("00:00") @map("daily_reset_time")
+  weeklyResetTime String   @default("Sunday 00:00") @map("weekly_reset_time")
+  lastDailyReset  DateTime? @map("last_daily_reset")
+  lastWeeklyReset DateTime? @map("last_weekly_reset")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("message_config")
+}
+
+model MessageBlacklist {
+  id        String   @id @default(cuid())
+  guildId   String   @map("guild_id")
+  targetId  String   @map("target_id")
+  type      String   // CHANNEL, CATEGORY
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([guildId, targetId])
+  @@map("message_blacklist")
+  @@index([guildId])
+}
+
+model MessageRole {
+  id           String   @id @default(cuid())
+  guildId      String   @map("guild_id")
+  roleId       String   @map("role_id")
+  messageCount Int      @map("message_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@unique([guildId, messageCount])
+  @@map("message_roles")
+  @@index([guildId])
+}
+
+model VoiceConfig {
+  id              String   @id @default(cuid())
+  guildId         String   @unique @map("guild_id")
+  dailyResetTime  String   @default("00:00") @map("daily_reset_time")
+  weeklyResetTime String   @default("Sunday 00:00") @map("weekly_reset_time")
+  lastDailyReset  DateTime? @map("last_daily_reset")
+  lastWeeklyReset DateTime? @map("last_weekly_reset")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("voice_config")
 }

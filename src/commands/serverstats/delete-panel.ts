@@ -47,7 +47,7 @@ const slashCommand: SlashCommand = {
     try {
       const guild = interaction.guild;
 
-      // Delete channels
+      
       const channels = [
         panel.totalChannelId,
         panel.usersChannelId,
@@ -67,7 +67,7 @@ const slashCommand: SlashCommand = {
         }
       }
 
-      // Delete category
+      
       try {
         const category = await guild.channels.fetch(panel.categoryId);
         if (category) await category.delete();
@@ -75,7 +75,7 @@ const slashCommand: SlashCommand = {
         console.error(`Error deleting category ${panel.categoryId}:`, error);
       }
 
-      // Remove from database
+      
       const dbDeleted = await db.deletePanel(interaction.guild.id, panelName);
 
       if (dbDeleted) {
@@ -151,7 +151,7 @@ const prefixCommand: PrefixCommand = {
     try {
       const guild = message.guild;
 
-      // Delete channels
+      
       const channels = [
         panel.totalChannelId,
         panel.usersChannelId,
@@ -171,7 +171,7 @@ const prefixCommand: PrefixCommand = {
         }
       }
 
-      // Delete category
+      
       try {
         const category = await guild.channels.fetch(panel.categoryId);
         if (category) await category.delete();
@@ -179,7 +179,7 @@ const prefixCommand: PrefixCommand = {
         console.error(`Error deleting category ${panel.categoryId}:`, error);
       }
 
-      // Remove from database
+      
       const dbDeleted = await db.deletePanel(message.guild.id, panelName);
 
       if (dbDeleted) {

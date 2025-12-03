@@ -19,10 +19,10 @@ export const handleStealCommand = async (interaction: ChatInputCommandInteractio
             return;
         }
 
-        // Check if it's a custom emoji to show modal immediately
+        
         const customEmoji = parseEmoji(content);
         if (customEmoji && customEmoji.id) {
-            // Show Modal
+            
             const modal = new ModalBuilder()
                 .setCustomId(`steal_modal_${Date.now()}`)
                 .setTitle('Steal Emoji');
@@ -50,10 +50,10 @@ export const handleStealCommand = async (interaction: ChatInputCommandInteractio
                 await submitted.deferReply();
                 await processSteal(submitted, content, false, name);
             } catch (err) {
-                // Time out or error
+                
             }
         } else {
-            // URL or other content - proceed to processSteal which handles buttons
+            
             await interaction.deferReply();
             await processSteal(interaction, content);
         }
@@ -107,12 +107,12 @@ async function resizeImage(url: string, isSticker: boolean): Promise<Buffer | nu
         const response = await axios.get(url, { responseType: 'arraybuffer' });
         const buffer = Buffer.from(response.data);
 
-        // Discord Limits:
-        // Emoji: 256KB
-        // Sticker: 500KB
+        
+        
+        
         const maxSize = isSticker ? 500 * 1024 : 256 * 1024;
 
-        // Check metadata to detect animation
+        
         const metadata = await sharp(buffer).metadata();
         const isAnimated = !!(metadata.pages && metadata.pages > 1);
 
@@ -122,9 +122,9 @@ async function resizeImage(url: string, isSticker: boolean): Promise<Buffer | nu
 
         let resized = buffer;
         let quality = 90;
-        let width = isSticker ? 320 : 128; // Standard sizes
+        let width = isSticker ? 320 : 128; 
 
-        // Iteratively reduce quality/size if needed
+        
         while (resized.length > maxSize && quality > 10) {
             const pipeline = sharp(buffer, { animated: isAnimated })
                 .resize({ width: width, fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } });
@@ -141,12 +141,12 @@ async function resizeImage(url: string, isSticker: boolean): Promise<Buffer | nu
                         .toBuffer();
                 }
             } else {
-                // Emojis: PNG or GIF
+                
                 if (isAnimated) {
-                    // GIF output doesn't support 'quality' in the same way as JPEG/PNG in some sharp versions, 
-                    // but 'colours' or 'effort'. However, let's try standard options or cast.
+                    
+                    
                     resized = await pipeline
-                        .gif({} as any) // GIF compression is limited in sharp, usually just reducing colors/dimensions helps size.
+                        .gif({} as any) 
                         .toBuffer();
                 } else {
                     resized = await pipeline
@@ -171,11 +171,11 @@ async function processSteal(context: ChatInputCommandInteraction | Message | Mod
 
     let statusMessage: Message | null = null;
 
-    // Helper to update status
+    
     const updateStatus = async (text: string, currentMsg: Message | null): Promise<Message | null> => {
         const embed = new EmbedBuilder()
             .setDescription(text)
-            .setColor('#ffff00'); // Yellow for processing
+            .setColor('#ffff00'); 
 
         if (context instanceof ChatInputCommandInteraction || context instanceof ModalSubmitInteraction) {
             if (context.deferred || context.replied) {
@@ -197,7 +197,7 @@ async function processSteal(context: ChatInputCommandInteraction | Message | Mod
     try {
         statusMessage = await updateStatus('⏳ **Processing...**\nAnalyzing content...', statusMessage);
 
-        // 1. Try to parse as Custom Emoji
+        
         const customEmoji = parseEmoji(content);
         if (customEmoji && customEmoji.id) {
             const url = `https://cdn.discordapp.com/emojis/${customEmoji.id}.${customEmoji.animated ? 'gif' : 'png'}`;
@@ -233,7 +233,7 @@ async function processSteal(context: ChatInputCommandInteraction | Message | Mod
             return;
         }
 
-        // 2. If not a custom emoji string, treat as URL (Media/Sticker)
+        
         if (!content.startsWith('http')) {
             const msg = '❌ Invalid content. Provide an emoji or a valid URL.';
             if (context instanceof ChatInputCommandInteraction || context instanceof ModalSubmitInteraction) await context.editReply(msg);
@@ -241,7 +241,7 @@ async function processSteal(context: ChatInputCommandInteraction | Message | Mod
             return;
         }
 
-        // It's a URL
+        
         const embed = new EmbedBuilder()
             .setTitle('Steal Media')
             .setDescription('What would you like to do with this media?')
@@ -272,7 +272,7 @@ async function processSteal(context: ChatInputCommandInteraction | Message | Mod
             }
         }
 
-        // Collector
+        
         const collector = response.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60000 });
 
         collector.on('collect', async (i: any) => {
@@ -281,7 +281,7 @@ async function processSteal(context: ChatInputCommandInteraction | Message | Mod
                 return;
             }
 
-            // If it's a slash/modal interaction, we can show another modal for the name!
+            
             if ((context instanceof ChatInputCommandInteraction || context instanceof ModalSubmitInteraction) && !i.replied && !i.deferred) {
                 const modal = new ModalBuilder()
                     .setCustomId(`steal_media_modal_${Date.now()}`)
@@ -331,12 +331,12 @@ async function processSteal(context: ChatInputCommandInteraction | Message | Mod
                     }
 
                 } catch (err) {
-                    // Modal timeout or error
+                    
                 }
                 return;
             }
 
-            // Fallback for prefix command (no modal)
+            
             await i.deferUpdate();
 
             try {
@@ -368,7 +368,7 @@ async function processSteal(context: ChatInputCommandInteraction | Message | Mod
         });
 
         collector.on('end', () => {
-            // Cleanup buttons if still there
+            
             if (context instanceof ChatInputCommandInteraction || context instanceof ModalSubmitInteraction) {
                 context.editReply({ components: [] }).catch(() => { });
             } else {
@@ -380,7 +380,7 @@ async function processSteal(context: ChatInputCommandInteraction | Message | Mod
         console.error('Process Steal Error:', error);
         const msg = `❌ **Error:** ${error.message}`;
         if (context instanceof ChatInputCommandInteraction || context instanceof ModalSubmitInteraction) {
-            // If already replied, edit. If not, reply.
+            
             if (context.replied || context.deferred) await context.editReply(msg);
             else await context.reply(msg);
         } else {

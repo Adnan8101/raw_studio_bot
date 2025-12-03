@@ -4,15 +4,15 @@ import { AttachmentBuilder } from 'discord.js';
 export class ReverseCanvas {
     public static async generateImage(text: string): Promise<AttachmentBuilder> {
         const width = 800;
-        const height = 400; // Taller for multi-line
+        const height = 400; 
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
 
-        // Background
+        
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, width, height);
 
-        // Add some noise
+        
         ctx.fillStyle = '#f0f0f0';
         for (let i = 0; i < 100; i++) {
             const x = Math.random() * width;
@@ -21,13 +21,13 @@ export class ReverseCanvas {
             ctx.fillRect(x, y, s, s);
         }
 
-        // Text settings
+        
         ctx.font = 'bold 40px sans-serif';
         ctx.fillStyle = '#000000';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        // Wrap text
+        
         const words = text.split(' ');
         const lines = [];
         let currentLine = words[0];
@@ -51,7 +51,7 @@ export class ReverseCanvas {
             ctx.fillText(lines[i], startX, startY + (i * 50));
         }
 
-        // Add some lines
+        
         ctx.strokeStyle = '#d0d0d0';
         ctx.lineWidth = 1;
         for (let i = 0; i < 5; i++) {

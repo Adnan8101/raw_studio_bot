@@ -1,6 +1,4 @@
-/**
- * Custom Emoji Definitions
- */
+
 
 export const CustomEmojis = {
   TICK: '<:tcet_tick:1437995479567962184>',
@@ -15,9 +13,7 @@ export const CustomEmojis = {
   CAUTION: '<:caution:1437997212008185866>',
 } as const;
 
-/**
- * Replace static emojis with custom ones in text
- */
+
 export function replaceEmojis(text: string): string {
   return text
     .replace(/<:tcet_tick:1437995479567962184>|:white_check_mark:/g, CustomEmojis.TICK)

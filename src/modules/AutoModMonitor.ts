@@ -1,6 +1,4 @@
-/**
- * AutoMod Monitor - Real-time message monitoring for automod features
- */
+
 
 import { Message, Client, GuildMember, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { AutoModService } from '../services/AutoModService';
@@ -21,7 +19,7 @@ export class AutoModMonitor {
   ) {
     this.setupMessageListener();
 
-    // Cleanup old cache entries every minute
+    
     this.cleanupInterval = setInterval(() => {
       this.cleanupCache();
     }, 60000);
@@ -31,7 +29,7 @@ export class AutoModMonitor {
 
   private setupMessageListener() {
     this.client.on('messageCreate', async (message: Message) => {
-      // Ignore DMs and the bot itself
+      
       if (!message.guild || message.author.id === this.client.user?.id) return;
 
       const guildId = message.guild.id;
@@ -39,16 +37,16 @@ export class AutoModMonitor {
       const channelId = message.channel.id;
 
       try {
-        // Check anti-spam
+        
         await this.checkAntiSpam(message, guildId, userId);
 
-        // Check mass mentions
+        
         await this.checkMassMention(message, guildId, userId);
 
-        // Check server invites
+        
         await this.checkServerInvite(message, guildId, userId, channelId);
 
-        // Check anti-link
+        
         await this.checkAntiLink(message, guildId, userId, channelId);
       } catch (error) {
         console.error('AutoMod error:', error);
@@ -62,7 +60,7 @@ export class AutoModMonitor {
     const config = await this.autoModService.getConfig(guildId, 'anti_spam');
     if (!config?.enabled) return;
 
-    // Check whitelist (modified to allow admins for spam check)
+    
     if (await this.isWhitelisted(message.guild!, 'anti_spam', userId, message.member!, message.channel.id)) {
       return;
     }
@@ -79,17 +77,17 @@ export class AutoModMonitor {
       this.messageCache.set(cacheKey, cache);
     }
 
-    // Remove old timestamps outside time window
+    
     cache.timestamps = cache.timestamps.filter(ts => now - ts < timeSpan);
 
-    // Add current message
+    
     cache.timestamps.push(now);
     cache.count = cache.timestamps.length;
 
-    // Count lines in current message
+    
     const currentLines = (message.content.match(/\n/g) || []).length + 1;
 
-    // Check violations
+    
     const maxMessages = config.maxMessages || 5;
     const maxLines = config.maxLines || 10;
 
@@ -113,7 +111,7 @@ export class AutoModMonitor {
         config.punishmentDuration || 600000
       );
 
-      // Clear message cache to reset spam counter
+      
       this.messageCache.delete(cacheKey);
     }
   }
@@ -122,7 +120,7 @@ export class AutoModMonitor {
     const config = await this.autoModService.getConfig(guildId, 'mass_mention');
     if (!config?.enabled) return;
 
-    // Check if whitelisted
+    
     if (await this.isWhitelisted(message.guild!, 'mass_mention', userId, message.member!, message.channel.id)) {
       return;
     }
@@ -145,12 +143,12 @@ export class AutoModMonitor {
     const config = await this.autoModService.getConfig(guildId, 'server_invite');
     if (!config?.enabled) return;
 
-    // Check if whitelisted
+    
     if (await this.isWhitelisted(message.guild!, 'server_invite', userId, message.member!, channelId)) {
       return;
     }
 
-    // Precise regex for Discord invite links (all official Discord invite formats)
+    
     const inviteRegex = /(?:https?:\/\/)?(?:www\.)?(?:discord\.(?:gg|io|me|li|com)\/(?:invite\/)?|discordapp\.com\/invite\/|discord\.com\/invite\/)[a-zA-Z0-9-]{2,32}/gi;
 
     if (inviteRegex.test(message.content)) {
@@ -168,26 +166,26 @@ export class AutoModMonitor {
     const config = await this.autoModService.getConfig(guildId, 'anti_link');
     if (!config?.enabled) return;
 
-    // Check if whitelisted
+    
     if (await this.isWhitelisted(message.guild!, 'anti_link', userId, message.member!, channelId)) {
       return;
     }
 
-    // Check if it's a Discord invite first - if so, skip anti-link check
-    // (Server invite feature will handle it if enabled)
+    
+    
     const inviteRegex = /(?:https?:\/\/)?(?:www\.)?(?:discord\.(?:gg|io|me|li|com)\/(?:invite\/)?|discordapp\.com\/invite\/|discord\.com\/invite\/)[a-zA-Z0-9-]{2,32}/gi;
     if (inviteRegex.test(message.content)) {
-      return; // Let server_invite feature handle Discord invites
+      return; 
     }
 
-    // Precise regex for external URLs (proper http://, https://, or www. prefix)
-    // This matches:
-    // - https://example.com
-    // - http://example.com  
-    // - www.example.com
-    // But NOT: example.com (without protocol or www)
-    // Precise regex for external URLs
-    // Matches: http://, https://, www.
+    
+    
+    
+    
+    
+    
+    
+    
     const urlRegex = /((?:https?:\/\/)[a-z0-9]+(?:[-.][a-z0-9]+)*\.[a-z]{2,5}(?::[0-9]{1,5})?(?:\/[^\s]*)?)|(?:www\.[a-z0-9]+(?:[-.][a-z0-9]+)*\.[a-z]{2,5}(?::[0-9]{1,5})?(?:\/[^\s]*)?)/gi;
 
     if (urlRegex.test(message.content)) {
@@ -208,24 +206,24 @@ export class AutoModMonitor {
     member: GuildMember | null,
     channelId: string
   ): Promise<boolean> {
-    // Check if user is the guild owner
+    
     if (userId === guild.ownerId) {
       return true;
     }
 
-    // Check for Administrator/ManageGuild permissions - REMOVED
-    // Admins are now subject to AutoMod checks just like everyone else.
+    
+    
 
 
-    // Get all whitelists (feature-specific + global)
+    
     const allWhitelists = await this.autoModService.getAllWhitelists(guild.id, feature);
 
-    // Check user whitelist
+    
     if (allWhitelists.some((w: any) => w.targetType === 'user' && w.targetId === userId)) {
       return true;
     }
 
-    // Check role whitelist
+    
     if (member) {
       for (const roleId of Array.from(member.roles.cache.keys())) {
         if (allWhitelists.some((w: any) => w.targetType === 'role' && w.targetId === roleId)) {
@@ -234,7 +232,7 @@ export class AutoModMonitor {
       }
     }
 
-    // Check channel whitelist (if whitelisted, all messages in that channel are ignored)
+    
     if (allWhitelists.some((w: any) => w.targetType === 'channel' && w.targetId === channelId)) {
       return true;
     }
@@ -256,7 +254,7 @@ export class AutoModMonitor {
     if (!botMember) return;
 
     try {
-      // Handle action type (delete, warn, or delete & warn)
+      
       switch (actionType) {
         case 'delete':
           await message.delete().catch(() => { });
@@ -278,7 +276,7 @@ export class AutoModMonitor {
           await this.takePunishment(message, member, botMember, punishment, reason, duration);
       }
 
-      // Send simple punishment notification (auto-deletes after 5 seconds)
+      
       await this.sendPunishmentNotification(message, member, reason, actionType);
     } catch (error) {
       console.error('Failed to handle automod violation:', error);
@@ -306,7 +304,7 @@ export class AutoModMonitor {
 
       const notificationMsg = await message.channel.send({ embeds: [embed] });
 
-      // Auto-delete after 5 seconds
+      
       setTimeout(() => {
         notificationMsg.delete().catch(() => { });
       }, 5000);
@@ -319,7 +317,7 @@ export class AutoModMonitor {
 
   private async warnUser(message: Message, member: GuildMember, reason: string) {
     try {
-      // Add warning using moderation service
+      
       await this.moderationService.addWarn(
         message.guild!.id,
         member.id,
@@ -327,13 +325,13 @@ export class AutoModMonitor {
         `AutoMod: ${reason}`
       );
 
-      // Get warn count
+      
       const warnCount = await this.moderationService.getWarnCount(
         message.guild!.id,
         member.id
       );
 
-      // Try to DM the user
+      
       try {
         await member.send(
           `⚠️ **Warning in ${message.guild!.name}**\n\n` +
@@ -342,7 +340,7 @@ export class AutoModMonitor {
           `Please follow the server rules to avoid further action.`
         );
       } catch {
-        // DM failed, ignore
+        
       }
     } catch (error) {
       console.error('Failed to warn user:', error);
@@ -358,7 +356,7 @@ export class AutoModMonitor {
     duration: number
   ) {
     try {
-      // Try to DM the user before punishment
+      
       await this.tryDMUser(member, punishment, reason, duration);
 
       switch (punishment) {
@@ -381,7 +379,7 @@ export class AutoModMonitor {
           break;
       }
 
-      // Log the punishment
+      
       await this.loggingService.logModeration(member.guild.id, {
         action: `AutoMod ${punishment.charAt(0).toUpperCase() + punishment.slice(1)}`,
         target: { tag: member.user.tag, id: member.id },
@@ -421,7 +419,7 @@ export class AutoModMonitor {
 
   private cleanupCache() {
     const now = Date.now();
-    const maxAge = 60000; // 1 minute
+    const maxAge = 60000; 
 
     for (const [key, cache] of Array.from(this.messageCache.entries())) {
       if (cache.timestamps.length === 0 || now - cache.timestamps[cache.timestamps.length - 1] > maxAge) {
@@ -429,7 +427,7 @@ export class AutoModMonitor {
       }
     }
 
-    // Cleanup violation tracker (remove entries older than 2 minutes)
+    
     for (const [key, tracker] of Array.from(this.violationTracker.entries())) {
       if (now - tracker.lastViolation > 120000) {
         this.violationTracker.delete(key);
