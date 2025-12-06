@@ -3,6 +3,9 @@ import { prisma } from '../../database/connect';
 import { createSuccessEmbed, createErrorEmbed } from '../../utils/embeds';
 
 export const category = 'Messages';
+export const permission = 'Manage Guild';
+export const syntax = '/resetmessages <user|all>';
+export const example = '/resetmessages user @Tai';
 
 export const data = new SlashCommandBuilder()
     .setName('resetmessages')

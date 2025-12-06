@@ -5,6 +5,11 @@ import {
 } from 'discord.js';
 import { BotClient } from '../../core/client';
 
+export const category = 'Tickets';
+export const permission = 'None';
+export const syntax = '/about';
+export const example = '/about';
+
 export const data = new SlashCommandBuilder()
   .setName('about')
   .setDescription('Information about the bot');
@@ -55,5 +60,5 @@ export async function execute(
     .setTimestamp();
 
   await interaction.editReply({ embeds: [embed] });
-  
+
 }

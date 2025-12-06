@@ -11,6 +11,11 @@ import { DatabaseManager } from '../../utils/DatabaseManager';
 import { createInfoEmbed, createErrorEmbed, COLORS, ICONS } from '../../utils/embeds';
 import { CustomEmojis } from '../../utils/emoji';
 
+export const category = 'Invites';
+export const permission = 'None';
+export const syntax = '/invites [user]';
+export const example = '/invites @Tai';
+
 const slashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName('invites')

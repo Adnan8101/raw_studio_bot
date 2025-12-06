@@ -17,6 +17,11 @@ interface LoggingServices {
   prisma: any;
 }
 
+export const category = 'logging';
+export const permission = 'Manage Guild';
+export const syntax = '/logging <enable|disable|status>';
+export const example = '/logging enable channel:#logs';
+
 export const data = new SlashCommandBuilder()
   .setName('logging')
   .setDescription('Configure server logging')
@@ -62,14 +67,14 @@ async function handleEnable(interaction: ChatInputCommandInteraction, prisma: an
   const channel = interaction.options.getChannel('channel', true) as TextChannel;
   const guildId = interaction.guild!.id;
 
-  
+
   if (!channel.isTextBased()) {
     const errorEmbed = createErrorEmbed('Please select a text channel for logging.');
     await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
     return;
   }
 
-  
+
   const permissions = channel.permissionsFor(interaction.guild!.members.me!);
   if (!permissions?.has(PermissionFlagsBits.SendMessages) || !permissions?.has(PermissionFlagsBits.EmbedLinks)) {
     const errorEmbed = createErrorEmbed(`I need **Send Messages** and **Embed Links** permissions in ${channel}!`);
@@ -77,7 +82,7 @@ async function handleEnable(interaction: ChatInputCommandInteraction, prisma: an
     return;
   }
 
-  
+
   await prisma.loggingConfig.upsert({
     where: { guildId },
     create: {
@@ -106,7 +111,7 @@ async function handleEnable(interaction: ChatInputCommandInteraction, prisma: an
 
   await interaction.reply({ embeds: [embed] });
 
-  
+
   const testEmbed = createInfoEmbed(`${CustomEmojis.LOGGING} Logging System Activated`, `Server logging has been enabled by ${interaction.user}.\n\nThis channel will receive audit log events.`)
     .setTimestamp();
 

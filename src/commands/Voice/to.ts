@@ -3,7 +3,10 @@ import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, 
 import { createSuccessEmbed, createErrorEmbed } from '../../utils/embedHelpers';
 import { CustomEmojis } from '../../utils/emoji';
 
-export const category = 'voice';
+export const category = 'Voice';
+export const permission = 'Move Members';
+export const syntax = '/to <user>';
+export const example = '/to @Tai';
 
 export const data = new SlashCommandBuilder()
     .setName('to')

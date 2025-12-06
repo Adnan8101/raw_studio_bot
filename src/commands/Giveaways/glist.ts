@@ -4,7 +4,10 @@ import { DatabaseManager } from '../../utils/DatabaseManager';
 import { createInfoEmbed, createErrorEmbed } from '../../utils/embedHelpers';
 import { PrefixCommand } from '../../types';
 
-export const category = 'giveaways';
+export const category = 'Giveaways';
+export const permission = 'Manage Guild';
+export const syntax = '/glist';
+export const example = '/glist';
 
 export const data = new SlashCommandBuilder()
     .setName('glist')
@@ -15,7 +18,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const db = DatabaseManager.getInstance();
     const giveaways = await db.getActiveGiveaways();
 
-    
+
     const guildGiveaways = giveaways.filter(g => g.guildId === interaction.guildId);
 
     if (guildGiveaways.length === 0) {
@@ -34,7 +37,7 @@ export const prefixExecute = async (interaction: any) => {
     const db = DatabaseManager.getInstance();
     const giveaways = await db.getActiveGiveaways();
 
-    
+
     const guildGiveaways = giveaways.filter((g: any) => g.guildId === interaction.guildId);
 
     if (guildGiveaways.length === 0) {

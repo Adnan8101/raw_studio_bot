@@ -2,7 +2,10 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, MessageFlags, VoiceChannel } from 'discord.js';
 import { createSuccessEmbed, createErrorEmbed } from '../../utils/embedHelpers';
 
-export const category = 'voice';
+export const category = 'Voice';
+export const permission = 'Deafen Members';
+export const syntax = '/undeafenall';
+export const example = '/undeafenall';
 
 export const data = new SlashCommandBuilder()
     .setName('undeafenall')

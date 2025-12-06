@@ -2,7 +2,10 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, TextChannel, EmbedBuilder, MessageFlags, ThreadChannel } from 'discord.js';
 import { GuessTheNumberManager } from './manager';
 
-export const category = 'games';
+export const category = 'Games';
+export const permission = 'Manage Guild';
+export const syntax = '/gtn start <min> <max> [options]';
+export const example = '/gtn start min:1 max:100';
 
 const dataBuilder = new SlashCommandBuilder()
     .setName('gtn')
@@ -150,7 +153,7 @@ export const handleGuessTheNumberCommand = async (interaction: ChatInputCommandI
 
             await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         } else if (subcommand === 'winner') {
-            
+
             await interaction.reply({ content: 'Winner role configuration is coming soon!', flags: MessageFlags.Ephemeral });
         } else if (subcommand === 'lock') {
             if (channel.isThread()) {

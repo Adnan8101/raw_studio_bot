@@ -8,7 +8,10 @@ import {
 } from 'discord.js';
 import { SlashCommand, PrefixCommand } from '../../types';
 import { DatabaseManager } from '../../utils/DatabaseManager';
-
+export const category = 'serverstats';
+export const permission = 'Administrator';
+export const syntax = '/delete-panel <name>';
+export const example = '/delete-panel name:Stats';
 const slashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName('delete-panel')
@@ -47,7 +50,7 @@ const slashCommand: SlashCommand = {
     try {
       const guild = interaction.guild;
 
-      
+
       const channels = [
         panel.totalChannelId,
         panel.usersChannelId,
@@ -67,7 +70,7 @@ const slashCommand: SlashCommand = {
         }
       }
 
-      
+
       try {
         const category = await guild.channels.fetch(panel.categoryId);
         if (category) await category.delete();
@@ -75,7 +78,7 @@ const slashCommand: SlashCommand = {
         console.error(`Error deleting category ${panel.categoryId}:`, error);
       }
 
-      
+
       const dbDeleted = await db.deletePanel(interaction.guild.id, panelName);
 
       if (dbDeleted) {
@@ -151,7 +154,7 @@ const prefixCommand: PrefixCommand = {
     try {
       const guild = message.guild;
 
-      
+
       const channels = [
         panel.totalChannelId,
         panel.usersChannelId,
@@ -171,7 +174,7 @@ const prefixCommand: PrefixCommand = {
         }
       }
 
-      
+
       try {
         const category = await guild.channels.fetch(panel.categoryId);
         if (category) await category.delete();
@@ -179,7 +182,7 @@ const prefixCommand: PrefixCommand = {
         console.error(`Error deleting category ${panel.categoryId}:`, error);
       }
 
-      
+
       const dbDeleted = await db.deletePanel(message.guild.id, panelName);
 
       if (dbDeleted) {

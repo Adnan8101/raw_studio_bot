@@ -2,6 +2,11 @@ import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
 import { VoiceService } from '../../services/VoiceService';
 import { createSuccessEmbed } from '../../utils/embeds';
 
+export const category = 'Voice';
+export const permission = 'None';
+export const syntax = '/resetmyvoice';
+export const example = '/resetmyvoice';
+
 export const data = new SlashCommandBuilder()
     .setName('resetmyvoice')
     .setDescription('Resets your own voice state record in this guild');

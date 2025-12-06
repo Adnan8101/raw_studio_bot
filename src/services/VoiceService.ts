@@ -11,28 +11,28 @@ export class VoiceService {
         if (!userId) return;
         if (newState.member?.user.bot) return;
 
-        
+
         if (!oldState.channelId && newState.channelId) {
-            await this.join(userId, guildId);
+            await this.join(userId, guildId, newState.channelId);
         }
-        
+
         else if (oldState.channelId && !newState.channelId) {
             await this.leave(userId, guildId);
         }
-        
+
         else if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
-            
-            
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
+
+
         }
     }
 
-    private static async join(userId: string, guildId: string) {
+    private static async join(userId: string, guildId: string, channelId: string) {
         try {
             await prisma.userStats.upsert({
                 where: {
@@ -42,12 +42,14 @@ export class VoiceService {
                     }
                 },
                 update: {
-                    lastVoiceJoin: new Date()
+                    lastVoiceJoin: new Date(),
+                    lastVoiceChannelId: channelId
                 },
                 create: {
                     guildId,
                     userId,
-                    lastVoiceJoin: new Date()
+                    lastVoiceJoin: new Date(),
+                    lastVoiceChannelId: channelId
                 }
             });
         } catch (error) {
@@ -74,6 +76,8 @@ export class VoiceService {
 
             if (duration <= 0) return;
 
+            await this.addTime(userId, guildId, duration, stats.lastVoiceChannelId || undefined);
+
             await prisma.userStats.update({
                 where: {
                     guildId_userId: {
@@ -82,10 +86,8 @@ export class VoiceService {
                     }
                 },
                 data: {
-                    voiceTime: { increment: duration },
-                    dailyVoiceTime: { increment: duration },
-                    weeklyVoiceTime: { increment: duration },
-                    lastVoiceJoin: null
+                    lastVoiceJoin: null,
+                    lastVoiceChannelId: null
                 }
             });
         } catch (error) {
@@ -105,7 +107,7 @@ export class VoiceService {
 
         if (!stats) return null;
 
-        
+
         let currentSession = 0;
         if (stats.lastVoiceJoin) {
             currentSession = Date.now() - new Date(stats.lastVoiceJoin).getTime();
@@ -118,30 +120,79 @@ export class VoiceService {
         };
     }
 
-    public static async addTime(userId: string, guildId: string, ms: number) {
-        await prisma.userStats.upsert({
-            where: { guildId_userId: { guildId, userId } },
-            create: {
-                guildId,
-                userId,
-                voiceTime: ms,
-                dailyVoiceTime: ms,
-                weeklyVoiceTime: ms
-            },
-            update: {
-                voiceTime: { increment: ms },
-                dailyVoiceTime: { increment: ms },
-                weeklyVoiceTime: { increment: ms }
+    public static async addTime(userId: string, guildId: string, ms: number, channelId?: string) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        try {
+            await prisma.userStats.upsert({
+                where: { guildId_userId: { guildId, userId } },
+                create: {
+                    guildId,
+                    userId,
+                    voiceTime: ms,
+                    dailyVoiceTime: ms,
+                    weeklyVoiceTime: ms
+                },
+                update: {
+                    voiceTime: { increment: ms },
+                    dailyVoiceTime: { increment: ms },
+                    weeklyVoiceTime: { increment: ms }
+                }
+            });
+
+            // Update UserDailyStats
+            await prisma.userDailyStats.upsert({
+                where: {
+                    guildId_userId_date: {
+                        guildId,
+                        userId,
+                        date: today
+                    }
+                },
+                update: {
+                    voiceTime: { increment: ms }
+                },
+                create: {
+                    guildId,
+                    userId,
+                    date: today,
+                    voiceTime: ms
+                }
+            });
+
+            // Update UserChannelStats
+            if (channelId) {
+                await prisma.userChannelStats.upsert({
+                    where: {
+                        guildId_userId_channelId: {
+                            guildId,
+                            userId,
+                            channelId
+                        }
+                    },
+                    update: {
+                        voiceTime: { increment: ms }
+                    },
+                    create: {
+                        guildId,
+                        userId,
+                        channelId,
+                        voiceTime: ms
+                    }
+                });
             }
-        });
+        } catch (error) {
+            console.error('Error adding voice stats:', error);
+        }
     }
 
     public static async removeTime(userId: string, guildId: string, ms: number) {
-        
-        
-        
-        
-        
+
+
+
+
+
         const stats = await prisma.userStats.findUnique({
             where: { guildId_userId: { guildId, userId } }
         });
@@ -184,8 +235,8 @@ export class VoiceService {
                     voiceTime: 0,
                     dailyVoiceTime: 0,
                     weeklyVoiceTime: 0,
-                    lastVoiceJoin: null 
-                    
+                    lastVoiceJoin: null
+
                 }
             });
         } else {

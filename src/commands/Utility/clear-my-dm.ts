@@ -1,6 +1,11 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, DMChannel, MessageFlags } from 'discord.js';
 import { SlashCommand } from '../../types';
 
+export const category = 'Utility';
+export const permission = 'None';
+export const syntax = '/clear-my-dm';
+export const example = '/clear-my-dm';
+
 const slashCommand: SlashCommand = {
     data: new SlashCommandBuilder()
         .setName('clear-my-dm')

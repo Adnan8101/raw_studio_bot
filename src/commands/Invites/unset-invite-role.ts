@@ -8,6 +8,11 @@ import { SlashCommand, PrefixCommand } from '../../types';
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import { createErrorEmbed, createSuccessEmbed } from '../../utils/embeds';
 
+export const category = 'Invites';
+export const permission = 'Administrator';
+export const syntax = '/unsetinviterole <invites>';
+export const example = '/unsetinviterole 10';
+
 const slashCommand: SlashCommand = {
     data: new SlashCommandBuilder()
         .setName('unsetinviterole')

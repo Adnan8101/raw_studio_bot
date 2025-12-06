@@ -3,6 +3,9 @@ import { prisma } from '../../database/connect';
 import { createSuccessEmbed, createErrorEmbed, COLORS } from '../../utils/embeds';
 
 export const category = 'Utility';
+export const permission = 'Manage Guild';
+export const syntax = '/setresettime <dailyvoice|weeklyvoice|dailymessage|weeklymessage> <time>';
+export const example = '/setresettime dailyvoice 00:00';
 
 export const data = new SlashCommandBuilder()
     .setName('setresettime')

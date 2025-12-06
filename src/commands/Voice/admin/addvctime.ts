@@ -2,6 +2,11 @@ import { SlashCommandBuilder, PermissionFlagsBits, ChatInputCommandInteraction, 
 import { VoiceService } from '../../../services/VoiceService';
 import { createSuccessEmbed } from '../../../utils/embeds';
 
+export const category = 'Voice';
+export const permission = 'Manage Guild';
+export const syntax = '/addvctime <user> <minutes>';
+export const example = '/addvctime @Tai 60';
+
 export const data = new SlashCommandBuilder()
     .setName('addvctime')
     .setDescription('Add voice time to All time, daily and weekly fields of a user')

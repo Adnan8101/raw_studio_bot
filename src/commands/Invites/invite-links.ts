@@ -8,7 +8,10 @@ import {
 import { SlashCommand, PrefixCommand } from '../../types';
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import { createErrorEmbed, COLORS, ICONS } from '../../utils/embeds';
-
+export const category = 'Invites';
+export const permission = 'None';
+export const syntax = '/invite-links [user]';
+export const example = '/invite-links @Tai';
 const slashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName('invite-links')
@@ -67,7 +70,7 @@ const slashCommand: SlashCommand = {
         };
       });
 
-      
+
       const embedsToSend: EmbedBuilder[] = [];
       const fieldsPerEmbed = 6;
 
@@ -172,7 +175,7 @@ const prefixCommand: PrefixCommand = {
         };
       });
 
-      
+
       const embedsToSend: EmbedBuilder[] = [];
       const fieldsPerEmbed = 6;
 

@@ -3,6 +3,9 @@ import { prisma } from '../../database/connect';
 import { createSuccessEmbed, createErrorEmbed, createCustomEmbed, ICONS, COLORS } from '../../utils/embeds';
 
 export const category = 'Messages';
+export const permission = 'Manage Guild';
+export const syntax = '/blacklist <channel|category|list> [target]';
+export const example = '/blacklist channel #general';
 
 export const data = new SlashCommandBuilder()
     .setName('blacklist')

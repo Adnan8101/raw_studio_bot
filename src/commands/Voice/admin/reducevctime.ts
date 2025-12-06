@@ -2,6 +2,11 @@ import { SlashCommandBuilder, PermissionFlagsBits, ChatInputCommandInteraction, 
 import { VoiceService } from '../../../services/VoiceService';
 import { createSuccessEmbed } from '../../../utils/embeds';
 
+export const category = 'Voice';
+export const permission = 'Manage Guild';
+export const syntax = '/reducevctime <user> <minutes>';
+export const example = '/reducevctime @Tai 30';
+
 export const data = new SlashCommandBuilder()
     .setName('reducevctime')
     .setDescription('Reduce voice time from All time, daily and weekly fields to a user')

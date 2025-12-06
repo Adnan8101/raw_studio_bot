@@ -3,7 +3,10 @@ import { createSuccessEmbed, createErrorEmbed } from '../../utils/embedHelpers';
 import { CustomEmojis } from '../../utils/emoji';
 import { resolveChannel } from '../../utils/resolver';
 
-export const category = 'voice';
+export const category = 'Voice';
+export const permission = 'Move Members';
+export const syntax = '/drag <user> [channel]';
+export const example = '/drag @Tai';
 
 export const data = new SlashCommandBuilder()
     .setName('drag')

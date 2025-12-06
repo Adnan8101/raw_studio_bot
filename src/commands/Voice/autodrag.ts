@@ -5,7 +5,10 @@ import { createSuccessEmbed, createErrorEmbed } from '../../utils/embedHelpers';
 import { resolveChannel } from '../../utils/resolver';
 import { CustomEmojis } from '../../utils/emoji';
 
-export const category = 'voice';
+export const category = 'Voice';
+export const permission = 'Move Members';
+export const syntax = '/autodrag <user> [channel]';
+export const example = '/autodrag @Tai';
 
 export const data = new SlashCommandBuilder()
     .setName('autodrag')

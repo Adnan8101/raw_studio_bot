@@ -9,6 +9,11 @@ import { SlashCommand, PrefixCommand } from '../../types';
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import { createErrorEmbed, createInfoEmbed, COLORS } from '../../utils/embeds';
 
+export const category = 'Invites';
+export const permission = 'Manage Roles';
+export const syntax = '/viewinviteroles';
+export const example = '/viewinviteroles';
+
 const slashCommand: SlashCommand = {
     data: new SlashCommandBuilder()
         .setName('viewinviteroles')

@@ -13,6 +13,11 @@ export const onMessageReactionAdd = async (client: Client, reaction: MessageReac
             return;
         }
     }
+
+    // Giveaway Handling
+    const { GiveawayManager } = require('../services/GiveawayManager');
+    await GiveawayManager.getInstance(client).handleReactionAdd(reaction, user);
+
     const message = reaction.message;
     if (message.channelId === CONFIG.CHANNELS.MANUAL_REVIEW) {
         const embed = message.embeds[0];

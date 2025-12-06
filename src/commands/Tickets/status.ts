@@ -6,6 +6,11 @@ import {
 import { BotClient } from '../../core/client';
 import * as os from 'os';
 
+export const category = 'Tickets';
+export const permission = 'None';
+export const syntax = '/status';
+export const example = '/status';
+
 export const data = new SlashCommandBuilder()
   .setName('status')
   .setDescription('Display comprehensive bot status and system information');
@@ -59,7 +64,7 @@ async function getDatabaseStats(client: BotClient): Promise<{
 
     const pool = client.db.getPool();
 
-    
+
     const statsResult = await pool.query(`
       SELECT 
         COUNT(*) FILTER (WHERE type IS NOT NULL) as total_records,
@@ -76,16 +81,16 @@ async function getDatabaseStats(client: BotClient): Promise<{
     const openTickets = parseInt(statsResult.rows[0].open_tickets);
     const closedTickets = parseInt(statsResult.rows[0].closed_tickets);
 
-    
+
     const sizeResult = await pool.query(`
       SELECT pg_size_pretty(pg_database_size(current_database())) as size
     `);
     const storage = sizeResult.rows[0].size;
 
-    
+
     let totalStorage = 'N/A';
     try {
-      
+
       const diskResult = await pool.query(`
         SELECT 
           pg_size_pretty(
@@ -97,19 +102,19 @@ async function getDatabaseStats(client: BotClient): Promise<{
           ) as wal_size
       `);
 
-      
+
       try {
         const fsResult = await pool.query(`
           SELECT 
             (pg_stat_file('base')).size as base_size,
             (pg_stat_file('global')).size as global_size
         `);
-        
+
       } catch (e) {
-        
+
       }
 
-      
+
       const walResult = await pool.query(`
         SELECT 
           COALESCE(sum(size), 0) as wal_size 
@@ -122,7 +127,7 @@ async function getDatabaseStats(client: BotClient): Promise<{
         WHERE datistemplate = false
       `);
 
-      
+
       const totalUsed = await pool.query(`
         SELECT pg_size_pretty(
           (SELECT sum(pg_database_size(datname))::bigint FROM pg_database WHERE datistemplate = false) +
@@ -133,7 +138,7 @@ async function getDatabaseStats(client: BotClient): Promise<{
       totalStorage = totalUsed.rows[0].total_disk_usage || allDbSize.rows[0].all_db_size;
 
     } catch (e) {
-      
+
       try {
         const allDbResult = await pool.query(`
           SELECT pg_size_pretty(sum(pg_database_size(datname))::bigint) as total_size
@@ -145,7 +150,7 @@ async function getDatabaseStats(client: BotClient): Promise<{
       }
     }
 
-    
+
 
     const versionResult = await pool.query('SELECT version() as version, current_database() as dbname');
     const fullVersion = versionResult.rows[0].version;
@@ -153,7 +158,7 @@ async function getDatabaseStats(client: BotClient): Promise<{
     const dbName = versionResult.rows[0].dbname;
 
 
-    
+
 
     const hostResult = await pool.query(`
       SELECT 
@@ -227,7 +232,7 @@ export async function execute(
   await interaction.deferReply();
 
 
-  
+
   const uptime = process.uptime();
   const days = Math.floor(uptime / 86400);
   const hours = Math.floor((uptime % 86400) / 3600);
@@ -248,7 +253,7 @@ export async function execute(
   const heapTotalMB = (processMemory.heapTotal / 1024 / 1024).toFixed(2);
 
 
-  
+
 
   const cpus = os.cpus();
   const cpuModel = cpus[0].model;
@@ -278,7 +283,7 @@ export async function execute(
 
   }
 
-  
+
 
   const guildCount = client.guilds.cache.size;
   const channelCount = client.channels.cache.size;
@@ -286,14 +291,14 @@ export async function execute(
   const wsLatency = client.ws.ping;
 
 
-  
+
   const nodeVersion = process.version;
   const pid = process.pid;
   const execPath = process.execPath;
   const cwd = process.cwd();
 
 
-  
+
   const dbStats = await getDatabaseStats(client);
 
 
@@ -312,7 +317,7 @@ export async function execute(
     }
   }
 
-  
+
   ;
   const statusEmbed = new EmbedBuilder()
     .setColor('#5865F2')
@@ -363,7 +368,7 @@ export async function execute(
     .setTimestamp()
     .setFooter({ text: `Requested by ${interaction.user.tag}` });
 
-  
+
   const dbEmbed = new EmbedBuilder()
     .setColor(dbStats.connected ? '#00ff00' : '#ff0000')
     .setTitle('Database Status')

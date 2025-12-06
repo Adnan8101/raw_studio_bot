@@ -9,6 +9,11 @@ import { SlashCommand, PrefixCommand } from '../../types';
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import { createSuccessEmbed, createErrorEmbed, COLORS, ICONS } from '../../utils/embeds';
 
+export const category = 'Invites';
+export const permission = 'Administrator';
+export const syntax = '/reset-invites <user>';
+export const example = '/reset-invites @Tai';
+
 const slashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName('reset-invites')
@@ -35,13 +40,13 @@ const slashCommand: SlashCommand = {
     try {
       const db = DatabaseManager.getInstance();
 
-      
+
       const currentNormalInvites = await db.getUserInviteCount(guild.id, targetUser.id);
       const currentBonusInvites = await db.getUserBonusInvites(guild.id, targetUser.id);
       const currentLeftInvites = await db.getUserLeftCount(guild.id, targetUser.id);
       const currentFakeInvites = await db.getUserFakeCount(guild.id, targetUser.id);
 
-      
+
       const resetResult = await db.resetUserInvites(guild.id, targetUser.id);
 
       const embed = createSuccessEmbed(
@@ -107,13 +112,13 @@ const prefixCommand: PrefixCommand = {
 
       const db = DatabaseManager.getInstance();
 
-      
+
       const currentNormalInvites = await db.getUserInviteCount(guild.id, member.id);
       const currentBonusInvites = await db.getUserBonusInvites(guild.id, member.id);
       const currentLeftInvites = await db.getUserLeftCount(guild.id, member.id);
       const currentFakeInvites = await db.getUserFakeCount(guild.id, member.id);
 
-      
+
       const resetResult = await db.resetUserInvites(guild.id, member.id);
 
       const embed = createSuccessEmbed(

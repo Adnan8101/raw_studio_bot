@@ -144,6 +144,11 @@ export const data = new SlashCommandBuilder()
       )
   );
 
+export const category = 'automod';
+export const permission = 'Manage Server';
+export const syntax = '/automod <setup|view|enable|disable|anti-spam|mass-mention>';
+export const example = '/automod setup';
+
 export const slashCommand: SlashCommand = {
   data: data,
   execute: execute,

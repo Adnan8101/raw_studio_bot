@@ -2,7 +2,10 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, MessageFlags, VoiceChannel } from 'discord.js';
 import { createSuccessEmbed, createErrorEmbed } from '../../utils/embedHelpers';
 
-export const category = 'voice';
+export const category = 'Voice';
+export const permission = 'Mute Members';
+export const syntax = '/unmuteall';
+export const example = '/unmuteall';
 
 export const data = new SlashCommandBuilder()
     .setName('unmuteall')

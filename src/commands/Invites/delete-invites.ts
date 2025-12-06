@@ -8,7 +8,10 @@ import {
 import { SlashCommand, PrefixCommand } from '../../types';
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import { createSuccessEmbed, createErrorEmbed, COLORS, ICONS } from '../../utils/embeds';
-
+export const category = 'Invites';
+export const permission = 'Administrator';
+export const syntax = '/delete-invites <user> <invites> [type]';
+export const example = '/delete-invites @Tai 3 normal';
 const slashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName('delete-invites')
@@ -87,14 +90,14 @@ const slashCommand: SlashCommand = {
       } else if (inviteType === 'both') {
         let remaining = invitesToRemove;
 
-        
+
         if (currentNormalInvites > 0) {
           const normalToRemove = Math.min(remaining, currentNormalInvites);
           normalRemoved = await db.removeNormalInvites(guild.id, targetUser.id, normalToRemove);
           remaining -= normalRemoved;
         }
 
-        
+
         if (remaining > 0 && currentBonusInvites > 0) {
           const bonusToRemove = Math.min(remaining, currentBonusInvites);
           await db.removeBonusInvites(guild.id, targetUser.id, bonusToRemove);
@@ -204,14 +207,14 @@ const prefixCommand: PrefixCommand = {
       } else if (inviteType === 'both') {
         let remaining = invitesToRemove;
 
-        
+
         if (currentNormalInvites > 0) {
           const normalToRemove = Math.min(remaining, currentNormalInvites);
           normalRemoved = await db.removeNormalInvites(guild.id, member.id, normalToRemove);
           remaining -= normalRemoved;
         }
 
-        
+
         if (remaining > 0 && currentBonusInvites > 0) {
           const bonusToRemove = Math.min(remaining, currentBonusInvites);
           await db.removeBonusInvites(guild.id, member.id, bonusToRemove);

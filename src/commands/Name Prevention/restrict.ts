@@ -44,7 +44,7 @@ export const handleRestrictCommand = async (interaction: ChatInputCommandInterac
             const nameToAdd = interaction.options.getString('name', true).toLowerCase();
 
             try {
-                
+
                 const currentSettings = await prisma.guildConfig.findUnique({ where: { guildId } });
                 let currentBlocked = currentSettings?.blockedNames || [];
 
@@ -107,3 +107,10 @@ export const handleRestrictCommand = async (interaction: ChatInputCommandInterac
         }
     }
 };
+export const category = 'Name Prevention';
+export const permission = 'Manage Nicknames';
+export const syntax = '/restrict <name> <add|remove|list> [args]';
+export const example = '/restrict name add badname';
+
+export const data = restrictCommand;
+export const execute = handleRestrictCommand;

@@ -12,6 +12,11 @@ import { canModerate, botCanModerate } from '../../utils/moderation';
 import { LoggingService } from '../../services/LoggingService';
 import { createErrorEmbed, createModerationEmbed } from '../../utils/embedHelpers';
 
+export const category = 'moderation';
+export const syntax = '/nick <user> <nickname> [reason]';
+export const example = '/nick user:@Tai nickname:Tai reason:Real name';
+export const permission = 'Manage Nicknames';
+
 export const data = new SlashCommandBuilder()
   .setName('nick')
   .setDescription('Change a member\'s nickname')
@@ -48,7 +53,7 @@ export async function execute(
   const guild = interaction.guild!;
   const moderator = interaction.member as any;
 
-  
+
   let target;
   try {
     target = await guild.members.fetch(user.id);
@@ -58,7 +63,7 @@ export async function execute(
     return;
   }
 
-  
+
   const moderatorCheck = canModerate(moderator, target, PermissionFlagsBits.ManageNicknames);
   if (!moderatorCheck.allowed) {
     const errorEmbed = createErrorEmbed(moderatorCheck.reason || 'You cannot moderate this user.');
@@ -73,10 +78,10 @@ export async function execute(
     return;
   }
 
-  
+
   const oldNickname = target.nickname || target.user.username;
 
-  
+
   try {
     await target.setNickname(nickname, reason);
 
@@ -89,7 +94,7 @@ export async function execute(
 
     await interaction.editReply({ embeds: [embed] });
 
-    
+
     await services.loggingService.logModeration(guild.id, {
       action: 'Nickname Change',
       target: user,

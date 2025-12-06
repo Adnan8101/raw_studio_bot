@@ -2,6 +2,9 @@ import { SlashCommandBuilder, ChatInputCommandInteraction, MessageFlags, Compone
 import { evaluateCode, createEvalEmbed, OWNER_ID } from './evalHelper';
 
 export const category = 'owner';
+export const permission = 'Bot Owner';
+export const syntax = '/eval <code>';
+export const example = '/eval console.log("Hello World")';
 
 export const evalCommand = new SlashCommandBuilder()
     .setName('eval')
@@ -27,7 +30,7 @@ export const handleEvalCommand = async (interaction: ChatInputCommandInteraction
 
     const code = interaction.options.getString('code', true);
 
-    
+
     const result = await evaluateCode(code, {
         client: interaction.client,
         interaction: interaction
@@ -42,15 +45,15 @@ export const handleEvalCommand = async (interaction: ChatInputCommandInteraction
         fetchReply: true
     });
 
-    
+
     const collector = reply.createMessageComponentCollector({
         componentType: ComponentType.Button,
-        time: 600000 
+        time: 600000
     });
 
     collector.on('collect', async i => {
         if (i.customId === 'delete_eval') {
-            await i.deferUpdate(); 
+            await i.deferUpdate();
             await interaction.deleteReply();
             collector.stop();
         }

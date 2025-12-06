@@ -116,6 +116,11 @@ const prefixCommand: PrefixCommand = {
   },
 };
 
+export const category = 'Welcome';
+export const permission = 'Manage Server';
+export const syntax = '/welcome <channel>';
+export const example = '/welcome #general';
+
 export const data = slashCommand.data;
 export const execute = slashCommand.execute;
 export { slashCommand, prefixCommand };

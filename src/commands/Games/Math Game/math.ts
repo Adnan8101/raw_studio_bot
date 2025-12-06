@@ -30,7 +30,10 @@ export const mathCommands = [
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 ];
 
-export const category = 'games';
+export const category = 'Games';
+export const permission = 'Manage Guild';
+export const syntax = '/math quiz [difficulty] [time]';
+export const example = '/math quiz difficulty:Easy';
 export const data = mathCommands[0];
 
 export const execute = async (interaction: ChatInputCommandInteraction, services: any) => {

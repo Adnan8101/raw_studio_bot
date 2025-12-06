@@ -3,6 +3,11 @@ import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, 
 import { getRecordingManager } from './RecordingManager';
 import { createSuccessEmbed, createErrorEmbed, createPendingEmbed, createInfoEmbed } from '../../utils/embeds';
 
+export const category = 'recording';
+export const permission = 'Manage Guild';
+export const syntax = '/record <start|stop|status|formats|delete>';
+export const example = '/record start';
+
 export const recorderCommand = new SlashCommandBuilder()
     .setName('record')
     .setDescription('Manage voice recordings')
@@ -44,9 +49,9 @@ export const handleRecorderCommand = async (interaction: ChatInputCommandInterac
         return;
     }
 
-    
-    
-    
+
+
+
     const ephemeralSubcommands = ['status', 'formats', 'delete'];
     const isEphemeral = ephemeralSubcommands.includes(subcommand);
 
@@ -57,7 +62,7 @@ export const handleRecorderCommand = async (interaction: ChatInputCommandInterac
         return;
     }
 
-    const member = interaction.member as any; 
+    const member = interaction.member as any;
     const voiceChannel = member?.voice?.channel as VoiceChannel;
 
     if (subcommand === 'start') {
@@ -109,7 +114,7 @@ export const handleRecorderCommand = async (interaction: ChatInputCommandInterac
         await interaction.editReply({ embeds: [embed] });
 
     } else if (subcommand === 'formats') {
-        
+
         const wav = interaction.options.getBoolean('wav') ?? false;
         const mp3 = interaction.options.getBoolean('mp3') ?? false;
         const opus = interaction.options.getBoolean('opus') ?? false;
@@ -118,7 +123,7 @@ export const handleRecorderCommand = async (interaction: ChatInputCommandInterac
         manager.updateFormats(guildId, { wav, mp3, opus, flac });
         await interaction.editReply({ embeds: [createSuccessEmbed('Output formats updated.')] });
     } else if (subcommand === 'delete') {
-        
+
         await interaction.editReply({ embeds: [createSuccessEmbed('Local recordings deleted (Placeholder).')] });
     }
 };

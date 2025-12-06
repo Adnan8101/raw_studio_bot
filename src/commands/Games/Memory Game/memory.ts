@@ -27,7 +27,10 @@ export const memoryCommands = [
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 ];
 
-export const category = 'games';
+export const category = 'Games';
+export const permission = 'Manage Guild';
+export const syntax = '/memory start [options]';
+export const example = '/memory start emoji_count:5';
 export const data = memoryCommands[0];
 
 export const execute = async (interaction: ChatInputCommandInteraction, services: any) => {

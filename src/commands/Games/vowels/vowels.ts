@@ -39,7 +39,10 @@ export const vowelsCommands = [
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 ];
 
-export const category = 'games';
+export const category = 'Games';
+export const permission = 'Manage Guild';
+export const syntax = '/vowels start [options]';
+export const example = '/vowels start difficulty:Easy';
 export const data = vowelsCommands[0];
 
 export const execute = async (interaction: ChatInputCommandInteraction, services: any) => {
@@ -54,7 +57,7 @@ export const handleVowelsCommand = async (interaction: ChatInputCommandInteracti
 
         if (subcommand === 'start') {
             const difficulty = options.getString('difficulty') || 'Easy';
-            const time = options.getInteger('time') ?? 0; 
+            const time = options.getInteger('time') ?? 0;
             const category = options.getString('category') || 'mixed';
 
             const manager = getVowelsGameManager(interaction.client);

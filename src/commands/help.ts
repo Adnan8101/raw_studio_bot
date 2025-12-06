@@ -146,12 +146,12 @@ const categoryConfig: Record<string, { name: string; emoji: string; description:
 function canRunCommand(command: any, member: GuildMember): boolean {
   const commandData = command.slashCommand || command;
 
-  
+
   if ((commandData.category || '').toLowerCase() === 'owner') {
     return member.id === OWNER_ID;
   }
 
-  
+
   if (commandData.data?.default_member_permissions) {
     const requiredPerms = BigInt(commandData.data.default_member_permissions);
     if (!member.permissions.has(requiredPerms)) {
@@ -166,20 +166,20 @@ export async function execute(
   interaction: ChatInputCommandInteraction,
   services: { guildConfigService: GuildConfigService; commands: Collection<string, any> }
 ) {
-  
+
   await interaction.deferReply();
 
   const prefix = await services.guildConfigService.getPrefix(interaction.guild!.id);
   const commands = services.commands;
   const specificCommand = interaction.options.getString('command');
 
-  
+
   if (specificCommand) {
     const cmd = commands.get(specificCommand.toLowerCase()) ||
       commands.find((c: any) => c.prefixCommand?.aliases?.includes(specificCommand.toLowerCase()));
 
     if (cmd) {
-      
+
       if (!canRunCommand(cmd, interaction.member as GuildMember)) {
         await interaction.editReply({
           embeds: [createInfoEmbed('Permission Denied', 'You do not have permission to view or use this command.')]
@@ -200,12 +200,12 @@ export async function execute(
       await interaction.editReply({ embeds: [embed] });
       return;
     } else {
-      
+
       const suggestions: string[] = [];
       const input = specificCommand.toLowerCase();
 
       commands.forEach((cmd: any) => {
-        
+
         if (!canRunCommand(cmd, interaction.member as GuildMember)) return;
 
         const cmdName = (cmd.data?.name || cmd.name).toLowerCase();
@@ -318,7 +318,7 @@ export async function execute(
     .setFooter({ text: 'Select a category from the dropdown below' })
     .setTimestamp();
 
-  
+
   const selectMenu = new StringSelectMenuBuilder()
     .setCustomId(`help_category_${interaction.user.id}`)
     .setPlaceholder('🔍 Select a category to view commands')
@@ -351,22 +351,22 @@ export async function execute(
     components: [row],
   });
 
-  
+
   const collector = response.createMessageComponentCollector({
     filter: i => i.user.id === interaction.user.id && i.customId === `help_category_${interaction.user.id}`,
-    time: 300000, 
+    time: 300000,
     componentType: ComponentType.StringSelect,
   });
 
   collector.on('collect', async (i: StringSelectMenuInteraction) => {
     try {
-      
+
       try {
         if (!i.deferred && !i.replied) {
           await i.deferUpdate();
         }
       } catch (error) {
-        
+
         return;
       }
 
@@ -392,13 +392,13 @@ export async function execute(
       const embeds: EmbedBuilder[] = [];
       const chunkSize = 25;
 
-      
+
       let allCommandStrings: string[] = [];
       for (const cmd of categoryCommands) {
         allCommandStrings.push(...getCommandDisplayNames(cmd));
       }
 
-      
+
       allCommandStrings.sort();
 
       for (let j = 0; j < allCommandStrings.length; j += chunkSize) {
@@ -432,7 +432,7 @@ export async function execute(
       await i.editReply({ embeds: embeds, components: [row] });
     } catch (error) {
       console.error('Error in help interaction collector:', error);
-      
+
       try {
         if (!i.replied && !i.deferred) {
           await i.reply({ content: 'An error occurred.', flags: MessageFlags.Ephemeral });
@@ -440,7 +440,7 @@ export async function execute(
           await i.editReply({ content: 'An error occurred while navigating.' });
         }
       } catch (e) {
-        
+
       }
     }
   });

@@ -4,7 +4,10 @@ import { GiveawayManager } from '../../services/GiveawayManager';
 import { createSuccessEmbed, createErrorEmbed } from '../../utils/embedHelpers';
 import { PrefixCommand } from '../../types';
 
-export const category = 'giveaways';
+export const category = 'Giveaways';
+export const permission = 'Manage Guild';
+export const syntax = '/gend <message_id>';
+export const example = '/gend message_id:123456789';
 
 export const data = new SlashCommandBuilder()
     .setName('gend')

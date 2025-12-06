@@ -3,6 +3,9 @@ import { prisma } from '../../database/connect';
 import { createCustomEmbed, createErrorEmbed, ICONS, COLORS } from '../../utils/embeds';
 
 export const category = 'Utility';
+export const permission = 'None';
+export const syntax = '/leaderboard <type>';
+export const example = '/leaderboard messages';
 
 export const data = new SlashCommandBuilder()
     .setName('leaderboard')
@@ -124,7 +127,7 @@ async function sendInviteLeaderboard(source: ChatInputCommandInteraction | Messa
     const guild = source.guild!;
     const topInviters = await prisma.inviteTracker.findMany({
         where: { guildId },
-        take: 50 
+        take: 50
     });
 
     if (topInviters.length === 0) {

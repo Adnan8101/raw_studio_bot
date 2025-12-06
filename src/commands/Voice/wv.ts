@@ -2,7 +2,10 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, MessageFlags, VoiceChannel, EmbedBuilder, ChannelType, Message } from 'discord.js';
 import { createInfoEmbed, createErrorEmbed } from '../../utils/embedHelpers';
 
-export const category = 'voice';
+export const category = 'Voice';
+export const permission = 'Manage Messages';
+export const syntax = '/wv [channel]';
+export const example = '/wv';
 
 export const data = new SlashCommandBuilder()
     .setName('wv')

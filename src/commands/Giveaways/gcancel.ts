@@ -3,7 +3,10 @@ import { DatabaseManager } from '../../utils/DatabaseManager';
 import { createSuccessEmbed, createErrorEmbed } from '../../utils/embedHelpers';
 import { PrefixCommand } from '../../types';
 
-export const category = 'giveaways';
+export const category = 'Giveaways';
+export const permission = 'Manage Guild';
+export const syntax = '/gcancel <message_id>';
+export const example = '/gcancel message_id:123456789';
 
 export const data = new SlashCommandBuilder()
     .setName('gcancel')
@@ -33,7 +36,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     await db.endGiveaway(messageId);
 
-    
+
     try {
         const channel = await interaction.guild?.channels.fetch(giveaway.channelId) as TextChannel;
         if (channel) {
@@ -41,7 +44,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             if (msg) await msg.delete();
         }
     } catch (e) {
-        
+
     }
 
     await interaction.editReply({ embeds: [createSuccessEmbed('Giveaway cancelled.')] });
@@ -70,7 +73,7 @@ export const prefixExecute = async (interaction: any) => {
 
     await db.endGiveaway(messageId);
 
-    
+
     try {
         const channel = await interaction.message.guild?.channels.fetch(giveaway.channelId) as TextChannel;
         if (channel) {
@@ -78,7 +81,7 @@ export const prefixExecute = async (interaction: any) => {
             if (msg) await msg.delete();
         }
     } catch (e) {
-        
+
     }
 
     await interaction.reply({ embeds: [createSuccessEmbed('Giveaway cancelled.')] });

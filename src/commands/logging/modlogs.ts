@@ -15,6 +15,11 @@ interface ModLogsServices {
   prisma: any;
 }
 
+export const category = 'logging';
+export const permission = 'Manage Guild';
+export const syntax = '/moderation-logs channel:#logs';
+export const example = '/moderation-logs channel:#mod-logs';
+
 export const data = new SlashCommandBuilder()
   .setName('moderation-logs')
   .setDescription('Configure moderation action logging')
@@ -33,14 +38,14 @@ export async function execute(
   const channel = interaction.options.getChannel('channel', true) as TextChannel;
   const guildId = interaction.guild!.id;
 
-  
+
   if (!channel.isTextBased()) {
     const errorEmbed = createErrorEmbed('Please select a text channel for moderation logs.');
     await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
     return;
   }
 
-  
+
   const permissions = channel.permissionsFor(interaction.guild!.members.me!);
   if (!permissions?.has(PermissionFlagsBits.SendMessages) || !permissions?.has(PermissionFlagsBits.EmbedLinks)) {
     const errorEmbed = createErrorEmbed(`I need **Send Messages** and **Embed Links** permissions in ${channel}!`);
@@ -48,7 +53,7 @@ export async function execute(
     return;
   }
 
-  
+
   await services.prisma.guildLogging.upsert({
     where: { guildId },
     create: {
@@ -78,7 +83,7 @@ export async function execute(
 
   await interaction.reply({ embeds: [embed] });
 
-  
+
   const testEmbed = createInfoEmbed(`${CustomEmojis.STAFF} Moderation Logging Activated`, `Moderation logging has been enabled by ${interaction.user}.\n\nThis channel will receive moderation action logs.`)
     .setTimestamp();
 

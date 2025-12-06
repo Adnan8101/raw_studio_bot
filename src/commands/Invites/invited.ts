@@ -12,6 +12,11 @@ import { createErrorEmbed, createInfoEmbed, COLORS, ICONS } from '../../utils/em
 
 const inviteService = new InviteService();
 
+export const category = 'Invites';
+export const permission = 'None';
+export const syntax = '/invited [user]';
+export const example = '/invited @Tai';
+
 const slashCommand: SlashCommand = {
     data: new SlashCommandBuilder()
         .setName('invited')
@@ -49,9 +54,9 @@ const slashCommand: SlashCommand = {
                 return;
             }
 
-            
-            
-            
+
+
+
 
             const fields = invitedMembers.map((memberData, index) => {
                 return {
@@ -61,9 +66,9 @@ const slashCommand: SlashCommand = {
                 };
             });
 
-            
+
             const embedsToSend: EmbedBuilder[] = [];
-            const fieldsPerEmbed = 24; 
+            const fieldsPerEmbed = 24;
 
             for (let i = 0; i < fields.length; i += fieldsPerEmbed) {
                 const currentFields = fields.slice(i, i + fieldsPerEmbed);
@@ -85,10 +90,10 @@ const slashCommand: SlashCommand = {
                 embedsToSend.push(embed);
             }
 
-            
-            
-            
-            
+
+
+
+
             await interaction.reply({ embeds: embedsToSend.slice(0, 2) });
             if (embedsToSend.length > 2) {
                 await interaction.followUp({ content: `...and ${embedsToSend.length - 2} more pages.`, ephemeral: true });

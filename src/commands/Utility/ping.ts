@@ -1,6 +1,11 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { SlashCommand } from '../../types';
 
+export const category = 'Utility';
+export const permission = 'None';
+export const syntax = '/ping';
+export const example = '/ping';
+
 const slashCommand: SlashCommand = {
     data: new SlashCommandBuilder()
         .setName('ping')

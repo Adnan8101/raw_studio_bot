@@ -15,6 +15,11 @@ import { parseDuration, formatDuration } from '../../utils/moderation';
 import { LoggingService } from '../../services/LoggingService';
 import { createErrorEmbed } from '../../utils/embedHelpers';
 
+export const category = 'moderation';
+export const permission = 'Manage Channels';
+export const syntax = '/channel <lock|unlock|hide|unhide|slowmode> [args]';
+export const example = '/channel lock reason:Raid in progress';
+
 export const data = new SlashCommandBuilder()
   .setName('channel')
   .setDescription('Channel moderation commands')
@@ -170,7 +175,7 @@ async function handleLock(
 
     await interaction.editReply({ embeds: [embed] });
 
-    
+
     await channel.send({
       embeds: [
         new EmbedBuilder()
@@ -213,7 +218,7 @@ async function handleUnlock(
 
     await interaction.editReply({ embeds: [embed] });
 
-    
+
     await channel.send({
       embeds: [
         new EmbedBuilder()
@@ -306,7 +311,7 @@ async function handleSlowmode(
     (interaction.options.getChannel('channel') as TextChannel) || (interaction.channel as TextChannel);
   const reason = interaction.options.getString('reason') || 'No reason provided';
 
-  
+
   let duration: number;
   if (durationStr === '0' || durationStr === '0s') {
     duration = 0;
@@ -320,7 +325,7 @@ async function handleSlowmode(
     duration = Math.floor(parsed / 1000); // Convert to seconds
   }
 
-  
+
   if (duration > 21600) {
     const errorEmbed = createErrorEmbed('Slowmode duration cannot exceed 6 hours.');
     await interaction.editReply({ embeds: [errorEmbed] });

@@ -3,6 +3,9 @@ import { prisma } from '../../database/connect';
 import { createSuccessEmbed, createErrorEmbed } from '../../utils/embeds';
 
 export const category = 'Messages';
+export const permission = 'Manage Guild';
+export const syntax = '/managemessages <add|remove> <user> <amount>';
+export const example = '/managemessages add @Tai 100';
 
 export const data = new SlashCommandBuilder()
     .setName('managemessages')
@@ -41,25 +44,25 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     } else if (subcommand === 'remove') {
         await prisma.userStats.upsert({
             where: { guildId_userId: { guildId, userId: targetUser.id } },
-            update: { messageCount: { decrement: amount } }, 
-            create: { guildId, userId: targetUser.id, messageCount: 0 } 
+            update: { messageCount: { decrement: amount } },
+            create: { guildId, userId: targetUser.id, messageCount: 0 }
         });
         await interaction.reply({ embeds: [createSuccessEmbed(`Removed **${amount}** messages from ${targetUser}.`)] });
     }
 }
 
 export const prefixExecute = async (message: Message, args: string[]) => {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
 };

@@ -49,39 +49,39 @@ export class CommandLoader {
                 await this.readCommands(filePath);
             } else if (file.endsWith('.ts') || file.endsWith('.js')) {
                 try {
-                    
+
                     delete require.cache[require.resolve(filePath)];
 
-                    
+
                     const commandModule = require(filePath);
 
-                    
+
                     const command = commandModule.default || commandModule;
 
-                    
+
                     if (command?.data?.name) {
                         this.commands.set(command.data.name, command);
-                        
 
-                        
+
+
                         if (command.prefixCommand?.aliases) {
                             for (const alias of command.prefixCommand.aliases) {
                                 this.aliases.set(alias, command.data.name);
                             }
                         }
                     } else if (command?.name && command?.execute) {
-                        
-                        
-                        
-                        
 
-                        
-                        if (!command.data) {
-                            command.data = { name: command.name, description: command.description || 'No description' };
-                        }
+
+
+
+
+
+                        // if (!command.data) {
+                        //     command.data = { name: command.name, description: command.description || 'No description' };
+                        // }
 
                         this.commands.set(command.name, command);
-                        
+
                     } else {
                         console.warn(`[CommandLoader] Skipped file ${file}: No valid command data found.`);
                     }

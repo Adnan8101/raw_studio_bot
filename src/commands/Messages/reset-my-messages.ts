@@ -3,6 +3,9 @@ import { prisma } from '../../database/connect';
 import { createSuccessEmbed } from '../../utils/embeds';
 
 export const category = 'Messages';
+export const permission = 'None';
+export const syntax = '/resetmymessages';
+export const example = '/resetmymessages';
 
 export const data = new SlashCommandBuilder()
     .setName('resetmymessages')

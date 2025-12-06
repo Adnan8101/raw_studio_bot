@@ -101,6 +101,11 @@ export const data = new SlashCommandBuilder()
       )
   );
 
+export const category = 'antinuke';
+export const permission = 'Administrator';
+export const syntax = '/antinuke <enable|disable|setup|status|restore|reset>';
+export const example = '/antinuke enable actions:ALL';
+
 export const slashCommand: SlashCommand = {
   data: data,
   execute: execute,
@@ -153,7 +158,7 @@ async function handleEnable(
   services: { configService: ConfigService; loggingService: LoggingService },
   guildId: string
 ): Promise<void> {
-  
+
   if (!await checkCommandPermission(interaction, { ownerOnly: true })) return;
 
   await interaction.deferReply();
@@ -162,7 +167,7 @@ async function handleEnable(
   const windowSeconds = interaction.options.getInteger('window_seconds') ?? 10;
   const windowMs = windowSeconds * 1000;
 
-  
+
   let protections: ProtectionAction[];
   if (actionsString === 'ALL') {
     protections = Object.values(ProtectionAction);
@@ -170,7 +175,7 @@ async function handleEnable(
     protections = actionsString.split(',').map(a => a.trim()) as ProtectionAction[];
   }
 
-  
+
   const validProtections = Object.values(ProtectionAction);
   const invalid = protections.filter(p => !validProtections.includes(p));
 
@@ -182,7 +187,7 @@ async function handleEnable(
     return;
   }
 
-  
+
   const guild = interaction.guild!;
   const botMember = guild.members.me!;
   const requiredPerms = [
@@ -200,15 +205,15 @@ async function handleEnable(
     warnings.push(`${CustomEmojis.CAUTION} Bot is missing required permissions. Some protections may not work.`);
   }
 
-  
+
   const existingConfig = await services.configService.getConfig(guildId);
   let finalProtections: ProtectionAction[];
 
   if (actionsString === 'ALL') {
-    
+
     finalProtections = protections;
   } else if (existingConfig?.protections) {
-    
+
     const existingSet = new Set(existingConfig.protections);
     finalProtections = [...existingConfig.protections];
 
@@ -218,14 +223,14 @@ async function handleEnable(
       }
     }
   } else {
-    
+
     finalProtections = protections;
   }
 
-  
+
   await services.configService.enableAntiNuke(guildId, finalProtections);
 
-  
+
   const newProtections = actionsString === 'ALL'
     ? finalProtections
     : protections.filter(p => !existingConfig?.protections.includes(p));
@@ -233,12 +238,12 @@ async function handleEnable(
   for (const protection of newProtections) {
     const existingLimit = await services.configService.getLimit(guildId, protection);
     if (!existingLimit) {
-      
+
       await services.configService.setLimit(guildId, protection, 3, windowMs);
     }
   }
 
-  
+
   const embed = new EmbedBuilder()
     .setTitle(`${CustomEmojis.TICK} Anti-Nuke Enabled`)
     .setDescription(`${CustomEmojis.SETTING} Anti-Nuke protection is now active for this server.`)
@@ -278,7 +283,7 @@ async function handleEnable(
     });
   }
 
-  
+
   await interaction.editReply({
     embeds: [embed],
   });
@@ -289,25 +294,25 @@ async function handleSetup(
   services: { configService: ConfigService },
   guildId: string
 ): Promise<void> {
-  
+
   if (!await checkCommandPermission(interaction, { ownerOnly: false })) return;
 
   await interaction.deferReply();
 
   const allProtections = Object.values(ProtectionAction);
 
-  
+
   await services.configService.enableAntiNuke(guildId, allProtections);
 
-  
+
   const defaultLimit = 3;
-  const defaultWindowMs = 10000; 
+  const defaultWindowMs = 10000;
 
   for (const action of allProtections) {
     await services.configService.setLimit(guildId, action, defaultLimit, defaultWindowMs);
   }
 
-  
+
   for (const action of allProtections) {
     await services.configService.setPunishment(guildId, {
       action: action,
@@ -315,7 +320,7 @@ async function handleSetup(
     });
   }
 
-  
+
   const embed = new EmbedBuilder()
     .setTitle(`${CustomEmojis.TICK} Anti-Nuke Setup Complete`)
     .setDescription(`${CustomEmojis.SETTING} Anti-Nuke has been fully configured with recommended defaults.`)
@@ -349,7 +354,7 @@ async function handleDisable(
   services: { configService: ConfigService },
   guildId: string
 ): Promise<void> {
-  
+
   if (!await checkCommandPermission(interaction, { ownerOnly: true })) return;
 
   await interaction.deferReply();
@@ -386,7 +391,7 @@ async function handleStatus(
 
   const brief = interaction.options.getBoolean('brief') ?? false;
 
-  
+
   const config = await services.configService.getConfig(guildId);
   const loggingConfig = await services.loggingService.getConfig(guildId);
 
@@ -416,7 +421,7 @@ async function handleStatus(
       }
     );
 
-  
+
   if (services.autoModService) {
     try {
       const antiSpam = await services.autoModService.getConfig(guildId, 'anti_spam');
@@ -436,11 +441,11 @@ async function handleStatus(
         inline: false,
       });
     } catch (e) {
-      
+
     }
   }
 
-  
+
   const allPunishments = await services.configService.getAllPunishments(guildId);
   if (allPunishments.length > 0) {
     const punishmentLines = allPunishments.map(p => {
@@ -457,7 +462,7 @@ async function handleStatus(
     });
   }
 
-  
+
   const loggingValue = [];
   if (loggingConfig.securityChannel) {
     loggingValue.push(`Security: <#${loggingConfig.securityChannel}>`);
@@ -475,7 +480,7 @@ async function handleStatus(
     inline: false,
   });
 
-  
+
   if (!brief) {
     const recentActions = await services.actionLimiter.getRecentActions(guildId, 5);
     if (recentActions.length > 0) {
@@ -516,7 +521,7 @@ async function handleReset(
 ): Promise<void> {
   await interaction.deferReply({ ephemeral: true });
 
-  
+
   await services.configService.resetGuild(guildId);
   await services.whitelistService.clearAllWhitelist(guildId);
   await services.actionLimiter.clearAllActions(guildId);
@@ -553,7 +558,7 @@ async function handleRestore(
   const mode = (interaction.options.getString('mode') as RecoveryMode) ?? RecoveryMode.PARTIAL;
   const preview = interaction.options.getBoolean('preview') ?? false;
 
-  
+
   const embed = new EmbedBuilder()
     .setTitle(preview ? `${CustomEmojis.SETTING} Restore Preview` : `${CustomEmojis.SETTING} Restore Started`)
     .setDescription(

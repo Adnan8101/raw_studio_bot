@@ -2,7 +2,10 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, TextChannel, EmbedBuilder } from 'discord.js';
 import { getEmojiEquationManager, Difficulty } from './gameInstance';
 
-export const category = 'games';
+export const category = 'Games';
+export const permission = 'Manage Guild';
+export const syntax = '/equation start <difficulty> [time]';
+export const example = '/equation start difficulty:easy';
 
 export const equationCommand = new SlashCommandBuilder()
     .setName('equation')

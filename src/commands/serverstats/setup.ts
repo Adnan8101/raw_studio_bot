@@ -10,7 +10,10 @@ import {
 } from 'discord.js';
 import { SlashCommand, PrefixCommand } from '../../types';
 import { DatabaseManager } from '../../utils/DatabaseManager';
-
+export const category = 'serverstats';
+export const permission = 'Administrator';
+export const syntax = '/setup <type> <name>';
+export const example = '/setup type:vc name:Stats';
 const slashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName('setup')
@@ -52,35 +55,35 @@ const slashCommand: SlashCommand = {
     try {
       const db = DatabaseManager.getInstance();
 
-      
+
       const existingPanel = await db.getPanel(interaction.guild.id, panelName);
       if (existingPanel) {
         await interaction.editReply(`A panel named "${panelName}" already exists!`);
         return;
       }
 
-      
+
       const category = await interaction.guild.channels.create({
         name: `📊 ${panelName}`,
         type: ChannelType.GuildCategory,
-        position: 0 
+        position: 0
       });
 
-      
+
       const guild = interaction.guild;
-      await guild.members.fetch(); 
-      await guild.members.fetch({ withPresences: true }); 
+      await guild.members.fetch();
+      await guild.members.fetch({ withPresences: true });
 
       const totalMembers = guild.memberCount;
       const users = guild.members.cache.filter(member => !member.user.bot).size;
       const bots = guild.members.cache.filter(member => member.user.bot).size;
 
-      
+
       const online = guild.members.cache.filter(m => !m.user.bot && m.presence?.status === 'online').size;
       const idle = guild.members.cache.filter(m => !m.user.bot && m.presence?.status === 'idle').size;
       const dnd = guild.members.cache.filter(m => !m.user.bot && m.presence?.status === 'dnd').size;
 
-      
+
       let totalChannel, usersChannel, botsChannel;
       let onlineChannel, idleChannel, dndChannel;
 
@@ -127,7 +130,7 @@ const slashCommand: SlashCommand = {
         totalChannel = await createText(`all-${totalMembers}`);
       }
 
-      
+
       await db.createPanel({
         guildId: interaction.guild.id,
         panelName: panelName,
@@ -136,7 +139,7 @@ const slashCommand: SlashCommand = {
         totalChannelId: totalChannel.id,
         usersChannelId: usersChannel.id,
         botsChannelId: botsChannel.id,
-        onlineChannelId: onlineChannel.id, 
+        onlineChannelId: onlineChannel.id,
         idleChannelId: undefined,
         dndChannelId: undefined
       });
@@ -206,35 +209,35 @@ const prefixCommand: PrefixCommand = {
     try {
       const db = DatabaseManager.getInstance();
 
-      
+
       const existingPanel = await db.getPanel(message.guild.id, panelName);
       if (existingPanel) {
         await statusMessage.edit(`A panel named "${panelName}" already exists!`);
         return;
       }
 
-      
+
       const category = await message.guild.channels.create({
         name: `📊 ${panelName}`,
         type: ChannelType.GuildCategory,
-        position: 0 
+        position: 0
       });
 
-      
+
       const guild = message.guild;
-      await guild.members.fetch(); 
-      await guild.members.fetch({ withPresences: true }); 
+      await guild.members.fetch();
+      await guild.members.fetch({ withPresences: true });
 
       const totalMembers = guild.memberCount;
       const users = guild.members.cache.filter(member => !member.user.bot).size;
       const bots = guild.members.cache.filter(member => member.user.bot).size;
 
-      
+
       const online = guild.members.cache.filter(m => !m.user.bot && m.presence?.status === 'online').size;
       const idle = guild.members.cache.filter(m => !m.user.bot && m.presence?.status === 'idle').size;
       const dnd = guild.members.cache.filter(m => !m.user.bot && m.presence?.status === 'dnd').size;
 
-      
+
       let totalChannel, usersChannel, botsChannel;
       let onlineChannel, idleChannel, dndChannel;
 
@@ -281,7 +284,7 @@ const prefixCommand: PrefixCommand = {
         totalChannel = await createText(`all-${totalMembers}`);
       }
 
-      
+
       await db.createPanel({
         guildId: message.guild.id,
         panelName: panelName,
@@ -290,7 +293,7 @@ const prefixCommand: PrefixCommand = {
         totalChannelId: totalChannel.id,
         usersChannelId: usersChannel.id,
         botsChannelId: botsChannel.id,
-        onlineChannelId: onlineChannel.id, 
+        onlineChannelId: onlineChannel.id,
         idleChannelId: undefined,
         dndChannelId: undefined
       });

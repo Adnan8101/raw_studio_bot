@@ -43,7 +43,10 @@ export const sequenceCommands = [
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 ];
 
-export const category = 'games';
+export const category = 'Games';
+export const permission = 'Manage Guild';
+export const syntax = '/sequence start [options]';
+export const example = '/sequence start difficulty:Easy';
 export const data = sequenceCommands[0];
 
 export const execute = async (interaction: ChatInputCommandInteraction, services: any) => {

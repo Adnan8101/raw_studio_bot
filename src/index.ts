@@ -4,6 +4,7 @@ import { onReady } from './events/ready';
 import { onMessageCreate } from './events/messageCreate';
 import { onGuildMemberUpdate } from './events/guildMemberUpdate';
 import { onMessageReactionAdd } from './events/messageReactionAdd';
+import { onMessageReactionRemove } from './events/messageReactionRemove';
 import { onInteractionCreate } from './events/interactionCreate';
 import { PrismaClient } from '@prisma/client';
 import * as dotenv from 'dotenv';
@@ -94,7 +95,7 @@ import { EmbedController } from './core/embedController';
 
 
 const ticketDB = new PostgresDB(process.env.DATABASE_URL);
-(client as any).db = ticketDB; 
+(client as any).db = ticketDB;
 
 
 router.register('wizard', new SetupWizardHandler());
@@ -134,7 +135,7 @@ export const services = {
     autoModService,
     prisma,
     commands,
-    ticketDB 
+    ticketDB
 };
 
 
@@ -146,7 +147,7 @@ async function deployCommands() {
     const rest = new REST({ version: '10' }).setToken(CONFIG.BOT_TOKEN);
 
     try {
-        console.log('🔄 Deploying slash commands...');
+        console.log(`🔄 Deploying ${commandsData.length} slash commands...`);
 
         if (!CONFIG.CLIENT_ID) {
             console.error('✖ CLIENT_ID is missing in config/env');
@@ -175,7 +176,7 @@ async function deployCommands() {
 
 
 function startPeriodicTasks() {
-    
+
     setInterval(async () => {
         try {
             const deleted = await actionLimiter.cleanupOldActions(30);
@@ -183,9 +184,9 @@ function startPeriodicTasks() {
         } catch (error) {
             console.error('Failed to cleanup old actions:', error);
         }
-    }, 6 * 60 * 60 * 1000); 
+    }, 6 * 60 * 60 * 1000);
 
-    
+
     setInterval(async () => {
         try {
             await recoveryManager.cleanupOldBackups(7);
@@ -193,9 +194,9 @@ function startPeriodicTasks() {
         } catch (error) {
             console.error('Failed to cleanup old backups:', error);
         }
-    }, 24 * 60 * 60 * 1000); 
+    }, 24 * 60 * 60 * 1000);
 
-    
+
     setInterval(async () => {
         try {
             const promises = Array.from(client.guilds.cache.keys()).map(guildId =>
@@ -206,9 +207,9 @@ function startPeriodicTasks() {
         } catch (error) {
             console.error('Failed to create snapshots:', error);
         }
-    }, 12 * 60 * 60 * 1000); 
+    }, 12 * 60 * 60 * 1000);
 
-    
+
     setInterval(async () => {
         try {
             console.log('🔄 Updating server stats...');
@@ -236,7 +237,7 @@ function startPeriodicTasks() {
         } catch (error) {
             console.error('Failed to update server stats:', error);
         }
-    }, 30 * 60 * 1000); 
+    }, 30 * 60 * 1000);
 
     console.log('✔ Periodic tasks started');
 }
@@ -246,41 +247,41 @@ client.once('clientReady', async () => {
     const startTime = Date.now();
     console.log('🚀 Starting bot...');
 
-    
+
     const commandsPath = path.join(__dirname, 'commands');
     await commandLoader.loadCommands(commandsPath);
 
-    
+
     commandLoader.commands.forEach((cmd, name) => {
         commands.set(name, cmd);
     });
     console.log(`✔ Loaded ${commands.size} commands`);
 
-    
-    await onReady(client);
 
-    
+    await onReady(client, commands);
+
+
     console.log(`✔ Bot logged in as ${client.user?.tag}`);
     console.log(` Serving ${client.guilds.cache.size} guilds`);
 
-    
-    
+
+
     const { AutoModMonitor } = await import('./modules/AutoModMonitor');
     autoModMonitor = new AutoModMonitor(client, autoModService, moderationService, loggingService);
     console.log('✔ AutoMod Monitor started - watching all channels 24/7');
 
-    
-    
-    
 
-    
+
+
+
+
     startPeriodicTasks();
 
-    
+
     GiveawayManager.getInstance(client).startTicker();
     console.log('✔ Giveaway Ticker started');
 
-    
+
     console.log('🔄 Caching invites in background...');
     (async () => {
         const invitePromises = Array.from(client.guilds.cache.values()).map(async guild => {
@@ -301,13 +302,13 @@ client.once('clientReady', async () => {
 });
 
 client.on('messageCreate', async (message) => {
-    
+
     await onMessageCreate(client, message);
 
-    
+
     if (message.author.bot || !message.guild) return;
 
-    
+
     const prefix = await guildConfigService.getPrefix(message.guild.id);
     if (!message.content.startsWith(prefix)) return;
 
@@ -317,12 +318,12 @@ client.on('messageCreate', async (message) => {
 
     let command = commands.get(commandName);
     if (!command) {
-        
+
         command = commandLoader.getCommandByAlias(commandName);
     }
     if (!command) return;
 
-    
+
     if (command.data?.default_member_permissions) {
         const member = message.member!;
         const requiredPerms = BigInt(command.data.default_member_permissions);
@@ -349,15 +350,16 @@ client.on('messageCreate', async (message) => {
 
 client.on('guildMemberUpdate', (oldMember, newMember) => onGuildMemberUpdate(client, oldMember, newMember));
 client.on('messageReactionAdd', (reaction, user) => onMessageReactionAdd(client, reaction as any, user as any));
+client.on('messageReactionRemove', (reaction, user) => onMessageReactionRemove(client, reaction as any, user as any));
 client.on('voiceStateUpdate', (oldState, newState) => onVoiceStateUpdate(client, oldState, newState));
 
 client.on('interactionCreate', async (interaction) => {
-    
+
     if (interaction.isChatInputCommand()) {
         const command = commands.get(interaction.commandName);
 
         if (command) {
-            
+
             if (interaction.inGuild() && command.data.default_member_permissions) {
                 const member = interaction.member as any;
                 const requiredPerms = BigInt(command.data.default_member_permissions);
@@ -373,25 +375,25 @@ client.on('interactionCreate', async (interaction) => {
                 console.error(`Error executing command ${interaction.commandName}:`, error);
             }
         } else {
-            
+
             await onInteractionCreate(client, interaction);
         }
         return;
     }
 
-    
 
-    
+
+
     await onInteractionCreate(client, interaction);
 
-    
+
     if (interaction.isButton() || interaction.isStringSelectMenu() ||
         interaction.isUserSelectMenu() || interaction.isRoleSelectMenu() ||
         interaction.isChannelSelectMenu() || interaction.isModalSubmit()) {
 
         try {
-            
-            
+
+
             if ('customId' in interaction &&
                 (interaction.customId.startsWith('help_category_') ||
                     interaction.customId.startsWith('steal_'))) {
@@ -436,7 +438,7 @@ client.on('inviteDelete', async invite => {
 });
 
 client.on('guildBanAdd', async ban => {
-    
+
     const serverStatsCommand = commands.get('server-stats');
     if (serverStatsCommand && serverStatsCommand.updateServerStats) {
         await serverStatsCommand.updateServerStats(ban.guild).catch(console.error);
@@ -455,7 +457,7 @@ client.on('guildMemberAdd', async member => {
         const db = DatabaseManager.getInstance();
         const config = await db.getWelcomeConfig(member.guild.id);
 
-        
+
         let inviterInfo = '';
         let inviteData = {
             inviterId: null as string | null,

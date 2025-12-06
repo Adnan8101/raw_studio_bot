@@ -3,6 +3,9 @@ import { prisma } from '../../database/connect';
 import { createSuccessEmbed, createErrorEmbed, createCustomEmbed, ICONS, COLORS } from '../../utils/embeds';
 
 export const category = 'Messages';
+export const permission = 'Manage Guild';
+export const syntax = '/messages-role <set|unset|view> [args]';
+export const example = '/messages-role set @VIP 1000';
 
 export const data = new SlashCommandBuilder()
     .setName('messages-role')
@@ -89,30 +92,30 @@ export const prefixExecute = async (message: Message, args: string[]) => {
     const guildId = message.guildId;
     if (!guildId) return;
 
-    
-    const commandName = message.content.split(' ')[0].slice(1).toLowerCase(); 
-    
-    
+
+    const commandName = message.content.split(' ')[0].slice(1).toLowerCase();
+
+
 
     let subcommand = args[0]?.toLowerCase();
     let shiftArgs = 1;
 
-    
+
     if (commandName === 'setmessagerole') { subcommand = 'set'; shiftArgs = 0; }
     else if (commandName === 'unsetmessagerole') { subcommand = 'unset'; shiftArgs = 0; }
     else if (commandName === 'viewmessageroles') { subcommand = 'view'; shiftArgs = 0; }
 
     if (subcommand === 'set') {
         const role = message.mentions.roles.first();
-        const count = parseInt(args[shiftArgs + 1]); 
-        
-        
+        const count = parseInt(args[shiftArgs + 1]);
 
-        
+
+
+
         const roleArg = args[shiftArgs];
         const countArg = args[shiftArgs + 1];
 
-        
+
         if (!role || isNaN(parseInt(countArg))) {
             await message.reply({ embeds: [createErrorEmbed('Usage: `messages-role set @role <count>`')] });
             return;

@@ -35,7 +35,10 @@ export const hiddenNumberCommands = [
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 ];
 
-export const category = 'games';
+export const category = 'Games';
+export const permission = 'Manage Guild';
+export const syntax = '/hidden start <difficulty> [options]';
+export const example = '/hidden start difficulty:Easy';
 export const data = hiddenNumberCommands[0];
 
 export const execute = async (interaction: ChatInputCommandInteraction, services: any) => {
@@ -54,7 +57,7 @@ export const handleHiddenNumberCommand = async (interaction: ChatInputCommandInt
             const channel = options.getChannel('channel') || interaction.channel;
 
             const manager = getHiddenNumberGameManager(interaction.client);
-            
+
             const success = await manager.startGame(interaction, difficulty, time, channel);
 
             if (!success) {
@@ -62,7 +65,7 @@ export const handleHiddenNumberCommand = async (interaction: ChatInputCommandInt
             }
         } else if (subcommand === 'end') {
             const manager = getHiddenNumberGameManager(interaction.client);
-            
+
             const success = await manager.stopGame(interaction);
 
             if (!success) {

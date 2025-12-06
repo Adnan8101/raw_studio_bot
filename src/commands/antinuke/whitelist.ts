@@ -91,6 +91,11 @@ export const data = new SlashCommandBuilder()
       )
   );
 
+export const category = 'antinuke';
+export const permission = 'Administrator';
+export const syntax = '/whitelist <add_role|add_user|remove_role|remove_user|view|list|reset>';
+export const example = '/whitelist add_user user:@Rexx';
+
 export const slashCommand: SlashCommand = {
   data: data,
   execute: execute,
@@ -109,7 +114,7 @@ export async function execute(
   const subcommand = interaction.options.getSubcommand();
   const guildId = interaction.guildId!;
 
-  
+
   if (!await checkCommandPermission(interaction, { ownerOnly: false })) return;
 
   switch (subcommand) {
@@ -145,7 +150,7 @@ async function handleAddRole(
   const guild = interaction.guild!;
   const botMember = guild.members.me!;
 
-  
+
   if (role.id === guild.roles.everyone.id) {
     const errorEmbed = new EmbedBuilder()
       .setColor(EmbedColors.ERROR)
@@ -154,7 +159,7 @@ async function handleAddRole(
     return;
   }
 
-  
+
   if (role.position >= botMember.roles.highest.position) {
     const embed = new EmbedBuilder()
       .setTitle('⚠️ Role Hierarchy Warning')
@@ -167,8 +172,8 @@ async function handleAddRole(
     await interaction.followUp({ embeds: [embed], ephemeral: true });
   }
 
-  
-  
+
+
   if (typeof role.permissions !== 'string' && role.permissions.has(PermissionFlagsBits.Administrator)) {
     const embed = new EmbedBuilder()
       .setTitle('⚠️ Security Warning')
@@ -194,7 +199,7 @@ async function handleAddUser(
   const user = interaction.options.getUser('user', true);
   const guild = interaction.guild!;
 
-  
+
   if (user.bot && user.id === interaction.client.user.id) {
     const errorEmbed = new EmbedBuilder()
       .setColor(EmbedColors.ERROR)
@@ -244,7 +249,7 @@ async function handleList(
   guildId: string
 ): Promise<void> {
   if (!interaction.deferred && !interaction.replied) {
-    await interaction.deferReply({ flags: 64 }); 
+    await interaction.deferReply({ flags: 64 });
   }
 
   const filterOption = interaction.options.getString('filter');
@@ -259,7 +264,7 @@ async function handleList(
     return;
   }
 
-  
+
   const grouped = new Map<string, typeof entries>();
   for (const entry of entries) {
     if (!grouped.has(entry.targetId)) {
@@ -268,7 +273,7 @@ async function handleList(
     grouped.get(entry.targetId)!.push(entry);
   }
 
-  
+
   const lines: string[] = [];
   let index = 1;
 
@@ -276,7 +281,7 @@ async function handleList(
     const isRole = targetEntries[0].isRole;
     const categoriesList = targetEntries.map(e => formatCategoryName(e.category as WhitelistCategory));
 
-    
+
     const hasAll = categoriesList.includes('ALL') || categoriesList.includes('ALL (bypass everything)');
     const displayCategories = hasAll ? 'All Categories' : categoriesList.join(', ');
 
@@ -285,7 +290,7 @@ async function handleList(
     index++;
   }
 
-  
+
   const pageSize = 10;
   const pages: string[][] = [];
   for (let i = 0; i < lines.length; i += pageSize) {
@@ -301,7 +306,7 @@ async function handleList(
     })
     .setTimestamp();
 
-  
+
   const removeButton = new ButtonBuilder()
     .setCustomId(`whitelist_list_remove_${interaction.user.id}`)
     .setLabel('Remove Entry')
@@ -315,7 +320,7 @@ async function handleList(
     components: [row]
   });
 
-  
+
   const collector = response.createMessageComponentCollector({
     componentType: ComponentType.Button,
     filter: i => i.user.id === interaction.user.id && i.customId === `whitelist_list_remove_${interaction.user.id}`,
@@ -366,7 +371,7 @@ async function handleRemoveSelection(
     });
   }
 
-  
+
   if (options.length > 25) {
     options.length = 25;
   }
@@ -398,7 +403,7 @@ async function handleRemoveSelection(
     const [targetId, isRoleStr] = i.values[0].split(':');
     const isRole = isRoleStr === 'true';
 
-    
+
     let targetName = targetId;
     try {
       if (isRole) {
@@ -410,17 +415,17 @@ async function handleRemoveSelection(
       }
     } catch { }
 
-    
-    
-    
-    
-    
-    
 
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
 
     await i.deferUpdate();
     await handleManageInteractive(originalInteraction, services, guildId, targetId, targetName, isRole);
@@ -435,7 +440,7 @@ async function handleManageInteractive(
   targetName: string,
   isRole: boolean
 ): Promise<void> {
-  
+
   const entries = await services.whitelistService.getEntriesForTarget(guildId, targetId);
   const currentCategories = new Set(entries.map(e => e.category as WhitelistCategory));
   const allCategories = Object.values(WhitelistCategory);
@@ -482,7 +487,7 @@ async function handleManageInteractive(
     components: [row1, row2]
   });
 
-  
+
   const collector = response.createMessageComponentCollector({
     filter: i => i.user.id === interaction.user.id && i.customId.includes(interaction.id),
     time: 60000
@@ -503,7 +508,7 @@ async function handleManageInteractive(
     } else if (i.customId === `whitelist_save_${interaction.id}`) {
       await i.deferUpdate();
 
-      
+
       const toAdd = [...selectedCategories].filter(c => !currentCategories.has(c));
       const toRemove = [...currentCategories].filter(c => !selectedCategories.has(c));
 
@@ -512,7 +517,7 @@ async function handleManageInteractive(
         return;
       }
 
-      
+
       if (toAdd.length > 0) {
         if (isRole) {
           await services.whitelistService.addRole(guildId, targetId, toAdd, interaction.user.id);
@@ -529,7 +534,7 @@ async function handleManageInteractive(
         }
       }
 
-      
+
       const successEmbed = new EmbedBuilder()
         .setColor(EmbedColors.SUCCESS)
         .setTitle('<:tcet_tick:1437995479567962184> Whitelist Updated')
@@ -595,7 +600,7 @@ async function handleReset(
     return;
   }
 
-  
+
   const entries = await services.whitelistService.listAll(guildId);
   const count = entries.length;
 
@@ -607,7 +612,7 @@ async function handleReset(
     return;
   }
 
-  
+
   await services.whitelistService.reset(guildId);
 
   const embed = new EmbedBuilder()

@@ -2,6 +2,11 @@ import { SlashCommandBuilder, PermissionFlagsBits, ChatInputCommandInteraction, 
 import { VoiceService } from '../../../services/VoiceService';
 import { createSuccessEmbed } from '../../../utils/embeds';
 
+export const category = 'Voice';
+export const permission = 'Manage Guild';
+export const syntax = '/clearvoice [user]';
+export const example = '/clearvoice @Tai';
+
 export const data = new SlashCommandBuilder()
     .setName('clearvoice')
     .setDescription('Resets everyone\'s voice state stats or a user\'s voice state stats in this guild')

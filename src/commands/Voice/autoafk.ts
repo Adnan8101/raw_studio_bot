@@ -3,7 +3,10 @@ import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, 
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import { createSuccessEmbed, createErrorEmbed } from '../../utils/embedHelpers';
 
-export const category = 'voice';
+export const category = 'Voice';
+export const permission = 'Manage Guild';
+export const syntax = '/autoafk <set|disable> [args]';
+export const example = '/autoafk set channel:#afk minutes:15';
 
 export const data = new SlashCommandBuilder()
     .setName('autoafk')

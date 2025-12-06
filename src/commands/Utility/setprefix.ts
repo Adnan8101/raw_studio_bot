@@ -23,7 +23,7 @@ export const data = new SlashCommandBuilder()
       .setMaxLength(5)
   );
 
-export const category = 'moderation';
+export const category = 'Utility';
 export const syntax = '/setprefix <prefix>';
 export const example = '/setprefix !';
 export const permission = 'Manage Guild';
@@ -35,14 +35,14 @@ export async function execute(
   const prefix = interaction.options.getString('prefix', true);
   const guild = interaction.guild!;
 
-  
+
   if (prefix.length > 5) {
     const errorEmbed = createErrorEmbed('Prefix must be 5 characters or less.');
     await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
     return;
   }
 
-  
+
   await services.guildConfigService.setPrefix(guild.id, prefix);
 
   const embed = new EmbedBuilder()

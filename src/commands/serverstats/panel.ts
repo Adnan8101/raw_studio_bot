@@ -13,7 +13,10 @@ import { SlashCommand, PrefixCommand } from '../../types';
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import { createInfoEmbed, createErrorEmbed, createSuccessEmbed } from '../../utils/embedHelpers';
 import { CustomEmojis } from '../../utils/emoji';
-
+export const category = 'serverstats';
+export const permission = 'Manage Channels';
+export const syntax = '/panel';
+export const example = '/panel';
 const slashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName('panel')
@@ -53,7 +56,7 @@ const slashCommand: SlashCommand = {
     const embed = createInfoEmbed('Server Stats Panels', 'Here are all the active stats panels on this server')
       .setTimestamp();
 
-    
+
     for (const panel of panels) {
       const channelTypeText = panel.channelType === 'vc' ? 'Voice Channels' : 'Text Channels';
       const createdDate = new Date(panel.createdAt).toLocaleDateString();
@@ -65,7 +68,7 @@ const slashCommand: SlashCommand = {
       }]);
     }
 
-    
+
     if (panels.length > 0) {
       const selectMenu = new StringSelectMenuBuilder()
         .setCustomId('delete_panel')
@@ -100,11 +103,11 @@ const slashCommand: SlashCommand = {
           return;
         }
 
-        
+
         try {
           const guild = interaction.guild;
 
-          
+
           const channels = [
             selectedPanel.totalChannelId,
             selectedPanel.usersChannelId,
@@ -120,7 +123,7 @@ const slashCommand: SlashCommand = {
             }
           }
 
-          
+
           try {
             const category = await guild.channels.fetch(selectedPanel.categoryId);
             if (category) await category.delete();
@@ -128,7 +131,7 @@ const slashCommand: SlashCommand = {
             console.error(`Error deleting category ${selectedPanel.categoryId}:`, error);
           }
 
-          
+
           await db.deletePanel(interaction.guild.id, selectedPanelName);
 
           const successEmbed = createSuccessEmbed('Panel Deleted')
@@ -194,7 +197,7 @@ const prefixCommand: PrefixCommand = {
     const embed = createInfoEmbed('Server Stats Panels', 'Here are all the active stats panels on this server')
       .setTimestamp();
 
-    
+
     for (const panel of panels) {
       const channelTypeText = panel.channelType === 'vc' ? 'Voice Channels' : 'Text Channels';
       const createdDate = new Date(panel.createdAt).toLocaleDateString();

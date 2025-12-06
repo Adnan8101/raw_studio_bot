@@ -10,6 +10,11 @@ import {
 import { EmbedColors } from '../types';
 import { createInfoEmbed } from '../utils/embedHelpers';
 
+export const category = 'utility';
+export const permission = 'None';
+export const syntax = '/server [full]';
+export const example = '/server full:true';
+
 export const data = new SlashCommandBuilder()
   .setName('server')
   .setDescription('Display server information')
@@ -28,33 +33,33 @@ export async function execute(
   const guild = interaction.guild!;
   const requestFull = interaction.options.getBoolean('full') ?? false;
 
-  
+
   const member = guild.members.cache.get(interaction.user.id);
   const hasAdminPerms = member?.permissions.has(PermissionFlagsBits.ManageGuild) ?? false;
   const showFull = requestFull && hasAdminPerms;
 
-  
+
   const owner = await guild.fetchOwner().catch(() => null);
   const channels = guild.channels.cache;
 
-  
+
   const textChannels = channels.filter(c => c.type === ChannelType.GuildText).size;
   const voiceChannels = channels.filter(c => c.type === ChannelType.GuildVoice).size;
   const categories = channels.filter(c => c.type === ChannelType.GuildCategory).size;
   const threads = channels.filter(c => c.isThread()).size;
 
-  
+
   const embed = createInfoEmbed(`📊 ${guild.name}`, '')
     .setThumbnail(guild.iconURL() ?? null);
 
-  
+
   embed.addFields(
     { name: 'Server ID', value: guild.id, inline: true },
     { name: 'Created', value: `<t:${Math.floor(guild.createdTimestamp / 1000)}:R>`, inline: true },
     { name: 'Owner', value: owner ? `${owner.user.tag}${showFull ? ` (${owner.id})` : ''}` : 'Unknown', inline: true }
   );
 
-  
+
   const memberCount = guild.memberCount;
   const botCount = guild.members.cache.filter(m => m.user.bot).size;
   const humanCount = memberCount - botCount;
@@ -65,7 +70,7 @@ export async function execute(
     inline: true,
   });
 
-  
+
   embed.addFields({
     name: 'Channels',
     value: [
@@ -77,7 +82,7 @@ export async function execute(
     inline: true,
   });
 
-  
+
   const boostTier = guild.premiumTier;
   const boostCount = guild.premiumSubscriptionCount ?? 0;
 
@@ -87,8 +92,8 @@ export async function execute(
     inline: true,
   });
 
-  
-  const roleCount = guild.roles.cache.size - 1; 
+
+  const roleCount = guild.roles.cache.size - 1;
   const topRoles = guild.roles.cache
     .sort((a, b) => b.position - a.position)
     .filter(r => r.id !== guild.roles.everyone.id)
@@ -102,9 +107,9 @@ export async function execute(
     inline: false,
   });
 
-  
+
   if (showFull) {
-    
+
     const features = guild.features.length > 0
       ? guild.features.map(f => `\`${f}\``).join(', ')
       : 'None';
@@ -115,7 +120,7 @@ export async function execute(
       inline: false,
     });
 
-    
+
     if (guild.systemChannel) {
       embed.addFields({
         name: 'System Channel',
@@ -124,7 +129,7 @@ export async function execute(
       });
     }
 
-    
+
     if (guild.rulesChannel) {
       embed.addFields({
         name: 'Rules Channel',
@@ -133,7 +138,7 @@ export async function execute(
       });
     }
 
-    
+
     if (guild.afkChannel) {
       embed.addFields({
         name: 'AFK',
@@ -142,7 +147,7 @@ export async function execute(
       });
     }
 
-    
+
     const verificationLevels = ['None', 'Low', 'Medium', 'High', 'Very High'];
     embed.addFields({
       name: 'Verification Level',
@@ -150,14 +155,14 @@ export async function execute(
       inline: true,
     });
 
-    
+
     embed.addFields({
       name: '2FA Requirement',
       value: guild.mfaLevel === 1 ? 'Enabled' : 'Disabled',
       inline: true,
     });
 
-    
+
     const contentFilters = ['Disabled', 'Members without roles', 'All members'];
     embed.addFields({
       name: 'Content Filter',
@@ -170,7 +175,7 @@ export async function execute(
     });
   }
 
-  
+
   if (guild.banner) {
     embed.setImage(guild.bannerURL({ size: 1024 }) ?? null);
   }

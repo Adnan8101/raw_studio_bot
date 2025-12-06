@@ -3,6 +3,9 @@ import { prisma } from '../../database/connect';
 import { createSuccessEmbed, createErrorEmbed } from '../../utils/embeds';
 
 export const category = 'Messages';
+export const permission = 'Manage Guild';
+export const syntax = '/addmessages <user> <amount>';
+export const example = '/addmessages @Tai 100';
 
 export const data = new SlashCommandBuilder()
     .setName('addmessages')

@@ -116,6 +116,11 @@ const prefixCommand: PrefixCommand = {
   },
 };
 
+export const category = 'Welcome';
+export const permission = 'Administrator';
+export const syntax = '/leave <channel>';
+export const example = '/leave #goodbye';
+
 export const data = slashCommand.data;
 export const execute = slashCommand.execute;
 export { slashCommand, prefixCommand };

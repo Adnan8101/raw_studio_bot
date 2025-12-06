@@ -39,7 +39,10 @@ export const reverseCommands = [
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 ];
 
-export const category = 'games';
+export const category = 'Games';
+export const permission = 'Manage Guild';
+export const syntax = '/reverse start [options]';
+export const example = '/reverse start difficulty:Easy';
 export const data = reverseCommands[0];
 
 export const execute = async (interaction: ChatInputCommandInteraction, services: any) => {

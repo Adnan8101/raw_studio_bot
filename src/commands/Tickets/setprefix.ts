@@ -6,6 +6,11 @@ import {
 } from 'discord.js';
 import { BotClient } from '../../core/client';
 
+export const category = 'Tickets';
+export const permission = 'Administrator';
+export const syntax = '/setprefix <prefix>';
+export const example = '/setprefix !';
+
 export const data = new SlashCommandBuilder()
   .setName('setprefix')
   .setDescription('Set the bot prefix for this server')
@@ -30,7 +35,7 @@ export async function execute(interaction: ChatInputCommandInteraction, client: 
 
     const newPrefix = interaction.options.getString('prefix', true);
 
-    
+
     if (newPrefix.length > 5) {
       await interaction.reply({
         content: '<:tcet_cross:1437995480754946178> Prefix must be 5 characters or less.',
@@ -39,7 +44,7 @@ export async function execute(interaction: ChatInputCommandInteraction, client: 
       return;
     }
 
-    
+
     await client.db.saveGuildConfig(interaction.guild.id, newPrefix);
 
     const embed = new EmbedBuilder()

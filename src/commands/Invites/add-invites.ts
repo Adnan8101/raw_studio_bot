@@ -8,7 +8,10 @@ import {
 import { SlashCommand, PrefixCommand } from '../../types';
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import { createSuccessEmbed, createErrorEmbed, COLORS, ICONS } from '../../utils/embeds';
-
+export const category = 'Invites';
+export const permission = 'Administrator';
+export const syntax = '/add-invites <user> <invites>';
+export const example = '/add-invites @Tai 5';
 const slashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName('add-invites')

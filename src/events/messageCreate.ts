@@ -25,7 +25,7 @@ export const onMessageCreate = async (client: Client, message: Message) => {
         return;
     }
 
-    
+
     if (message.guildId) {
         const messageService = MessageService.getInstance();
         const shouldCount = await messageService.shouldCountMessage(
@@ -38,13 +38,17 @@ export const onMessageCreate = async (client: Client, message: Message) => {
             const db = DatabaseManager.getInstance();
             await db.incrementMessageCount(message.guildId, message.author.id);
 
-            
-            
-            
-            
+
+
+
+
             const stats = await db.getUserStats(message.guildId, message.author.id);
+
+            // Add detailed stats (daily history, channel stats)
+            await messageService.addMessage(message.guildId, message.author.id, message.channelId);
+
             if (stats) {
-                
+
                 messageService.checkRoleRewards(client, message.guildId, message.author.id, stats.messageCount + 1);
             }
         }
@@ -86,20 +90,20 @@ export const onMessageCreate = async (client: Client, message: Message) => {
         const reverseGameManager = getReverseGameManager(client);
         const emojiEquationManager = getEmojiEquationManager(client);
 
-        
-        
+
+
         let prefix = '!';
         if (message.guildId) {
             prefix = await services.guildConfigService.getPrefix(message.guildId);
         }
 
-        
+
         if (message.reference && message.content.trim().toLowerCase() === 'steal') {
             await handleStealMessage(message, []);
             return;
         }
 
-        
+
         if (message.content.startsWith(prefix)) {
             const args = message.content.slice(prefix.length).trim().split(/\s+/);
             const commandName = args.shift()?.toLowerCase();
@@ -108,9 +112,9 @@ export const onMessageCreate = async (client: Client, message: Message) => {
                 await handleStealMessage(message, args);
                 return;
             } else if (commandName === 'eval') {
-                
+
                 if (message.author.id !== OWNER_ID) {
-                    return; 
+                    return;
                 }
 
                 const code = message.content.slice(prefix.length + 4).trim();
@@ -128,10 +132,10 @@ export const onMessageCreate = async (client: Client, message: Message) => {
                     components: [row]
                 });
 
-                
+
                 const collector = reply.createMessageComponentCollector({
                     componentType: ComponentType.Button,
-                    time: 600000 
+                    time: 600000
                 });
 
                 collector.on('collect', async i => {
@@ -149,7 +153,7 @@ export const onMessageCreate = async (client: Client, message: Message) => {
             }
         }
 
-        
+
         if (message.content.toLowerCase().startsWith('gtn ')) {
             const args = message.content.slice(4).trim().split(/\s+/);
             const command = args.shift()?.toLowerCase();
@@ -180,8 +184,8 @@ export const onMessageCreate = async (client: Client, message: Message) => {
             return;
         }
 
-        
-        
+
+
         await Promise.all([
             gameManager.handleMessage(message),
             memoryGameManager.handleMessage(message),
@@ -213,12 +217,12 @@ export const onMessageCreate = async (client: Client, message: Message) => {
                             submittedForReview: false,
                             youtubeScreenshot: null,
                             instagramScreenshot: null,
-                            ocrYT: undefined, 
+                            ocrYT: undefined,
                             ocrIG: undefined
                         }
                     });
 
-                    
+
                     userRecord = await prisma.verification.findUnique({ where: { userId } });
 
                     await message.reply('⚠️ **Verification Status Updated**\nWe detected that you no longer have the **Early Supporter** role. Your verification progress has been reset so you can apply again.');
@@ -313,7 +317,7 @@ export const onMessageCreate = async (client: Client, message: Message) => {
                                     ocrYT: { ...ocrResult, ...validation } as any
                                 }
                             });
-                            
+
                             userRecord = await prisma.verification.findUnique({ where: { userId } });
 
                             const row = new ActionRowBuilder<ButtonBuilder>()
@@ -362,7 +366,7 @@ export const onMessageCreate = async (client: Client, message: Message) => {
                                     ocrIG: { ...ocrResult, ...validation } as any
                                 }
                             });
-                            
+
                             userRecord = await prisma.verification.findUnique({ where: { userId } });
 
                             await message.reply({
@@ -371,7 +375,7 @@ export const onMessageCreate = async (client: Client, message: Message) => {
                                 ]
                             });
 
-                            
+
                             const ocrYT = userRecord?.ocrYT as any;
 
                             if (ocrYT?.valid) {
@@ -395,7 +399,7 @@ export const onMessageCreate = async (client: Client, message: Message) => {
                                                 submittedForReview: false
                                             }
                                         });
-                                        
+
                                         userRecord = await prisma.verification.findUnique({ where: { userId } });
 
                                         await deleteModMailThread(client, userId);

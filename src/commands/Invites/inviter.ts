@@ -8,7 +8,10 @@ import { SlashCommand, PrefixCommand } from '../../types';
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import { createInfoEmbed, createErrorEmbed, COLORS, ICONS } from '../../utils/embeds';
 import { CustomEmojis } from '../../utils/emoji';
-
+export const category = 'Invites';
+export const permission = 'Manage Messages';
+export const syntax = '/inviter <user>';
+export const example = '/inviter @Tai';
 const slashCommand: SlashCommand = {
   data: new SlashCommandBuilder()
     .setName('inviter')

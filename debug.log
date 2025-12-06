@@ -1,0 +1,215 @@
+
+> raw-modmail@1.0.0 dev
+> nodemon src/index.ts
+
+[33m[nodemon] 3.1.11[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: ts,json[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[dotenv@17.2.3] injecting env (7) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+objc[95487]: Class GNotificationCenterDelegate is implemented in both /Users/adnan/Downloads/discord-bots/Raw ModMail/node_modules/@img/sharp-libvips-darwin-arm64/lib/libvips-cpp.8.17.3.dylib (0x13755d978) and /Users/adnan/Downloads/discord-bots/Raw ModMail/node_modules/canvas/build/Release/libgio-2.0.0.dylib (0x107d6c4b8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+✔ AuditLogMonitor: Event listeners registered
+✔ AutoResponder message listener setup
+🚀 Starting bot...
+[CommandLoader] Skipped file gameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file gameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file manager.ts: No valid command data found.
+[CommandLoader] Skipped file types.ts: No valid command data found.
+[CommandLoader] Skipped file hiddenGameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file mathGameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file gameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file reverseCanvas.ts: No valid command data found.
+[CommandLoader] Skipped file reverseManager.ts: No valid command data found.
+[CommandLoader] Skipped file sequenceCanvas.ts: No valid command data found.
+[CommandLoader] Skipped file sequenceManager.ts: No valid command data found.
+[CommandLoader] Skipped file vowelsCanvas.ts: No valid command data found.
+[CommandLoader] Skipped file vowelsManager.ts: No valid command data found.
+[CommandLoader] Skipped file restrict.ts: No valid command data found.
+[CommandLoader] Skipped file steal.ts: No valid command data found.
+[CommandLoader] Skipped file add.ts: No valid command data found.
+[CommandLoader] Skipped file delete.ts: No valid command data found.
+[CommandLoader] Skipped file edit.ts: No valid command data found.
+[CommandLoader] Skipped file list.ts: No valid command data found.
+[CommandLoader] Skipped file toggle.ts: No valid command data found.
+[CommandLoader] Skipped file evalHelper.ts: No valid command data found.
+[CommandLoader] Skipped file AudioPipeline.ts: No valid command data found.
+[CommandLoader] Skipped file PostProcessor.ts: No valid command data found.
+[CommandLoader] Skipped file RecordingManager.ts: No valid command data found.
+[CommandLoader] Skipped file recorder.ts: No valid command data found.
+[CommandLoader] Loaded 90 commands.
+✔ Loaded 90 commands
+✅ Logged in as Raw_Boat#0161!
+✅ Connection pool warmed up
+✅ Database tables initialized
+✅ Connected to PostgreSQL via Prisma
+Commands to deploy: 0: clear-my-dm, 1: equation, 2: gtn, 3: hidden, 4: math, 5: memory, 6: reverse, 7: sequence, 8: vowels, 9: gcancel, 10: gcreate, 11: gend, 12: glist, 13: greroll, 14: add-invites, 15: delete-invites, 16: invite-links, 17: invited, 18: inviter, 19: invites, 20: reset-invites, 21: resetmyinvites, 22: setinviterole, 23: unsetinviterole, 24: viewinviteroles, 25: addmessages, 26: blacklist, 27: managemessages, 28: messages-role, 29: messages, 30: removemessages, 31: resetmessages, 32: resetmymessages, 33: about, 34: panel, 35: setprefix, 36: status, 37: ticket, 38: clear-my-dm, 39: leaderboard, 40: ping, 41: setresettime, 42: addvctime, 43: clearvoice, 44: reducevctime, 45: autoafk, 46: autodrag, 47: dc, 48: deafenall, 49: drag, 50: muteall, 51: resetmyvoice, 52: to, 53: undeafenall, 54: unmuteall, 55: vc, 56: vcclear, 57: wv, 58: leave, 59: welcome, 60: antinuke, 61: setlimit, 62: setpunishment, 63: whitelist, 64: automod-whitelist, 65: automod, 66: autoresponder, 67: help, 68: logging, 69: logs, 70: moderation-logs, 71: ban, 72: channel, 73: checkwarn, 74: kick, 75: mute, 76: nick, 77: nuke, 78: purge, 79: quarantine, 80: role, 81: softban, 82: unban, 83: unmute, 84: warn, 85: eval, 86: server, 87: delete-panel, 88: refresh, 89: server-stats, 90: setup
+Started refreshing 91 application (/) commands.
+DiscordAPIError[50035]: Invalid Form Body
+38[APPLICATION_COMMANDS_DUPLICATE_NAME]: Application command names must be unique
+    at handleErrors (/Users/adnan/Downloads/discord-bots/Raw ModMail/node_modules/@discordjs/rest/src/lib/handlers/Shared.ts:148:10)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async SequentialHandler.runRequest (/Users/adnan/Downloads/discord-bots/Raw ModMail/node_modules/@discordjs/rest/src/lib/handlers/SequentialHandler.ts:417:20)
+    at async SequentialHandler.queueRequest (/Users/adnan/Downloads/discord-bots/Raw ModMail/node_modules/@discordjs/rest/src/lib/handlers/SequentialHandler.ts:169:11)
+    at async _REST.request (/Users/adnan/Downloads/discord-bots/Raw ModMail/node_modules/@discordjs/rest/src/lib/REST.ts:210:20) {
+  requestBody: {
+    files: undefined,
+    json: [
+      [Object], [Object], [Object], [Object], [Object], [Object],
+      [Object], [Object], [Object], [Object], [Object], [Object],
+      [Object], [Object], [Object], [Object], [Object], [Object],
+      [Object], [Object], [Object], [Object], [Object], [Object],
+      [Object], [Object], [Object], [Object], [Object], [Object],
+      [Object], [Object], [Object], [Object], [Object], [Object],
+      [Object], [Object], [Object], [Object], [Object], [Object],
+      [Object], [Object], [Object], [Object], [Object], [Object],
+      [Object], [Object], [Object], [Object], [Object], [Object],
+      [Object], [Object], [Object], [Object], [Object], [Object],
+      [Object], [Object], [Object], [Object], [Object], [Object],
+      [Object], [Object], [Object], [Object], [Object], [Object],
+      [Object], [Object], [Object], [Object], [Object], [Object],
+      [Object], [Object], [Object], [Object], [Object], [Object],
+      [Object], [Object], [Object], [Object], [Object], [Object],
+      [Object]
+    ]
+  },
+  rawError: {
+    message: 'Invalid Form Body',
+    code: 50035,
+    errors: { '38': [Object] }
+  },
+  code: 50035,
+  status: 400,
+  method: 'PUT',
+  url: 'https://discord.com/api/v10/applications/1445481085231169749/commands'
+}
+✔ Bot logged in as Raw_Boat#0161
+ Serving 2 guilds
+✔ AutoMod Monitor initialized
+✔ AutoMod Monitor started - watching all channels 24/7
+✔ Periodic tasks started
+✔ Giveaway Ticker started
+🔄 Caching invites in background...
+✨ Startup took 14205ms
+✔ Cached invites for 2/2 guilds
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[dotenv@17.2.3] injecting env (7) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+objc[96202]: Class GNotificationCenterDelegate is implemented in both /Users/adnan/Downloads/discord-bots/Raw ModMail/node_modules/@img/sharp-libvips-darwin-arm64/lib/libvips-cpp.8.17.3.dylib (0x13fddd978) and /Users/adnan/Downloads/discord-bots/Raw ModMail/node_modules/canvas/build/Release/libgio-2.0.0.dylib (0x10be944b8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+✔ AuditLogMonitor: Event listeners registered
+✔ AutoResponder message listener setup
+🚀 Starting bot...
+[CommandLoader] Skipped file gameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file gameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file manager.ts: No valid command data found.
+[CommandLoader] Skipped file types.ts: No valid command data found.
+[CommandLoader] Skipped file hiddenGameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file mathGameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file gameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file reverseCanvas.ts: No valid command data found.
+[CommandLoader] Skipped file reverseManager.ts: No valid command data found.
+[CommandLoader] Skipped file sequenceCanvas.ts: No valid command data found.
+[CommandLoader] Skipped file sequenceManager.ts: No valid command data found.
+[CommandLoader] Skipped file vowelsCanvas.ts: No valid command data found.
+[CommandLoader] Skipped file vowelsManager.ts: No valid command data found.
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[dotenv@17.2.3] injecting env (7) from .env -- tip: ⚙️  override existing env vars with { override: true }
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[dotenv@17.2.3] injecting env (7) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+objc[96615]: Class GNotificationCenterDelegate is implemented in both /Users/adnan/Downloads/discord-bots/Raw ModMail/node_modules/@img/sharp-libvips-darwin-arm64/lib/libvips-cpp.8.17.3.dylib (0x12808d978) and /Users/adnan/Downloads/discord-bots/Raw ModMail/node_modules/canvas/build/Release/libgio-2.0.0.dylib (0x1089584b8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+✔ AuditLogMonitor: Event listeners registered
+✔ AutoResponder message listener setup
+🚀 Starting bot...
+[CommandLoader] Skipped file gameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file gameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file manager.ts: No valid command data found.
+[CommandLoader] Skipped file types.ts: No valid command data found.
+[CommandLoader] Skipped file hiddenGameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file mathGameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file gameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file reverseCanvas.ts: No valid command data found.
+[CommandLoader] Skipped file reverseManager.ts: No valid command data found.
+[CommandLoader] Skipped file sequenceCanvas.ts: No valid command data found.
+[CommandLoader] Skipped file sequenceManager.ts: No valid command data found.
+[CommandLoader] Skipped file vowelsCanvas.ts: No valid command data found.
+[CommandLoader] Skipped file vowelsManager.ts: No valid command data found.
+[CommandLoader] Skipped file gstart.ts: No valid command data found.
+[CommandLoader] Skipped file restrict.ts: No valid command data found.
+[CommandLoader] Skipped file steal.ts: No valid command data found.
+[CommandLoader] Skipped file add.ts: No valid command data found.
+[CommandLoader] Skipped file delete.ts: No valid command data found.
+[CommandLoader] Skipped file edit.ts: No valid command data found.
+[CommandLoader] Skipped file list.ts: No valid command data found.
+[CommandLoader] Skipped file toggle.ts: No valid command data found.
+[CommandLoader] Skipped file evalHelper.ts: No valid command data found.
+[CommandLoader] Skipped file AudioPipeline.ts: No valid command data found.
+[CommandLoader] Skipped file PostProcessor.ts: No valid command data found.
+[CommandLoader] Skipped file RecordingManager.ts: No valid command data found.
+[CommandLoader] Skipped file recorder.ts: No valid command data found.
+[CommandLoader] Loaded 90 commands.
+✔ Loaded 90 commands
+✅ Logged in as Raw_Boat#0161!
+⚠️ Pool warmup failed: Error: Connection terminated due to connection timeout
+    at /Users/adnan/Downloads/discord-bots/Raw ModMail/node_modules/pg-pool/index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Promise.all (index 2) {
+  [cause]: Error: Connection terminated unexpectedly
+      at Connection.<anonymous> (/Users/adnan/Downloads/discord-bots/Raw ModMail/node_modules/pg/lib/client.js:136:73)
+      at Object.onceWrapper (node:events:621:28)
+      at Connection.emit (node:events:507:28)
+      at Connection.emit (node:domain:489:12)
+      at Socket.<anonymous> (/Users/adnan/Downloads/discord-bots/Raw ModMail/node_modules/pg/lib/connection.js:62:12)
+      at Socket.emit (node:events:519:35)
+      at Socket.emit (node:domain:489:12)
+      at TCP.<anonymous> (node:net:346:12)
+}
+✅ Connected to PostgreSQL via Prisma
+Commands to deploy: 0: equation, 1: gtn, 2: hidden, 3: math, 4: memory, 5: reverse, 6: sequence, 7: vowels, 8: gcancel, 9: gcreate, 10: gend, 11: glist, 12: greroll, 13: add-invites, 14: delete-invites, 15: invite-links, 16: invited, 17: inviter, 18: invites, 19: reset-invites, 20: resetmyinvites, 21: setinviterole, 22: unsetinviterole, 23: viewinviteroles, 24: addmessages, 25: blacklist, 26: managemessages, 27: messages-role, 28: messages, 29: removemessages, 30: resetmessages, 31: resetmymessages, 32: about, 33: panel, 34: setprefix, 35: status, 36: ticket, 37: clear-my-dm, 38: leaderboard, 39: ping, 40: setresettime, 41: addvctime, 42: clearvoice, 43: reducevctime, 44: autoafk, 45: autodrag, 46: dc, 47: deafenall, 48: drag, 49: muteall, 50: resetmyvoice, 51: to, 52: undeafenall, 53: unmuteall, 54: vc, 55: vcclear, 56: wv, 57: leave, 58: welcome, 59: antinuke, 60: setlimit, 61: setpunishment, 62: whitelist, 63: automod-whitelist, 64: automod, 65: autoresponder, 66: help, 67: logging, 68: logs, 69: moderation-logs, 70: ban, 71: channel, 72: checkwarn, 73: kick, 74: mute, 75: nick, 76: nuke, 77: purge, 78: quarantine, 79: role, 80: softban, 81: unban, 82: unmute, 83: warn, 84: eval, 85: server, 86: delete-panel, 87: refresh, 88: server-stats, 89: setup
+Started refreshing 90 application (/) commands.
+Successfully reloaded application (/) commands.
+✔ Bot logged in as Raw_Boat#0161
+ Serving 2 guilds
+✔ AutoMod Monitor initialized
+✔ AutoMod Monitor started - watching all channels 24/7
+✔ Periodic tasks started
+✔ Giveaway Ticker started
+🔄 Caching invites in background...
+✨ Startup took 35730ms
+✅ Database tables initialized
+✔ Cached invites for 2/2 guilds
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `ts-node src/index.ts`[39m
+[dotenv@17.2.3] injecting env (7) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+objc[97572]: Class GNotificationCenterDelegate is implemented in both /Users/adnan/Downloads/discord-bots/Raw ModMail/node_modules/@img/sharp-libvips-darwin-arm64/lib/libvips-cpp.8.17.3.dylib (0x13fddd978) and /Users/adnan/Downloads/discord-bots/Raw ModMail/node_modules/canvas/build/Release/libgio-2.0.0.dylib (0x10c0b84b8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+✔ AuditLogMonitor: Event listeners registered
+✔ AutoResponder message listener setup
+✅ Connection pool warmed up
+✅ Database tables initialized
+🚀 Starting bot...
+[CommandLoader] Skipped file gameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file gameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file manager.ts: No valid command data found.
+[CommandLoader] Skipped file types.ts: No valid command data found.
+[CommandLoader] Skipped file hiddenGameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file mathGameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file gameInstance.ts: No valid command data found.
+[CommandLoader] Skipped file reverseCanvas.ts: No valid command data found.
+[CommandLoader] Skipped file reverseManager.ts: No valid command data found.
+[CommandLoader] Skipped file sequenceCanvas.ts: No valid command data found.
+[CommandLoader] Skipped file sequenceManager.ts: No valid command data found.
+[CommandLoader] Skipped file vowelsCanvas.ts: No valid command data found.
+[CommandLoader] Skipped file vowelsManager.ts: No valid command data found.
+[CommandLoader] Skipped file restrict.ts: No valid command data found.
+[CommandLoader] Skipped file steal.ts: No valid command data found.

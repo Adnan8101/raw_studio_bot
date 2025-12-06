@@ -14,9 +14,9 @@ export class DatabaseManager {
     return DatabaseManager.instance;
   }
 
-  
-  
-  
+
+
+
 
   async setWelcomeChannel(guildId: string, channelId: string): Promise<void> {
     try {
@@ -105,9 +105,9 @@ export class DatabaseManager {
     }
   }
 
-  
-  
-  
+
+
+
 
   async getUserInviteCount(guildId: string, userId: string): Promise<number> {
     try {
@@ -201,7 +201,7 @@ export class DatabaseManager {
         where: { guildId_userId: { guildId, userId } }
       });
     } catch (error) {
-      
+
     }
   }
 
@@ -269,9 +269,9 @@ export class DatabaseManager {
     }
   }
 
-  
-  
-  
+
+
+
 
   async addInviteRole(guildId: string, roleId: string, invites: number): Promise<void> {
     try {
@@ -293,7 +293,7 @@ export class DatabaseManager {
       });
       return !!result;
     } catch (error) {
-      
+
       return false;
     }
   }
@@ -322,9 +322,9 @@ export class DatabaseManager {
     }
   }
 
-  
-  
-  
+
+
+
 
   async createPanel(data: {
     guildId: string;
@@ -388,13 +388,13 @@ export class DatabaseManager {
     }
   }
 
-  
-  
-  
 
-  
-  
-  
+
+
+
+
+
+
 
   private messageCountBuffer: Map<string, number> = new Map();
   private flushInterval: NodeJS.Timeout | null = null;
@@ -405,7 +405,7 @@ export class DatabaseManager {
 
   private startFlushInterval() {
     if (this.flushInterval) return;
-    this.flushInterval = setInterval(() => this.flushMessageCounts(), 60000); 
+    this.flushInterval = setInterval(() => this.flushMessageCounts(), 60000);
   }
 
   private async flushMessageCounts() {
@@ -458,21 +458,21 @@ export class DatabaseManager {
     }
   }
 
-  async getUserStats(guildId: string, userId: string): Promise<{ messageCount: number; voiceMinutes: number } | null> {
+  async getUserStats(guildId: string, userId: string): Promise<{ messageCount: number; voiceMinutes: number; voiceTime: bigint } | null> {
     try {
       const stats = await prisma.userStats.findUnique({
         where: { guildId_userId: { guildId, userId } }
       });
-      return stats ? { messageCount: stats.messageCount, voiceMinutes: stats.voiceMinutes } : null;
+      return stats ? { messageCount: stats.messageCount, voiceMinutes: stats.voiceMinutes, voiceTime: stats.voiceTime } : null;
     } catch (error) {
       console.error('Failed to get user stats:', error);
       return null;
     }
   }
 
-  
-  
-  
+
+
+
 
   async createAutoDragRule(guildId: string, userId: string, targetChannelId: string, createdBy: string): Promise<void> {
     try {
@@ -505,7 +505,7 @@ export class DatabaseManager {
         where: { guildId_userId: { guildId, userId } }
       });
     } catch (error) {
-      
+
     }
   }
 
@@ -531,23 +531,23 @@ export class DatabaseManager {
     }
   }
 
-  
-  
-  
+
+
+
 
   async createGiveaway(data: any): Promise<string> {
     try {
-      
-      
-      
-      
+
+
+
+
 
       const { participants, winners, ...giveawayData } = data;
 
       const giveaway = await prisma.giveaway.create({
         data: {
           ...giveawayData,
-          
+
         }
       });
       return giveaway.messageId;
@@ -569,7 +569,7 @@ export class DatabaseManager {
 
       if (!giveaway) return null;
 
-      
+
       return {
         ...giveaway,
         participants: giveaway.participants.map(p => p.userId),
@@ -616,18 +616,34 @@ export class DatabaseManager {
 
   async addGiveawayParticipant(giveawayId: string, userId: string): Promise<void> {
     try {
-      
+
       const giveaway = await prisma.giveaway.findUnique({ where: { messageId: giveawayId } });
       if (!giveaway) return;
 
       await prisma.giveawayParticipant.create({
         data: {
-          giveawayId: giveaway.id, 
+          giveawayId: giveaway.id,
           userId
         }
       });
     } catch (error) {
       console.error('Failed to add giveaway participant:', error);
+    }
+  }
+
+  async removeGiveawayParticipant(giveawayId: string, userId: string): Promise<void> {
+    try {
+      const giveaway = await prisma.giveaway.findUnique({ where: { messageId: giveawayId } });
+      if (!giveaway) return;
+
+      await prisma.giveawayParticipant.deleteMany({
+        where: {
+          giveawayId: giveaway.id,
+          userId
+        }
+      });
+    } catch (error) {
+      console.error('Failed to remove giveaway participant:', error);
     }
   }
 

@@ -9,6 +9,11 @@ import { SlashCommand, PrefixCommand } from '../../types';
 import { DatabaseManager } from '../../utils/DatabaseManager';
 import { createErrorEmbed, createSuccessEmbed } from '../../utils/embeds';
 
+export const category = 'Invites';
+export const permission = 'Administrator';
+export const syntax = '/setinviterole <role> <invites>';
+export const example = '/setinviterole @VIP 10';
+
 const slashCommand: SlashCommand = {
     data: new SlashCommandBuilder()
         .setName('setinviterole')
@@ -38,7 +43,7 @@ const slashCommand: SlashCommand = {
             return;
         }
 
-        
+
         if (role.position >= (guild.members.me?.roles.highest.position || 0)) {
             await interaction.reply({ embeds: [createErrorEmbed('I cannot assign this role because it is higher than or equal to my highest role!')], ephemeral: true });
             return;
@@ -102,7 +107,7 @@ const prefixCommand: PrefixCommand = {
             return;
         }
 
-        
+
         if (role.position >= (guild.members.me?.roles.highest.position || 0)) {
             await message.reply({ embeds: [createErrorEmbed('I cannot assign this role because it is higher than or equal to my highest role!')] });
             return;

@@ -2,7 +2,10 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, MessageFlags, VoiceChannel } from 'discord.js';
 import { createSuccessEmbed, createErrorEmbed } from '../../utils/embedHelpers';
 
-export const category = 'voice';
+export const category = 'Voice';
+export const permission = 'Mute Members';
+export const syntax = '/muteall';
+export const example = '/muteall';
 
 export const data = new SlashCommandBuilder()
     .setName('muteall')

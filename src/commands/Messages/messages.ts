@@ -3,6 +3,9 @@ import { prisma } from '../../database/connect';
 import { createCustomEmbed, ICONS, COLORS } from '../../utils/embeds';
 
 export const category = 'Messages';
+export const permission = 'None';
+export const syntax = '/messages [user]';
+export const example = '/messages @Tai';
 
 export const data = new SlashCommandBuilder()
     .setName('messages')
